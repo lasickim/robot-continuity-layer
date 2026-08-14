@@ -69,6 +69,13 @@ from .intent_discovery import (
     load_default_intent_discovery_policy,
 )
 from .intent_reference_adapter import IntentReferenceAdapter
+from .intent_revision import (
+    INTENT_REVISION_APPLY_METHOD,
+    INTENT_REVISION_PATCH_METHOD,
+    INTENT_REVISION_VERSION,
+    apply_intent_revision,
+    preview_intent_revision,
+)
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
 from .profile_diff import (
@@ -123,6 +130,9 @@ __all__ = [
     "INTENT_APPROVAL_VERSION",
     "INTENT_DISCOVERY_METHOD",
     "INTENT_DISCOVERY_VERSION",
+    "INTENT_REVISION_APPLY_METHOD",
+    "INTENT_REVISION_PATCH_METHOD",
+    "INTENT_REVISION_VERSION",
     "INTENT_VOCABULARY_VERSION",
     "IntentMigrationResult",
     "IntentReferenceAdapter",
@@ -138,6 +148,7 @@ __all__ = [
     "STATISTICAL_EVALUATION_VERSION",
     "apply_habit_approval",
     "apply_intent_approval",
+    "apply_intent_revision",
     "calculate_continuity_score",
     "classify_capability_id",
     "compact_experience",
@@ -158,6 +169,7 @@ __all__ = [
     "migrate_profile",
     "preview_habit_approval",
     "preview_intent_approval",
+    "preview_intent_revision",
     "registered_capabilities",
     "registered_intent_goals",
     "reserved_namespaces",
