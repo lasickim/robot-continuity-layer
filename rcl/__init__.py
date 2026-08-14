@@ -47,6 +47,12 @@ from .expression_optimization import (
     apply_expression_optimization,
     preview_expression_optimization,
 )
+from .expression_recommendation import (
+    EXPRESSION_RECOMMENDATION_METHOD,
+    EXPRESSION_RECOMMENDATION_VERSION,
+    evaluate_expression_optimization_recommendations,
+    load_default_expression_optimization_policy,
+)
 from .expression_timing import (
     EXPRESSIVE_TIMING_VERSION,
     realize_temporal_style,
@@ -146,6 +152,8 @@ __all__ = [
     "EXPRESSION_OPTIMIZATION_APPLY_METHOD",
     "EXPRESSION_OPTIMIZATION_PATCH_METHOD",
     "EXPRESSION_OPTIMIZATION_VERSION",
+    "EXPRESSION_RECOMMENDATION_METHOD",
+    "EXPRESSION_RECOMMENDATION_VERSION",
     "EXPRESSIVE_TIMING_VERSION",
     "ExpressionMigrationResult",
     "ExpressionTimingMigrationResult",
@@ -192,6 +200,7 @@ __all__ = [
     "diff_profiles",
     "discover_intent_candidate",
     "discover_intent_candidate_from_summary",
+    "evaluate_expression_optimization_recommendations",
     "evaluate_habit_promotion_candidates",
     "evaluate_observed_continuity",
     "evaluate_observed_intent_success",
@@ -200,6 +209,7 @@ __all__ = [
     "get_capability",
     "get_intent_goal",
     "load_capability_registry",
+    "load_default_expression_optimization_policy",
     "load_default_habit_promotion_policy",
     "load_default_intent_discovery_policy",
     "load_intent_vocabulary",
