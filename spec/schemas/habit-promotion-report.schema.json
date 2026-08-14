@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:habit-promotion-report",
+  "title": "RCL Habit Promotion Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["promotion_version", "method", "created_at", "as_of", "policy", "profile", "evidence_report", "eligible_count", "blocked_count", "terminal_count", "decisions", "disclaimer"],
+  "properties": {
+    "promotion_version": {"const": "0.1"},
+    "method": {"const": "rcl.habit.promotion.review.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"const": "0.1"}
+      }
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "continuity_generation", "embodiment_id"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "continuity_generation": {"type": "integer", "minimum": 1},
+        "embodiment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "evidence_report": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "created_at", "status", "evaluation_success", "scorable_session_count", "mean_score", "score_std", "score_ci_half_width"],
+      "properties": {
+        "method": {"type": "string", "minLength": 1},
+        "created_at": {"type": "string", "format": "date-time"},
+        "status": {"type": "string", "minLength": 1},
+        "evaluation_success": {"type": "boolean"},
+        "scorable_session_count": {"type": "integer", "minimum": 0},
+        "mean_score": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+        "score_std": {"type": ["number", "null"], "minimum": 0},
+        "score_ci_half_width": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "eligible_count": {"type": "integer", "minimum": 0},
+    "blocked_count": {"type": "integer", "minimum": 0},
+    "terminal_count": {"type": "integer", "minimum": 0},
+    "decisions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["behavior_id", "current_lifecycle", "recommended_lifecycle", "decision", "eligible", "gates", "behavior_metric_count", "qualifying_metric_count"],
+        "properties": {
+          "behavior_id": {"type": "string", "minLength": 1},
+          "current_lifecycle": {"type": "string", "enum": ["configured", "learning", "stable", "legacy"]},
+          "recommended_lifecycle": {"type": ["string", "null"], "enum": ["learning", "stable", "legacy", null]},
+          "decision": {"type": "string", "enum": ["candidate", "blocked", "terminal"]},
+          "eligible": {"type": "boolean"},
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["gate", "passed", "actual", "required", "reason"],
+              "properties": {
+                "gate": {"type": "string", "minLength": 1},
+                "passed": {"type": "boolean"},
+                "actual": {},
+                "required": {},
+                "reason": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "behavior_metric_count": {"type": "integer", "minimum": 0},
+          "qualifying_metric_count": {"type": "integer", "minimum": 0}
+        }
+      }
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
