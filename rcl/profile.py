@@ -96,12 +96,14 @@ class RCLProfile:
             instance = _load_json(path)
             validate_schema(instance, payload.removesuffix(".json"))
             if payload == "behavior.json":
-                # Local import avoids a module import cycle: evaluation imports
-                # RCLProfile, while profile validation needs only the metadata
-                # cross-reference checker at runtime.
+                # Local imports avoid cycles: the evaluation/history validators
+                # depend on profile helpers, while profile validation only needs
+                # their cross-field checks at runtime.
                 from .evaluation import validate_behavior_evaluation_metadata
+                from .history import validate_behavior_habit_metadata
 
                 validate_behavior_evaluation_metadata(instance)
+                validate_behavior_habit_metadata(instance)
 
         manifest_path = self.root / "manifest.json"
         if require_manifest:

@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:profile-diff-report",
+  "title": "RCL Profile Diff Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["diff_version", "method", "before", "after", "changed", "summary", "behavior_changes"],
+  "properties": {
+    "diff_version": {"const": "0.1"},
+    "method": {"const": "rcl.profile.semantic_diff.v0.1"},
+    "before": {"$ref": "#/$defs/profile_ref"},
+    "after": {"$ref": "#/$defs/profile_ref"},
+    "changed": {"type": "boolean"},
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added_behaviors", "removed_behaviors", "modified_behaviors"],
+      "properties": {
+        "added_behaviors": {"type": "integer", "minimum": 0},
+        "removed_behaviors": {"type": "integer", "minimum": 0},
+        "modified_behaviors": {"type": "integer", "minimum": 0}
+      }
+    },
+    "behavior_changes": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/behavior_change"}
+    }
+  },
+  "$defs": {
+    "profile_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "continuity_generation", "embodiment_id"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "continuity_generation": {"type": "integer", "minimum": 0},
+        "embodiment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "value_change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["field", "change_type", "before", "after"],
+      "properties": {
+        "field": {"type": "string", "minLength": 1},
+        "change_type": {"type": "string", "enum": ["added", "removed", "changed"]},
+        "before": {},
+        "after": {}
+      }
+    },
+    "behavior_change": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["behavior_id", "change_type", "parameter_changes", "field_changes", "history_events_added", "history_event_ids_removed"],
+      "properties": {
+        "behavior_id": {"type": "string", "minLength": 1},
+        "change_type": {"type": "string", "enum": ["added", "removed", "modified"]},
+        "parameter_changes": {"type": "array", "items": {"$ref": "#/$defs/value_change"}},
+        "field_changes": {"type": "array", "items": {"$ref": "#/$defs/value_change"}},
+        "history_events_added": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["event_id", "observed_at", "event_type"],
+            "properties": {
+              "event_id": {"type": "string"},
+              "observed_at": {"type": "string", "format": "date-time"},
+              "event_type": {"type": "string"}
+            },
+            "additionalProperties": true
+          }
+        },
+        "history_event_ids_removed": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+      }
+    }
+  }
+}

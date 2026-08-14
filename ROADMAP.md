@@ -41,13 +41,16 @@ Primary goal: make RCL testable against external implementations and begin separ
 - [x] dependency-free 95% Student-t confidence intervals with a minimum of 3 scorable sessions
 - [x] strict cross-session robot/protocol/context series consistency gate
 - [x] per-metric session-level similarity uncertainty summaries
-- [ ] profile diff command
+- [x] semantic profile diff command and machine-readable diff report
+- [x] backward-compatible behavior habit/history metadata
+- [x] configured → learning → stable → legacy lifecycle model
+- [x] chronological habit-event validation and earlier/later profile fixtures
 - [ ] migration report cross-implementation fixtures
 - [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, and report uncertainty across a comparable series of repeated sessions.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, report uncertainty across a comparable series of repeated sessions, and expose auditable semantic profile evolution without replaying historical events as commands.
 
 ## v0.4 — private continuity and provenance
 
@@ -59,6 +62,7 @@ Primary goal: support long-lived profiles that may contain user-specific continu
 - [ ] provenance metadata
 - [ ] selective export
 - [ ] profile portability rules
+- [ ] retained-history compaction / archival policy
 
 ## v0.5 — real robot reference migration
 
@@ -69,6 +73,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
 - [ ] measured before/after manipulation behavior
+- [ ] live learned-habit capture and promotion demo
 - [ ] multi-session Statistical Continuity Score on physical robots
 - [ ] controlled experiment context capture from real sessions
 - [ ] uncertainty and confidence reporting on real robot data
@@ -95,6 +100,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] measured continuity evaluation profile
 - [ ] reproducible statistical evaluation protocol
 - [ ] longitudinal uncertainty profile
+- [ ] behavior-history portability profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
@@ -102,4 +108,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness or personhood, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness or personhood, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, history, and measurable preservation of robot continuity data.

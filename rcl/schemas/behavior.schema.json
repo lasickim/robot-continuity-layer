@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.2:behavior",
-  "title": "RCL Behavior v0.2 with v0.3-dev evaluation metadata",
+  "title": "RCL Behavior v0.2 with v0.3-dev evaluation and habit metadata",
   "type": "object",
   "additionalProperties": false,
   "required": ["behaviors"],
@@ -48,6 +48,34 @@
                     "weight": {"type": "number", "exclusiveMinimum": 0},
                     "required": {"type": "boolean", "default": true},
                     "min_trials": {"type": "integer", "minimum": 2, "default": 5}
+                  }
+                }
+              }
+            }
+          },
+          "habit": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["lifecycle", "first_observed_at", "events"],
+            "properties": {
+              "lifecycle": {"type": "string", "enum": ["configured", "learning", "stable", "legacy"]},
+              "first_observed_at": {"type": "string", "format": "date-time"},
+              "stable_since": {"type": "string", "format": "date-time"},
+              "legacy_since": {"type": "string", "format": "date-time"},
+              "user_confirmed_at": {"type": "string", "format": "date-time"},
+              "events": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["event_id", "observed_at", "event_type"],
+                  "properties": {
+                    "event_id": {"type": "string", "minLength": 1},
+                    "observed_at": {"type": "string", "format": "date-time"},
+                    "event_type": {"type": "string", "enum": ["configured", "observed", "learned_update", "stabilized", "legacy_promoted", "user_confirmed", "note"]},
+                    "parameter_values": {"type": "object"},
+                    "note": {"type": "string"},
+                    "evidence_ref": {"type": "string", "minLength": 1}
                   }
                 }
               }

@@ -16,6 +16,7 @@ from .evaluation import evaluate_observed_continuity
 from .example_adapter import ExampleMobileBaseAdapter
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, validate_schema
+from .profile_diff import diff_profiles
 from .session_evaluation import evaluate_repeated_sessions
 from .statistical_evaluation import compare_trial_distributions
 
@@ -23,6 +24,16 @@ from .statistical_evaluation import compare_trial_distributions
 def _read_json(path: str | Path):
     with Path(path).open("r", encoding="utf-8") as f:
         return json.load(f)
+
+
+def _write_or_print_json(report, output: str | None) -> None:
+    if output:
+        path = Path(output)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(path)
+    else:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
 
 
 def _cmd_validate(args: argparse.Namespace) -> int:
@@ -51,15 +62,8 @@ def _cmd_migrate(args: argparse.Namespace) -> int:
     validate_schema(target, "embodiment")
     if args.adapter != "example-mobile-base":
         raise RCLValidationError(f"Unknown built-in adapter: {args.adapter}")
-    adapter = ExampleMobileBaseAdapter()
-    report = migrate_profile(profile, target, adapter)
-    if args.output:
-        output = Path(args.output)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(output)
-    else:
-        print(json.dumps(report, indent=2, ensure_ascii=False))
+    report = migrate_profile(profile, target, ExampleMobileBaseAdapter())
+    _write_or_print_json(report, args.output)
     return 0 if report["continuity"]["migration_success"] else 3
 
 
@@ -78,14 +82,9 @@ def _cmd_report(args: argparse.Namespace) -> int:
 
 def _cmd_evaluate(args: argparse.Namespace) -> int:
     profile = RCLProfile.open(args.source)
-    observations = _read_json(args.observations)
-    report = evaluate_observed_continuity(profile, observations)
-
+    report = evaluate_observed_continuity(profile, _read_json(args.observations))
     if args.output:
-        output = Path(args.output)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(output)
+        _write_or_print_json(report, args.output)
     elif args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
@@ -105,15 +104,13 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
 
 def _cmd_compare_trials(args: argparse.Namespace) -> int:
     profile = RCLProfile.open(args.source)
-    source_trials = _read_json(args.source_trials)
-    target_trials = _read_json(args.target_trials)
-    report = compare_trial_distributions(profile, source_trials, target_trials)
-
+    report = compare_trial_distributions(
+        profile,
+        _read_json(args.source_trials),
+        _read_json(args.target_trials),
+    )
     if args.output:
-        output = Path(args.output)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(output)
+        _write_or_print_json(report, args.output)
     elif args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
@@ -127,12 +124,11 @@ def _cmd_compare_trials(args: argparse.Namespace) -> int:
             f"B={target_protocol['protocol_id']}@{target_protocol['protocol_version']}"
         )
         print(f"Comparison Fields: {', '.join(context['comparison_fields'])}")
-        if context["mismatches"]:
-            for item in context["mismatches"]:
-                print(
-                    f"- CONTEXT MISMATCH {item['field']}: "
-                    f"A={item['source']!r} B={item['target']!r} ({item['reason']})"
-                )
+        for item in context["mismatches"]:
+            print(
+                f"- CONTEXT MISMATCH {item['field']}: "
+                f"A={item['source']!r} B={item['target']!r} ({item['reason']})"
+            )
         if report["score"] is None:
             print("Statistical Continuity Score: N/A")
         else:
@@ -161,29 +157,18 @@ def _cmd_compare_sessions(args: argparse.Namespace) -> int:
     manifest_path = Path(args.session_manifest)
     manifest = _read_json(manifest_path)
     validate_schema(manifest, "session-manifest")
-
     base = manifest_path.resolve().parent
-    pairs = []
-    for item in manifest["sessions"]:
-        pairs.append(
-            {
-                "session_id": item["session_id"],
-                "source_trials": _read_json(_manifest_path(base, item["source_trials"])),
-                "target_trials": _read_json(_manifest_path(base, item["target_trials"])),
-            }
-        )
-
-    report = evaluate_repeated_sessions(
-        profile,
-        pairs,
-        min_sessions=int(manifest["min_sessions"]),
-    )
-
+    pairs = [
+        {
+            "session_id": item["session_id"],
+            "source_trials": _read_json(_manifest_path(base, item["source_trials"])),
+            "target_trials": _read_json(_manifest_path(base, item["target_trials"])),
+        }
+        for item in manifest["sessions"]
+    ]
+    report = evaluate_repeated_sessions(profile, pairs, min_sessions=int(manifest["min_sessions"]))
     if args.output:
-        output = Path(args.output)
-        output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-        print(output)
+        _write_or_print_json(report, args.output)
     elif args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
     else:
@@ -220,21 +205,16 @@ def _cmd_compare_sessions(args: argparse.Namespace) -> int:
                 f"- {item['session_id']}: {item['status']} "
                 f"(score={score}, context={'YES' if item['context_compatible'] else 'NO'})"
             )
-        if report["series_comparison"]["mismatches"]:
-            for item in report["series_comparison"]["mismatches"]:
-                print(
-                    f"- SERIES MISMATCH {item['session_id']} {item['field']}: "
-                    f"reference={item['reference']!r} observed={item['observed']!r}"
-                )
+        for item in report["series_comparison"]["mismatches"]:
+            print(
+                f"- SERIES MISMATCH {item['session_id']} {item['field']}: "
+                f"reference={item['reference']!r} observed={item['observed']!r}"
+            )
         if report["metric_summaries"]:
             print("Metric uncertainty:")
             for item in report["metric_summaries"]:
                 metric_ci = item["confidence_interval_95"]
-                ci_text = (
-                    "N/A"
-                    if metric_ci is None
-                    else f"[{metric_ci['low']:.3f}, {metric_ci['high']:.3f}]"
-                )
+                ci_text = "N/A" if metric_ci is None else f"[{metric_ci['low']:.3f}, {metric_ci['high']:.3f}]"
                 std_text = "N/A" if item["similarity_std"] is None else f"{item['similarity_std']:.3f}"
                 print(
                     f"- {item['behavior_id']}.{item['metric_id']}: "
@@ -242,6 +222,55 @@ def _cmd_compare_sessions(args: argparse.Namespace) -> int:
                     f"sessions={item['session_count']}"
                 )
     return 0 if report["evaluation_success"] else 6
+
+
+def _cmd_diff(args: argparse.Namespace) -> int:
+    before = RCLProfile.open(args.before)
+    after = RCLProfile.open(args.after)
+    report = diff_profiles(before, after)
+    if args.output:
+        _write_or_print_json(report, args.output)
+    elif args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        summary = report["summary"]
+        print("RCL Profile Diff")
+        print(
+            f"Before: {report['before']['robot_id']} generation={report['before']['continuity_generation']} "
+            f"embodiment={report['before']['embodiment_id']}"
+        )
+        print(
+            f"After:  {report['after']['robot_id']} generation={report['after']['continuity_generation']} "
+            f"embodiment={report['after']['embodiment_id']}"
+        )
+        print(f"Changed: {'YES' if report['changed'] else 'NO'}")
+        print(
+            "Behaviors: "
+            f"+{summary['added_behaviors']} "
+            f"-{summary['removed_behaviors']} "
+            f"~{summary['modified_behaviors']}"
+        )
+        for item in report["behavior_changes"]:
+            marker = {"added": "+", "removed": "-", "modified": "~"}[item["change_type"]]
+            print(f"{marker} {item['behavior_id']} ({item['change_type']})")
+            for change in item["parameter_changes"]:
+                print(
+                    f"  parameter {change['field']}: "
+                    f"{change['before']!r} -> {change['after']!r}"
+                )
+            for change in item["field_changes"]:
+                print(
+                    f"  {change['field']}: "
+                    f"{change['before']!r} -> {change['after']!r}"
+                )
+            for event in item["history_events_added"]:
+                print(
+                    f"  + history {event['event_id']} "
+                    f"[{event['event_type']}] @ {event['observed_at']}"
+                )
+            for event_id in item["history_event_ids_removed"]:
+                print(f"  - history {event_id}")
+    return 0
 
 
 def _cmd_capabilities_list(args: argparse.Namespace) -> int:
@@ -293,6 +322,7 @@ def _cmd_capabilities_validate(args: argparse.Namespace) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(prog="rcl")
     sub = parser.add_subparsers(dest="command", required=True)
+
     p_validate = sub.add_parser("validate"); p_validate.add_argument("path"); p_validate.set_defaults(func=_cmd_validate)
     p_inspect = sub.add_parser("inspect"); p_inspect.add_argument("path"); p_inspect.set_defaults(func=_cmd_inspect)
     p_pack = sub.add_parser("pack"); p_pack.add_argument("source"); p_pack.add_argument("output"); p_pack.add_argument("--profile-id", default="RCL-DEMO-PROFILE-001"); p_pack.set_defaults(func=_cmd_pack)
@@ -301,11 +331,14 @@ def main() -> int:
     p_evaluate = sub.add_parser("evaluate"); p_evaluate.add_argument("source"); p_evaluate.add_argument("observations"); p_evaluate.add_argument("--output"); p_evaluate.add_argument("--json", action="store_true"); p_evaluate.set_defaults(func=_cmd_evaluate)
     p_trials = sub.add_parser("compare-trials"); p_trials.add_argument("source"); p_trials.add_argument("source_trials"); p_trials.add_argument("target_trials"); p_trials.add_argument("--output"); p_trials.add_argument("--json", action="store_true"); p_trials.set_defaults(func=_cmd_compare_trials)
     p_sessions = sub.add_parser("compare-sessions"); p_sessions.add_argument("source"); p_sessions.add_argument("session_manifest"); p_sessions.add_argument("--output"); p_sessions.add_argument("--json", action="store_true"); p_sessions.set_defaults(func=_cmd_compare_sessions)
+    p_diff = sub.add_parser("diff"); p_diff.add_argument("before"); p_diff.add_argument("after"); p_diff.add_argument("--output"); p_diff.add_argument("--json", action="store_true"); p_diff.set_defaults(func=_cmd_diff)
+
     p_capabilities = sub.add_parser("capabilities")
     capability_sub = p_capabilities.add_subparsers(dest="capability_command", required=True)
     p_cap_list = capability_sub.add_parser("list"); p_cap_list.add_argument("--json", action="store_true"); p_cap_list.set_defaults(func=_cmd_capabilities_list)
     p_cap_show = capability_sub.add_parser("show"); p_cap_show.add_argument("capability_id"); p_cap_show.add_argument("--json", action="store_true"); p_cap_show.set_defaults(func=_cmd_capabilities_show)
     p_cap_validate = capability_sub.add_parser("validate"); p_cap_validate.add_argument("capability_id"); p_cap_validate.add_argument("--standard-only", action="store_true"); p_cap_validate.add_argument("--json", action="store_true"); p_cap_validate.set_defaults(func=_cmd_capabilities_validate)
+
     args = parser.parse_args()
     try:
         return args.func(args)

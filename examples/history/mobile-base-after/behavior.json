@@ -1,0 +1,82 @@
+{
+  "behaviors": [
+    {
+      "behavior_id": "navigation.follow_person",
+      "description": "Maintain the learned following style without preserving raw motor commands.",
+      "parameters": {
+        "preferred_distance_m": 1.32,
+        "speed_style": "gentle",
+        "turn_style": "cautious",
+        "stop_delay_ms": 420
+      },
+      "preservation": {"priority": "preferred", "mode": "semantic"},
+      "source": "learned",
+      "confidence": 0.93,
+      "required_capabilities": ["navigation.planar_velocity", "perception.person_tracking"],
+      "habit": {
+        "lifecycle": "stable",
+        "first_observed_at": "2026-01-15T00:00:00Z",
+        "stable_since": "2026-07-01T00:00:00Z",
+        "user_confirmed_at": "2026-07-15T00:00:00Z",
+        "events": [
+          {
+            "event_id": "follow-001",
+            "observed_at": "2026-01-15T00:00:00Z",
+            "event_type": "observed",
+            "parameter_values": {"preferred_distance_m": 1.4, "stop_delay_ms": 350},
+            "note": "Initial repeated following pattern detected."
+          },
+          {
+            "event_id": "follow-002",
+            "observed_at": "2026-03-01T00:00:00Z",
+            "event_type": "learned_update",
+            "parameter_values": {"preferred_distance_m": 1.36, "stop_delay_ms": 380},
+            "note": "Pattern continued to shift toward a closer and slower handoff style."
+          },
+          {
+            "event_id": "follow-003",
+            "observed_at": "2026-07-01T00:00:00Z",
+            "event_type": "stabilized",
+            "parameter_values": {"preferred_distance_m": 1.32, "stop_delay_ms": 420},
+            "note": "Behavior stayed inside the learned band long enough to mark stable.",
+            "evidence_ref": "sessions/person-following-2026H1"
+          },
+          {
+            "event_id": "follow-004",
+            "observed_at": "2026-07-15T00:00:00Z",
+            "event_type": "user_confirmed",
+            "note": "User chose to preserve this learned following habit."
+          }
+        ]
+      }
+    },
+    {
+      "behavior_id": "navigation.pre_turn_observation",
+      "description": "Briefly orient sensing toward the intended turn direction before a large turn.",
+      "parameters": {"minimum_turn_deg": 70, "observation_pause_ms": 250},
+      "preservation": {"priority": "optional", "mode": "legacy"},
+      "source": "learned",
+      "confidence": 0.84,
+      "required_capabilities": ["perception.directional_attention"],
+      "habit": {
+        "lifecycle": "stable",
+        "first_observed_at": "2026-04-10T00:00:00Z",
+        "stable_since": "2026-07-20T00:00:00Z",
+        "events": [
+          {
+            "event_id": "turn-001",
+            "observed_at": "2026-04-10T00:00:00Z",
+            "event_type": "observed",
+            "parameter_values": {"minimum_turn_deg": 70, "observation_pause_ms": 250}
+          },
+          {
+            "event_id": "turn-002",
+            "observed_at": "2026-07-20T00:00:00Z",
+            "event_type": "stabilized",
+            "note": "The pre-turn sensing pause became a consistent recognizable behavior."
+          }
+        ]
+      }
+    }
+  ]
+}

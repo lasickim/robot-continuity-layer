@@ -22,8 +22,14 @@ from .experiment_context import (
     DEFAULT_COMPARISON_FIELDS,
     compare_experiment_context,
 )
+from .history import HABIT_LIFECYCLES, validate_behavior_habit_metadata
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
+from .profile_diff import (
+    PROFILE_DIFF_METHOD,
+    PROFILE_DIFF_VERSION,
+    diff_profiles,
+)
 from .score import calculate_continuity_score
 from .session_evaluation import (
     CONFIDENCE_LEVEL,
@@ -55,6 +61,9 @@ __all__ = [
     "DEFAULT_MIN_TRIALS",
     "EVALUATION_METHOD",
     "EVALUATION_VERSION",
+    "HABIT_LIFECYCLES",
+    "PROFILE_DIFF_METHOD",
+    "PROFILE_DIFF_VERSION",
     "RCLAdapter",
     "RCLProfile",
     "RCLValidationError",
@@ -68,6 +77,7 @@ __all__ = [
     "compare_experiment_context",
     "compare_trial_distributions",
     "confidence_interval_95",
+    "diff_profiles",
     "evaluate_observed_continuity",
     "evaluate_repeated_sessions",
     "get_capability",
@@ -80,6 +90,7 @@ __all__ = [
     "sample_std",
     "t95_critical",
     "validate_behavior_evaluation_metadata",
+    "validate_behavior_habit_metadata",
     "validate_capability_id",
     "validate_capability_set",
     "wasserstein_1d",

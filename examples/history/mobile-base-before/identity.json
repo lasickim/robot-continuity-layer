@@ -1,0 +1,8 @@
+{
+  "robot_id": "RCL-DEMO-ROVER-A",
+  "display_name": "Demo Rover A",
+  "continuity_generation": 1,
+  "first_activated_at": "2026-08-14T00:00:00Z",
+  "previous_profile_id": null,
+  "notes": "First RCL mobile-base continuity demo"
+}
