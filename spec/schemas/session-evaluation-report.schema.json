@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:session-evaluation-report",
+  "title": "RCL Repeated-Session Confidence Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "session_evaluation_version",
+    "method",
+    "created_at",
+    "confidence_level",
+    "min_sessions",
+    "total_session_count",
+    "scorable_session_count",
+    "successful_session_count",
+    "failed_session_count",
+    "failed_session_ids",
+    "context_mismatch_session_ids",
+    "series_comparison",
+    "mean_score",
+    "score_std",
+    "confidence_interval_95",
+    "evaluation_success",
+    "status",
+    "session_results",
+    "metric_summaries",
+    "disclaimer"
+  ],
+  "properties": {
+    "session_evaluation_version": {"const": "0.1"},
+    "method": {"const": "rcl.observed.session_mean_t95.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "confidence_level": {"const": 0.95},
+    "min_sessions": {"type": "integer", "minimum": 3},
+    "total_session_count": {"type": "integer", "minimum": 1},
+    "scorable_session_count": {"type": "integer", "minimum": 0},
+    "successful_session_count": {"type": "integer", "minimum": 0},
+    "failed_session_count": {"type": "integer", "minimum": 0},
+    "failed_session_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "context_mismatch_session_ids": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "series_comparison": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["compatible", "reference_session_id", "mismatches"],
+      "properties": {
+        "compatible": {"type": "boolean"},
+        "reference_session_id": {"type": ["string", "null"]},
+        "mismatches": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["session_id", "field", "reference_session_id", "reference", "observed"],
+            "properties": {
+              "session_id": {"type": "string"},
+              "field": {"type": "string"},
+              "reference_session_id": {"type": "string"},
+              "reference": true,
+              "observed": true
+            }
+          }
+        }
+      }
+    },
+    "mean_score": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+    "score_std": {"type": ["number", "null"], "minimum": 0},
+    "confidence_interval_95": {
+      "oneOf": [
+        {"type": "null"},
+        {"$ref": "#/$defs/score_ci"}
+      ]
+    },
+    "evaluation_success": {"type": "boolean"},
+    "status": {
+      "type": "string",
+      "enum": ["estimated", "insufficient_sessions", "session_failures", "no_scorable_sessions", "series_mismatch"]
+    },
+    "session_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "session_id",
+          "score",
+          "evaluation_success",
+          "status",
+          "context_compatible",
+          "required_failures",
+          "source_session_id",
+          "target_session_id"
+        ],
+        "properties": {
+          "session_id": {"type": "string", "minLength": 1},
+          "score": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
+          "evaluation_success": {"type": "boolean"},
+          "status": {"type": "string", "minLength": 1},
+          "context_compatible": {"type": "boolean"},
+          "required_failures": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+          "source_session_id": {"type": "string", "minLength": 1},
+          "target_session_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "metric_summaries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "behavior_id",
+          "metric_id",
+          "unit",
+          "session_count",
+          "mean_similarity",
+          "similarity_std",
+          "confidence_interval_95"
+        ],
+        "properties": {
+          "behavior_id": {"type": "string", "minLength": 1},
+          "metric_id": {"type": "string", "minLength": 1},
+          "unit": {"type": "string", "minLength": 1},
+          "session_count": {"type": "integer", "minimum": 1},
+          "mean_similarity": {"type": "number", "minimum": 0, "maximum": 1},
+          "similarity_std": {"type": ["number", "null"], "minimum": 0},
+          "confidence_interval_95": {
+            "oneOf": [
+              {"type": "null"},
+              {"$ref": "#/$defs/similarity_ci"}
+            ]
+          }
+        }
+      }
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "score_ci": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low", "high", "half_width", "critical_value"],
+      "properties": {
+        "low": {"type": "number", "minimum": 0, "maximum": 100},
+        "high": {"type": "number", "minimum": 0, "maximum": 100},
+        "half_width": {"type": "number", "minimum": 0},
+        "critical_value": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "similarity_ci": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["low", "high", "half_width", "critical_value"],
+      "properties": {
+        "low": {"type": "number", "minimum": 0, "maximum": 1},
+        "high": {"type": "number", "minimum": 0, "maximum": 1},
+        "half_width": {"type": "number", "minimum": 0},
+        "critical_value": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  }
+}
