@@ -60,7 +60,15 @@
 - Added conservative stable-review defaults (3 sessions, mean >= 90, std <= 5, score CI half-width <= 5, behavior metric similarity >= 0.90).
 - Added stricter default legacy-review requirements (5 sessions, 180 stable days, explicit user confirmation).
 - Documented that habit history is formation evidence while Robot A↔B repeated-session continuity is supporting reproducibility evidence only.
-- Expanded the roadmap toward real-robot longitudinal habit capture, user-reviewed promotion, and portable history governance.
+- Added Explicit Habit Approval / Profile Patch v0.1 as the intentional mutation step after a promotion recommendation.
+- Added deterministic `preview_habit_approval()` patches with profile, candidate, lifecycle, and timestamp precondition checks.
+- Added `apply_habit_approval()` to create a new validated snapshot without overwriting or writing inside the source profile.
+- Added fresh manifest/SHA-256 generation for approved snapshots and source-payload immutability verification.
+- Added a `promotion_approved` audit event and explicit rules for `stable_since`, `legacy_since`, and user-confirmation timestamps.
+- Added Profile Diff minimality checks that reject any approval which changes semantic behavior parameters or another behavior.
+- Added `rcl approve-habit preview` and `rcl approve-habit apply` through an approval-aware CLI router while preserving existing RCL commands.
+- Added runtime/public approval patch and apply-result schemas plus approval workflow documentation.
+- Expanded the roadmap toward real-robot longitudinal habit capture, explicit user approval, and immutable profile snapshots.
 
 ## 0.2.0-dev — 2026-08-14
 
