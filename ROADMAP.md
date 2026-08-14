@@ -45,12 +45,16 @@ Primary goal: make RCL testable against external implementations and begin separ
 - [x] backward-compatible behavior habit/history metadata
 - [x] configured → learning → stable → legacy lifecycle model
 - [x] chronological habit-event validation and earlier/later profile fixtures
+- [x] Habit Promotion Policy v0.1 with explicit versioned thresholds
+- [x] non-mutating configured → learning / learning → stable / stable → legacy review recommendations
+- [x] behavior-specific repeated-session evidence gates for stable and legacy review
+- [x] machine-readable habit-promotion policy and report schemas
 - [ ] migration report cross-implementation fixtures
 - [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, report uncertainty across a comparable series of repeated sessions, and expose auditable semantic profile evolution without replaying historical events as commands.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, report uncertainty across a comparable series of repeated sessions, expose auditable semantic profile evolution without replaying historical events as commands, and produce transparent non-mutating habit-promotion review recommendations from versioned evidence gates.
 
 ## v0.4 — private continuity and provenance
 
@@ -77,6 +81,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] multi-session Statistical Continuity Score on physical robots
 - [ ] controlled experiment context capture from real sessions
 - [ ] uncertainty and confidence reporting on real robot data
+- [ ] user-reviewed habit promotion on real longitudinal evidence
 - [ ] video demo
 - [ ] reproducible test procedure and dataset
 
@@ -101,6 +106,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] reproducible statistical evaluation protocol
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
+- [ ] evidence-backed habit-promotion profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
