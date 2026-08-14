@@ -25,14 +25,20 @@
 - Added a transparent full-credit / linear-falloff / zero-credit numeric scoring rule.
 - Added profile validation for invalid evaluation parameter references and invalid tolerance falloff ranges.
 - Added a Robot B observation example (`1.37 m`, `372 ms`) and observed evaluation documentation.
-- Added repeated-trial observation format v0.1 for source and target robots.
+- Added repeated-trial observation format v0.2 for source and target robots.
 - Added Statistical Continuity Evaluation v0.2 using exact dependency-free one-dimensional empirical Wasserstein-1 distance.
 - Added source/target trial count, mean, sample standard deviation, distribution distance, and per-metric similarity reporting.
 - Added per-metric `min_trials` with a default of 5 and explicit required-metric failure on missing or insufficient trial data.
 - Added `compare_trial_distributions()` and `rcl compare-trials` with text, JSON, and report-file output.
 - Added Robot A / Robot B repeated-trial fixtures and documentation.
 - Added regression coverage proving equal means can still receive degraded continuity when empirical distributions differ.
-- Expanded the roadmap toward repeated-session uncertainty, environmental context, and real-robot validation.
+- Added Experiment Context / Measurement Protocol v0.1 with protocol IDs, versions, comparison fields, and session context.
+- Added a strict context gate that blocks statistical scoring when protocol or required experiment conditions differ.
+- Added machine-readable `context_comparison` results and `context_mismatch` report status with `score: null`.
+- Added non-blocking software, adapter, and sensor metadata differences so different robot implementations can still be compared under the same external scenario.
+- Added reference person-following protocol metadata and context-aware Robot A / Robot B trial fixtures.
+- Added tests for environment mismatch, missing required context, protocol-version mismatch, and informational implementation differences.
+- Expanded the roadmap toward repeated-session uncertainty and real-robot validation.
 
 ## 0.2.0-dev — 2026-08-14
 
