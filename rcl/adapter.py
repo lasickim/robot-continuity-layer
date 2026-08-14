@@ -12,6 +12,14 @@ MIGRATION_STATUSES = (
     "blocked_for_safety",
 )
 
+TIMING_MIGRATION_STATUSES = (
+    "naturalized",
+    "preserved",
+    "approximated",
+    "unsupported",
+    "blocked_for_safety",
+)
+
 
 def _validate_status(status: str, similarity: float | None = None) -> None:
     if status not in MIGRATION_STATUSES:
@@ -21,6 +29,11 @@ def _validate_status(status: str, similarity: float | None = None) -> None:
             raise ValueError("similarity must be between 0 and 1")
         if status in {"unsupported", "blocked_for_safety"} and similarity != 0.0:
             raise ValueError(f"{status} results must use similarity=0.0")
+
+
+def _validate_timing_status(status: str) -> None:
+    if status not in TIMING_MIGRATION_STATUSES:
+        raise ValueError(f"Unsupported expression timing migration status: {status}")
 
 
 @dataclass(frozen=True)
@@ -94,13 +107,38 @@ class ExpressionMigrationResult:
         }
 
 
+@dataclass(frozen=True)
+class ExpressionTimingMigrationResult:
+    expression_id: str
+    status: str
+    reason: str
+    timing_policy: str
+    semantic_style: dict[str, Any]
+    realized_timing: dict[str, Any] | None = None
+    source_artifacts: tuple[dict[str, str], ...] = ()
+
+    def __post_init__(self) -> None:
+        _validate_timing_status(self.status)
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "expression_id": self.expression_id,
+            "status": self.status,
+            "reason": self.reason,
+            "timing_policy": self.timing_policy,
+            "semantic_style": self.semantic_style,
+            "realized_timing": self.realized_timing,
+            "source_artifacts": [dict(item) for item in self.source_artifacts],
+        }
+
+
 class RCLAdapter(ABC):
     """Translate semantic RCL behavior into a target embodiment representation.
 
     Adapters generate migration plans; they do not directly command hardware.
-    v0.4 adds optional intent and visible-expression translation alongside the
-    existing behavior translation. Existing adapters remain valid because the
-    new facet methods provide conservative defaults.
+    v0.4 adds optional intent, visible-expression, and expressive-timing
+    translation alongside the existing behavior translation. Existing adapters
+    remain valid because the new facet methods provide conservative defaults.
     """
 
     adapter_id: str
@@ -186,6 +224,49 @@ class RCLAdapter(ABC):
             reason="Target can reproduce the declared visible expression.",
             target_expression=expression["expression_id"],
             required_capabilities=tuple(sorted(required)),
+        )
+
+    def translate_expression_timing(
+        self,
+        behavior: dict[str, Any],
+        source_embodiment: dict[str, Any],
+        target_embodiment: dict[str, Any],
+    ) -> ExpressionTimingMigrationResult | None:
+        expression = behavior.get("expression")
+        style = (expression or {}).get("temporal_style")
+        if expression is None or style is None:
+            return None
+
+        required = self.expression_required_capabilities(behavior)
+        available = set(target_embodiment.get("capabilities", []))
+        missing = required - available
+        semantic_style = {
+            "tempo": style["tempo"],
+            "dwell": style["dwell"],
+            "transition": style["transition"],
+            "legacy_significance": style["legacy_significance"],
+        }
+        if missing:
+            return ExpressionTimingMigrationResult(
+                expression_id=expression["expression_id"],
+                status="unsupported",
+                reason="Target cannot realize timing for an expression it cannot reproduce.",
+                timing_policy=style["timing_policy"],
+                semantic_style=semantic_style,
+                source_artifacts=tuple(style.get("source_artifacts", [])),
+            )
+
+        status = "naturalized" if style["timing_policy"] == "naturalize" else "preserved"
+        reason = (
+            "Adapter accepts the portable temporal style; concrete timing remains target-defined."
+        )
+        return ExpressionTimingMigrationResult(
+            expression_id=expression["expression_id"],
+            status=status,
+            reason=reason,
+            timing_policy=style["timing_policy"],
+            semantic_style=semantic_style,
+            source_artifacts=tuple(style.get("source_artifacts", [])),
         )
 
     @abstractmethod
