@@ -52,7 +52,15 @@
 - Added deterministic Profile Diff Report v0.1 and `diff_profiles()` for semantic profile evolution.
 - Added `rcl diff <before> <after>` with human-readable, JSON, and report-file output.
 - Added earlier/later mobile-base fixtures demonstrating learned parameter drift, learning-to-stable promotion, new history events, and a newly established behavior.
-- Expanded the roadmap toward real-robot longitudinal habit capture and portable history governance.
+- Added Habit Promotion Policy v0.1 with a published conservative default threshold set.
+- Added machine-readable habit-promotion policy and report schemas plus `evaluate_habit_promotion_candidates()`.
+- Added `rcl habit-candidates <profile> <session-report>` with custom-policy and explicit `--as-of` support.
+- Added non-mutating review gates for configured-to-learning, learning-to-stable, and stable-to-legacy transitions.
+- Added behavior-specific metric evidence requirements so high overall continuity cannot hide an unstable candidate behavior.
+- Added conservative stable-review defaults (3 sessions, mean >= 90, std <= 5, score CI half-width <= 5, behavior metric similarity >= 0.90).
+- Added stricter default legacy-review requirements (5 sessions, 180 stable days, explicit user confirmation).
+- Documented that habit history is formation evidence while Robot A↔B repeated-session continuity is supporting reproducibility evidence only.
+- Expanded the roadmap toward real-robot longitudinal habit capture, user-reviewed promotion, and portable history governance.
 
 ## 0.2.0-dev — 2026-08-14
 
