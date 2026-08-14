@@ -1,5 +1,6 @@
 import json
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -40,6 +41,17 @@ def test_registry_v01_validates_and_contains_initial_vocabulary():
         "safety",
         "system",
     }.issubset(reserved_namespaces())
+
+
+def test_published_spec_registry_matches_packaged_registry():
+    root = Path(__file__).resolve().parents[1]
+    published = json.loads(
+        (root / "spec" / "capability-registry-v0.1.json").read_text(encoding="utf-8")
+    )
+    packaged = load_capability_registry()
+
+    assert published == packaged
+    validate_schema(published, "capability-registry")
 
 
 def test_registered_standard_capability_is_classified_and_resolvable():
