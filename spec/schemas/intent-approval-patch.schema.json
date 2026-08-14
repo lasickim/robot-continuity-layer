@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:intent-approval-patch",
+  "title": "RCL Intent Approval Patch v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["approval_version", "method", "behavior_id", "approved_at", "approved_by", "source_profile", "source_behavior_sha256", "candidate", "before_intent", "after_intent"],
+  "properties": {
+    "approval_version": {"const": "0.1"},
+    "method": {"const": "rcl.intent.approval.patch.v0.1"},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "approved_at": {"type": "string", "format": "date-time"},
+    "approved_by": {"type": ["string", "null"]},
+    "source_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "continuity_generation", "embodiment_id"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "continuity_generation": {"type": "integer", "minimum": 1},
+        "embodiment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "source_behavior_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_id", "dataset_id", "discovery_method", "candidate_report_sha256", "confidence", "causal_claim"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "dataset_id": {"type": "string", "minLength": 1},
+        "discovery_method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
+        "candidate_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "confidence": {"type": "string", "enum": ["moderate", "strong"]},
+        "causal_claim": {"const": false}
+      }
+    },
+    "before_intent": {"type": "null"},
+    "after_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goal_id", "trigger", "success_condition", "failure_action", "criticality", "required_capabilities", "provenance"],
+      "properties": {
+        "goal_id": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "trigger": {"type": "string", "minLength": 1},
+        "success_condition": {"type": "string", "minLength": 1},
+        "failure_action": {"type": "string", "enum": ["block", "retry", "request_help", "abort", "degrade_safely"]},
+        "criticality": {"type": "string", "enum": ["required", "preferred", "advisory"]},
+        "required_capabilities": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "constraints": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+        "provenance": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["source", "candidate_id", "dataset_id", "discovery_method", "policy_id", "policy_version", "candidate_report_sha256", "approved_at", "approved_by", "causal_claim"],
+          "properties": {
+            "source": {"const": "discovered"},
+            "candidate_id": {"type": "string", "minLength": 1},
+            "dataset_id": {"type": "string", "minLength": 1},
+            "discovery_method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
+            "policy_id": {"type": "string", "minLength": 1},
+            "policy_version": {"const": "0.1"},
+            "candidate_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "approved_at": {"type": "string", "format": "date-time"},
+            "approved_by": {"type": ["string", "null"]},
+            "causal_claim": {"const": false}
+          }
+        }
+      }
+    }
+  }
+}
