@@ -96,16 +96,18 @@ class RCLProfile:
             instance = _load_json(path)
             validate_schema(instance, payload.removesuffix(".json"))
             if payload == "behavior.json":
-                # Local imports avoid cycles: the evaluation/history/intent
+                # Local imports avoid cycles: the evaluation/history/intent/timing
                 # validators depend on profile helpers, while profile validation
                 # only needs their cross-field checks at runtime.
                 from .evaluation import validate_behavior_evaluation_metadata
+                from .expression_timing import validate_behavior_expression_timing_metadata
                 from .history import validate_behavior_habit_metadata
                 from .intent import validate_behavior_intent_metadata
 
                 validate_behavior_evaluation_metadata(instance)
                 validate_behavior_habit_metadata(instance)
                 validate_behavior_intent_metadata(instance)
+                validate_behavior_expression_timing_metadata(instance)
 
         manifest_path = self.root / "manifest.json"
         if require_manifest:
