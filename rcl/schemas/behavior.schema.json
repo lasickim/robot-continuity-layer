@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.2:behavior",
-  "title": "RCL Behavior v0.2",
+  "title": "RCL Behavior v0.2 with v0.3-dev evaluation metadata",
   "type": "object",
   "additionalProperties": false,
   "required": ["behaviors"],
@@ -24,6 +24,32 @@
             "properties": {
               "priority": {"type": "string", "enum": ["required", "preferred", "optional"]},
               "mode": {"type": "string", "enum": ["semantic", "legacy"]}
+            }
+          },
+          "evaluation": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["metrics"],
+            "properties": {
+              "metrics": {
+                "type": "array",
+                "minItems": 1,
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["metric_id", "observable", "target_parameter", "unit", "tolerance", "zero_credit_at", "weight"],
+                  "properties": {
+                    "metric_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+                    "observable": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+                    "target_parameter": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+                    "unit": {"type": "string", "minLength": 1},
+                    "tolerance": {"type": "number", "minimum": 0},
+                    "zero_credit_at": {"type": "number", "exclusiveMinimum": 0},
+                    "weight": {"type": "number", "exclusiveMinimum": 0},
+                    "required": {"type": "boolean", "default": true}
+                  }
+                }
+              }
             }
           },
           "source": {"type": "string", "enum": ["configured", "learned", "imported"]},
