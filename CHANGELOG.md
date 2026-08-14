@@ -2,6 +2,17 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Lightweight Experience Store + Compaction v0.1 for low-overhead long-lived context-action-outcome evidence.
+- Added Experience Episode Set v0.1 with timestamped semantic context, action, outcomes, optional session refs, parameters, and external evidence refs without embedding raw media.
+- Added deterministic `compact_experience()` grouping by exact semantic context, action ID, and outcome-key set with no behavior-specific hardcoding.
+- Added numeric outcome summaries with count, mean, sample standard deviation, minimum, and maximum.
+- Added binary outcome summaries with true/false counts and true rate.
+- Added action-present/action-absent counts, first/last observation timestamps, deterministic source-store digest, per-group episode-ID digest, and early/late retained exemplar IDs.
+- Added explicit mixed-outcome-type rejection so incompatible evidence is not silently coerced or averaged.
+- Added `rcl compact-experience` plus a mixed object-release / auto-docking reference fixture.
+- Added runtime/public Experience Episode and Experience Summary schemas with parity tests.
+- Made v0.1 compaction explicitly non-destructive with `destructive=false`; summary creation never deletes source episodes or implies retention consent.
+- Documented a three-timescale compute model: real-time control, event-time semantic logging, and idle/charging-window longitudinal compaction.
 - Added Intent Discovery / Intent Candidate v0.1 as a model-independent evidence layer for newly learned behavior.
 - Added a generic context-action-outcome dataset format that does not hardcode specific robot behaviors.
 - Added a versioned Intent Discovery Policy v0.1 with explicit context sample, action-present, action-absent, and repetition gates.
