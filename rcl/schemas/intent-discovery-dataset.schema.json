@@ -1,0 +1,110 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:intent-discovery-dataset",
+  "title": "RCL Intent Discovery Dataset v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "discovery_dataset_version",
+    "dataset_id",
+    "candidate_action_id",
+    "context_match",
+    "outcome",
+    "proposed_intent",
+    "episodes"
+  ],
+  "properties": {
+    "discovery_dataset_version": {"const": "0.1"},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "candidate_action_id": {
+      "type": "string",
+      "pattern": "^(?:[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+|x\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z][a-z0-9_]*)+)$"
+    },
+    "context_match": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {"type": ["string", "number", "boolean"]}
+    },
+    "outcome": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["outcome_id", "type", "higher_is_better", "minimum_meaningful_effect"],
+      "properties": {
+        "outcome_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+        "type": {"type": "string", "enum": ["numeric", "binary"]},
+        "higher_is_better": {"type": "boolean"},
+        "minimum_meaningful_effect": {"type": "number", "exclusiveMinimum": 0},
+        "unit": {"type": "string", "minLength": 1}
+      }
+    },
+    "proposed_intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "goal_id",
+        "trigger",
+        "success_condition",
+        "failure_action",
+        "criticality",
+        "required_capabilities"
+      ],
+      "properties": {
+        "goal_id": {"type": "string", "minLength": 1},
+        "description": {"type": "string", "minLength": 1},
+        "trigger": {"type": "string", "minLength": 1},
+        "success_condition": {"type": "string", "minLength": 1},
+        "failure_action": {"type": "string", "enum": ["block", "retry", "request_help", "abort", "degrade_safely"]},
+        "criticality": {"type": "string", "enum": ["required", "preferred", "advisory"]},
+        "required_capabilities": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "constraints": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "episodes": {
+      "type": "array",
+      "minItems": 2,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["episode_id", "context", "action", "outcomes"],
+        "properties": {
+          "episode_id": {"type": "string", "minLength": 1},
+          "observed_at": {"type": "string", "format": "date-time"},
+          "session_ref": {"type": "string", "minLength": 1},
+          "context": {
+            "type": "object",
+            "additionalProperties": {"type": ["string", "number", "boolean"]}
+          },
+          "action": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action_id", "performed"],
+            "properties": {
+              "action_id": {"type": "string", "minLength": 1},
+              "performed": {"type": "boolean"},
+              "parameters": {"type": "object"}
+            }
+          },
+          "outcomes": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {"type": "number"},
+                {"type": "boolean"}
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}

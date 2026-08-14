@@ -1,0 +1,11 @@
+{
+  "policy_version": "0.1",
+  "policy_id": "rcl.intent.discovery.default.v0.1",
+  "description": "Conservative default evidence gates for context-action-outcome intent candidate discovery. Outcome effect thresholds remain dataset-specific.",
+  "min_context_episodes": 10,
+  "min_action_present": 4,
+  "min_action_absent": 4,
+  "min_action_repeat_rate": 0.3,
+  "strong_effect_multiplier": 2.0,
+  "strong_sample_multiplier": 2.0
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:intent-discovery-policy",
+  "title": "RCL Intent Discovery Policy v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_version", "policy_id", "min_context_episodes", "min_action_present", "min_action_absent", "min_action_repeat_rate", "strong_effect_multiplier", "strong_sample_multiplier"],
+  "properties": {
+    "policy_version": {"const": "0.1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "min_context_episodes": {"type": "integer", "minimum": 2},
+    "min_action_present": {"type": "integer", "minimum": 1},
+    "min_action_absent": {"type": "integer", "minimum": 1},
+    "min_action_repeat_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "strong_effect_multiplier": {"type": "number", "minimum": 1},
+    "strong_sample_multiplier": {"type": "number", "minimum": 1}
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "discovery_dataset_version": "0.1",
+  "dataset_id": "demo-object-release-stability-001",
+  "candidate_action_id": "interaction.post_release_hold",
+  "context_match": {
+    "task": "object_release"
+  },
+  "outcome": {
+    "outcome_id": "object_stability_score",
+    "type": "numeric",
+    "higher_is_better": true,
+    "minimum_meaningful_effect": 0.15,
+    "unit": "ratio"
+  },
+  "proposed_intent": {
+    "goal_id": "x.rcl-demo.stabilize_released_object",
+    "description": "Keep support briefly after release so the object reaches a stable state before the manipulator withdraws.",
+    "trigger": "activity.after_object_release",
+    "success_condition": "state.released_object_stable",
+    "failure_action": "retry",
+    "criticality": "preferred",
+    "required_capabilities": [
+      "x.rcl-demo.object_stability_observation"
+    ]
+  },
+  "episodes": [
+    {"episode_id":"release-01","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":390}},"outcomes":{"object_stability_score":0.96}},
+    {"episode_id":"release-02","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":410}},"outcomes":{"object_stability_score":0.94}},
+    {"episode_id":"release-03","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":405}},"outcomes":{"object_stability_score":0.95}},
+    {"episode_id":"release-04","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":420}},"outcomes":{"object_stability_score":0.97}},
+    {"episode_id":"release-05","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":400}},"outcomes":{"object_stability_score":0.93}},
+    {"episode_id":"release-06","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":415}},"outcomes":{"object_stability_score":0.96}},
+    {"episode_id":"release-07","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":395}},"outcomes":{"object_stability_score":0.95}},
+    {"episode_id":"release-08","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":425}},"outcomes":{"object_stability_score":0.94}},
+    {"episode_id":"release-09","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":400}},"outcomes":{"object_stability_score":0.97}},
+    {"episode_id":"release-10","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true,"parameters":{"hold_ms":410}},"outcomes":{"object_stability_score":0.95}},
+    {"episode_id":"release-11","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.58}},
+    {"episode_id":"release-12","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.61}},
+    {"episode_id":"release-13","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.63}},
+    {"episode_id":"release-14","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.57}},
+    {"episode_id":"release-15","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.60}},
+    {"episode_id":"release-16","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.62}},
+    {"episode_id":"release-17","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.59}},
+    {"episode_id":"release-18","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.64}},
+    {"episode_id":"release-19","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.56}},
+    {"episode_id":"release-20","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.60}},
+    {"episode_id":"other-01","context":{"task":"handover"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.80}},
+    {"episode_id":"other-02","context":{"task":"handover"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.82}}
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:intent-candidate-report",
+  "title": "RCL Intent Candidate Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["discovery_version", "method", "created_at", "dataset_id", "candidate_id", "policy", "hypothesis", "evidence", "gates", "status", "confidence", "recommended_next_action", "causal_claim", "disclaimer"],
+  "properties": {
+    "discovery_version": {"const": "0.1"},
+    "method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "policy": {"type": "object", "additionalProperties": false, "required": ["policy_id", "policy_version"], "properties": {"policy_id": {"type": "string", "minLength": 1}, "policy_version": {"const": "0.1"}}},
+    "hypothesis": {"type": "object", "additionalProperties": false, "required": ["candidate_action_id", "context_match", "outcome", "proposed_intent"], "properties": {"candidate_action_id": {"type": "string", "minLength": 1}, "context_match": {"type": "object"}, "outcome": {"type": "object"}, "proposed_intent": {"type": "object"}}},
+    "evidence": {"type": "object", "additionalProperties": false, "required": ["total_episode_count", "context_episode_count", "ignored_episode_count", "action_present_count", "action_absent_count", "action_repeat_rate", "action_present_mean", "action_absent_mean", "raw_difference", "beneficial_effect", "minimum_meaningful_effect", "effect_direction", "outcome_type"], "properties": {"total_episode_count": {"type": "integer", "minimum": 2}, "context_episode_count": {"type": "integer", "minimum": 0}, "ignored_episode_count": {"type": "integer", "minimum": 0}, "action_present_count": {"type": "integer", "minimum": 0}, "action_absent_count": {"type": "integer", "minimum": 0}, "action_repeat_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1}, "action_present_mean": {"type": ["number", "null"]}, "action_absent_mean": {"type": ["number", "null"]}, "raw_difference": {"type": ["number", "null"]}, "beneficial_effect": {"type": ["number", "null"]}, "minimum_meaningful_effect": {"type": "number", "exclusiveMinimum": 0}, "effect_direction": {"type": "string", "enum": ["beneficial", "neutral_or_harmful", "not_estimable"]}, "outcome_type": {"type": "string", "enum": ["numeric", "binary"]}}},
+    "gates": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["gate", "passed", "actual", "required", "reason"], "properties": {"gate": {"type": "string", "minLength": 1}, "passed": {"type": "boolean"}, "actual": {}, "required": {}, "reason": {"type": "string", "minLength": 1}}}},
+    "status": {"type": "string", "enum": ["candidate", "insufficient_evidence"]},
+    "confidence": {"type": "string", "enum": ["strong", "moderate", "insufficient"]},
+    "recommended_next_action": {"type": "string", "enum": ["review_candidate", "collect_more_evidence"]},
+    "causal_claim": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
