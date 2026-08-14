@@ -29,15 +29,19 @@ Primary goal: make RCL testable against external implementations and begin separ
 - [x] observation input format v0.1
 - [x] Observed Continuity Evaluation v0.1 (observed-vs-declared)
 - [x] machine-readable observed evaluation report schema
+- [x] repeated-trial observation format v0.1
+- [x] source-vs-target Statistical Continuity Evaluation v0.2
+- [x] exact 1D empirical Wasserstein distribution comparison
+- [x] repeated-trial minimum sample policy
 - [ ] profile diff command
-- [ ] source-vs-target repeated-trial evaluation protocol
-- [ ] distribution / confidence metadata for observed behavior
+- [ ] repeated-session confidence / uncertainty metadata
+- [ ] environment and measurement-context metadata
 - [ ] migration report cross-implementation fixtures
 - [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, and emit observations that can be evaluated against declared semantic tolerances.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, and participate in repeated-trial source-vs-target behavior comparison.
 
 ## v0.4 — private continuity and provenance
 
@@ -59,8 +63,9 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
 - [ ] measured before/after manipulation behavior
-- [ ] source-vs-target Observed Continuity Score
-- [ ] repeated-trial statistics and confidence
+- [ ] multi-session Statistical Continuity Score
+- [ ] environmental control / context recording
+- [ ] uncertainty and confidence reporting
 - [ ] video demo
 - [ ] reproducible test procedure and dataset
 
@@ -82,6 +87,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] multi-vendor adapter ecosystem
 - [ ] independent conformance suites for multiple embodiment classes
 - [ ] measured continuity evaluation profile
+- [ ] reproducible statistical evaluation protocol
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
