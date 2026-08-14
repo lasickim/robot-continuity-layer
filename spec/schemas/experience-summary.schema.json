@@ -42,34 +42,15 @@
           "outcomes": {
             "type": "object",
             "minProperties": 1,
-            "additionalProperties": {
-              "oneOf": [
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["type", "count", "mean", "sample_std", "min", "max"],
-                  "properties": {
-                    "type": {"const": "numeric"},
-                    "count": {"type": "integer", "minimum": 1},
-                    "mean": {"type": "number"},
-                    "sample_std": {"type": ["number", "null"], "minimum": 0},
-                    "min": {"type": "number"},
-                    "max": {"type": "number"}
-                  }
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "required": ["type", "count", "true_count", "false_count", "true_rate"],
-                  "properties": {
-                    "type": {"const": "binary"},
-                    "count": {"type": "integer", "minimum": 1},
-                    "true_count": {"type": "integer", "minimum": 0},
-                    "false_count": {"type": "integer", "minimum": 0},
-                    "true_rate": {"type": "number", "minimum": 0, "maximum": 1}
-                  }
-                }
-              ]
+            "additionalProperties": {"$ref": "#/$defs/outcomeSummary"}
+          },
+          "action_strata": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["present", "absent"],
+            "properties": {
+              "present": {"$ref": "#/$defs/actionStratum"},
+              "absent": {"$ref": "#/$defs/actionStratum"}
             }
           },
           "provenance": {
@@ -84,6 +65,49 @@
           }
         }
       }
+    }
+  },
+  "$defs": {
+    "actionStratum": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["episode_count", "outcomes"],
+      "properties": {
+        "episode_count": {"type": "integer", "minimum": 0},
+        "outcomes": {
+          "type": "object",
+          "additionalProperties": {"$ref": "#/$defs/outcomeSummary"}
+        }
+      }
+    },
+    "outcomeSummary": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "count", "mean", "sample_std", "min", "max"],
+          "properties": {
+            "type": {"const": "numeric"},
+            "count": {"type": "integer", "minimum": 1},
+            "mean": {"type": "number"},
+            "sample_std": {"type": ["number", "null"], "minimum": 0},
+            "min": {"type": "number"},
+            "max": {"type": "number"}
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["type", "count", "true_count", "false_count", "true_rate"],
+          "properties": {
+            "type": {"const": "binary"},
+            "count": {"type": "integer", "minimum": 1},
+            "true_count": {"type": "integer", "minimum": 0},
+            "false_count": {"type": "integer", "minimum": 0},
+            "true_rate": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        }
+      ]
     }
   }
 }
