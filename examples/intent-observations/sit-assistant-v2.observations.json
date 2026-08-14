@@ -1,0 +1,28 @@
+{
+  "intent_observation_version": "0.1",
+  "robot_id": "RCL-INTENT-DEMO-V2",
+  "embodiment_id": "intent-demo-v2-humanoid",
+  "captured_at": "2026-08-15T01:05:00Z",
+  "intent_observations": [
+    {
+      "observation_id": "v2-sit-001",
+      "behavior_id": "safety.pre_sit_clearance_check",
+      "trigger": "activity.before_sit_down",
+      "trigger_state": "observed",
+      "success_condition": "state.sitting_area_clear",
+      "success_state": "satisfied",
+      "strategy_id": "target.direct_rear_depth_sensing",
+      "evidence_refs": ["observation://v2/sit/rear-depth"]
+    },
+    {
+      "observation_id": "v2-handover-001",
+      "behavior_id": "interaction.present_handover",
+      "trigger": "interaction.before_handover_release",
+      "trigger_state": "observed",
+      "success_condition": "state.handover_orientation_acceptable",
+      "success_state": "satisfied",
+      "strategy_id": "target.native_handover_orientation",
+      "evidence_refs": ["observation://v2/handover/native-orientation"]
+    }
+  ]
+}
