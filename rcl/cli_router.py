@@ -7,6 +7,10 @@ from pathlib import Path
 
 from .cli import main as legacy_main
 from .habit_approval import apply_habit_approval, preview_habit_approval
+from .intent_discovery import (
+    discover_intent_candidate,
+    load_default_intent_discovery_policy,
+)
 from .profile import RCLProfile, RCLValidationError
 
 
@@ -100,10 +104,78 @@ def _run_approval(argv: list[str]) -> int:
     return 0
 
 
+def _discovery_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="rcl discover-intent")
+    parser.add_argument("dataset")
+    parser.add_argument("--policy")
+    parser.add_argument("--output")
+    parser.add_argument("--json", action="store_true")
+    return parser
+
+
+def _run_discovery(argv: list[str]) -> int:
+    args = _discovery_parser().parse_args(argv)
+    dataset = _read_json(args.dataset)
+    policy = _read_json(args.policy) if args.policy else load_default_intent_discovery_policy()
+    report = discover_intent_candidate(dataset, policy=policy)
+
+    if args.output:
+        print(_write_json(args.output, report))
+    elif args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        evidence = report["evidence"]
+        hypothesis = report["hypothesis"]
+        intent = hypothesis["proposed_intent"]
+        print("RCL Intent Discovery")
+        print(f"Dataset: {report['dataset_id']}")
+        print(f"Candidate ID: {report['candidate_id']}")
+        print(f"Action: {hypothesis['candidate_action_id']}")
+        print(f"Proposed Goal: {intent['goal_id']}")
+        print(f"Context: {hypothesis['context_match']}")
+        print(
+            "Samples: "
+            f"context={evidence['context_episode_count']} "
+            f"present={evidence['action_present_count']} "
+            f"absent={evidence['action_absent_count']} "
+            f"ignored={evidence['ignored_episode_count']}"
+        )
+        repeat = evidence["action_repeat_rate"]
+        print(f"Action Repeat Rate: {'N/A' if repeat is None else f'{repeat:.3f}'}")
+        print(
+            "Outcome Means: "
+            f"present={evidence['action_present_mean']} "
+            f"absent={evidence['action_absent_mean']}"
+        )
+        print(
+            "Beneficial Effect: "
+            f"{evidence['beneficial_effect']} "
+            f"(required >= {evidence['minimum_meaningful_effect']})"
+        )
+        print(f"Status: {report['status']}")
+        print(f"Confidence: {report['confidence']}")
+        print("Causal Claim: NO")
+        print(f"Next: {report['recommended_next_action']}")
+        failed = [gate for gate in report["gates"] if not gate["passed"]]
+        for gate in failed:
+            print(
+                f"- BLOCK {gate['gate']}: actual={gate['actual']!r} "
+                f"required={gate['required']!r}"
+            )
+
+    return 0 if report["status"] == "candidate" else 7
+
+
 def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "approve-habit":
         try:
             return _run_approval(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "discover-intent":
+        try:
+            return _run_discovery(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
