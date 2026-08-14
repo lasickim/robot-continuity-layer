@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:expression-optimization-patch",
+  "title": "RCL Expression Optimization Patch v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["optimization_version", "method", "behavior_id", "approved_at", "approved_by", "source_profile", "source_behavior_sha256", "candidate", "before_expression", "after_expression", "history_entry"],
+  "properties": {
+    "optimization_version": {"const": "0.1"},
+    "method": {"const": "rcl.expression.optimization.patch.v0.1"},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "approved_at": {"type": "string", "format": "date-time"},
+    "approved_by": {"type": ["string", "null"]},
+    "source_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "continuity_generation", "embodiment_id"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "continuity_generation": {"type": "integer", "minimum": 1},
+        "embodiment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "source_behavior_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "candidate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["candidate_id", "candidate_sha256", "created_at", "action", "reason", "evidence_refs"],
+      "properties": {
+        "candidate_id": {"type": "string", "minLength": 1},
+        "candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "action": {"type": "string", "enum": ["simplify", "remove"]},
+        "reason": {"type": "string", "minLength": 1},
+        "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "before_expression": {"type": "object"},
+    "after_expression": {"type": ["object", "null"]},
+    "history_entry": {"type": "object"}
+  }
+}
