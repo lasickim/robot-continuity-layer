@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:habit-approval-patch",
+  "title": "RCL Habit Approval Patch v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "approval_version",
+    "method",
+    "behavior_id",
+    "from_lifecycle",
+    "to_lifecycle",
+    "approved_at",
+    "approved_by",
+    "promotion_evidence",
+    "changes",
+    "history_event"
+  ],
+  "properties": {
+    "approval_version": {"const": "0.1"},
+    "method": {"const": "rcl.habit.approval.patch.v0.1"},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "from_lifecycle": {"type": "string", "enum": ["configured", "learning", "stable"]},
+    "to_lifecycle": {"type": "string", "enum": ["learning", "stable", "legacy"]},
+    "approved_at": {"type": "string", "format": "date-time"},
+    "approved_by": {"type": ["string", "null"], "minLength": 1},
+    "promotion_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "created_at", "as_of", "policy_id", "policy_version"],
+      "properties": {
+        "method": {"const": "rcl.habit.promotion.review.v0.1"},
+        "created_at": {"type": "string", "format": "date-time"},
+        "as_of": {"type": "string", "format": "date-time"},
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"const": "0.1"}
+      }
+    },
+    "changes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "before", "after"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "enum": [
+              "habit.lifecycle",
+              "habit.stable_since",
+              "habit.legacy_since",
+              "habit.user_confirmed_at"
+            ]
+          },
+          "before": {},
+          "after": {}
+        }
+      }
+    },
+    "history_event": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["event_id", "observed_at", "event_type", "note", "evidence_ref"],
+      "properties": {
+        "event_id": {"type": "string", "minLength": 1},
+        "observed_at": {"type": "string", "format": "date-time"},
+        "event_type": {"const": "promotion_approved"},
+        "note": {"type": "string", "minLength": 1},
+        "evidence_ref": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
