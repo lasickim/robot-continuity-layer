@@ -23,6 +23,8 @@ EXPECTED_INITIAL_CAPABILITIES = {
     "perception.person_tracking",
     "perception.forward_range",
     "perception.directional_attention",
+    "perception.sitting_area_clearance",
+    "manipulation.handover_orientation",
 }
 
 
