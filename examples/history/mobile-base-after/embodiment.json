@@ -1,0 +1,10 @@
+{
+  "embodiment_id": "demo-rover-a-v1",
+  "vendor": "example",
+  "model": "two-wheel-rover",
+  "class": "mobile_base",
+  "capabilities": ["navigation.planar_velocity", "perception.person_tracking", "perception.forward_range"],
+  "limits": {"max_linear_speed_mps": 1.2, "max_angular_speed_rps": 2.0},
+  "sensors": ["rgb_camera", "range_sensor"],
+  "adapter": {"adapter_id": "rcl.example.mobile_base", "adapter_version": "0.2"}
+}

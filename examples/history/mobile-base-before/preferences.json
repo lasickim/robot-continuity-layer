@@ -1,0 +1,3 @@
+{
+  "preferences": [{"preference_id": "navigation.follow_person.preferred_distance_m", "scope": "global", "subject_ref": null, "value": 1.4, "source": "learned", "confidence": 0.93}]
+}

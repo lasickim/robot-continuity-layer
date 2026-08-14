@@ -1,0 +1,38 @@
+{
+  "behaviors": [
+    {
+      "behavior_id": "navigation.follow_person",
+      "description": "Maintain the learned following style without preserving raw motor commands.",
+      "parameters": {
+        "preferred_distance_m": 1.36,
+        "speed_style": "gentle",
+        "turn_style": "cautious",
+        "stop_delay_ms": 380
+      },
+      "preservation": {"priority": "preferred", "mode": "semantic"},
+      "source": "learned",
+      "confidence": 0.82,
+      "required_capabilities": ["navigation.planar_velocity", "perception.person_tracking"],
+      "habit": {
+        "lifecycle": "learning",
+        "first_observed_at": "2026-01-15T00:00:00Z",
+        "events": [
+          {
+            "event_id": "follow-001",
+            "observed_at": "2026-01-15T00:00:00Z",
+            "event_type": "observed",
+            "parameter_values": {"preferred_distance_m": 1.4, "stop_delay_ms": 350},
+            "note": "Initial repeated following pattern detected."
+          },
+          {
+            "event_id": "follow-002",
+            "observed_at": "2026-03-01T00:00:00Z",
+            "event_type": "learned_update",
+            "parameter_values": {"preferred_distance_m": 1.36, "stop_delay_ms": 380},
+            "note": "Pattern continued to shift toward a closer and slower handoff style."
+          }
+        ]
+      }
+    }
+  ]
+}
