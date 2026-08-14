@@ -59,7 +59,7 @@ The package container remains the five-payload `.rcl` format.
 
 ## v0.4 — Behavior Intent / Goal Semantics
 
-Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion.
+Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, and begin discovering reviewable purpose hypotheses from new learned behavior.
 
 - [x] optional `behavior.intent` block
 - [x] portable goal / trigger / success-condition / failure-action model
@@ -72,10 +72,22 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] required-intent hard migration gate
 - [x] reference V1 → V2 demo where intent is preserved while obsolete expressions are dropped
 - [x] Profile Diff support for intent/expression changes
+- [x] Intent Discovery Dataset v0.1 using generic context-action-outcome episodes
+- [x] Intent Discovery Policy v0.1 with explicit sample/repetition gates
+- [x] Intent Candidate Report v0.1 with `causal_claim=false`
+- [x] generic deterministic numeric and binary outcome association engine
+- [x] higher-is-better and lower-is-better outcome support
+- [x] dataset-specific meaningful-effect thresholds
+- [x] model-independent `rcl discover-intent` CLI
+- [x] reference object-release and unrelated auto-docking discovery fixtures
+- [x] strong/moderate evidence labels explicitly separated from probability claims
+- [ ] Explicit Intent Approval / Profile Patch that converts an accepted candidate into a new immutable snapshot
+- [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
 - [ ] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
 - [ ] observed intent-success evidence model distinct from motion similarity
+- [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
 
 ### v0.4 semantic rule
 
@@ -88,6 +100,28 @@ HISTORY  → habit / legacy
 ```
 
 A target may change HOW and lose an optional LOOKS expression while still preserving WHY.
+
+Intent Discovery extends the lifecycle before intent is declared:
+
+```text
+experience
+  ↓
+pattern
+  ↓
+goal hypothesis
+  ↓
+context-action-outcome evidence
+  ↓
+Intent Candidate
+  ↓
+explicit review / future approval
+  ↓
+declared intent
+  ↓
+continuity
+```
+
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation.
 
 ### v0.4 privacy/provenance follow-on
 
@@ -111,6 +145,9 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] measured before/after manipulation behavior
 - [ ] measured functional-intent success independently from visible expression similarity
 - [ ] live learned-habit capture and promotion demo
+- [ ] live context-action-outcome capture for an emergent behavior
+- [ ] real Intent Candidate generation from longitudinal robot data
+- [ ] explicit human review of a discovered intent candidate
 - [ ] multi-session Statistical Continuity Score on physical robots
 - [ ] controlled experiment context capture from real sessions
 - [ ] uncertainty and confidence reporting on real robot data
@@ -144,6 +181,8 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] behavior-history portability profile
 - [ ] explicit approved-mutation / snapshot profile
 - [ ] functional-intent preservation profile
+- [ ] model-independent intent-discovery evidence profile
+- [ ] explicit intent-candidate approval profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
@@ -151,4 +190,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, history, declared purpose, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, history, declared purpose, reviewable purpose hypotheses, and measurable preservation of robot continuity data.
