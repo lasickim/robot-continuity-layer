@@ -55,6 +55,13 @@ from .intent import (
     registered_intent_goals,
     validate_behavior_intent_metadata,
 )
+from .intent_approval import (
+    INTENT_APPROVAL_APPLY_METHOD,
+    INTENT_APPROVAL_PATCH_METHOD,
+    INTENT_APPROVAL_VERSION,
+    apply_intent_approval,
+    preview_intent_approval,
+)
 from .intent_discovery import (
     INTENT_DISCOVERY_METHOD,
     INTENT_DISCOVERY_VERSION,
@@ -111,6 +118,9 @@ __all__ = [
     "HABIT_LIFECYCLES",
     "HABIT_PROMOTION_METHOD",
     "HABIT_PROMOTION_VERSION",
+    "INTENT_APPROVAL_APPLY_METHOD",
+    "INTENT_APPROVAL_PATCH_METHOD",
+    "INTENT_APPROVAL_VERSION",
     "INTENT_DISCOVERY_METHOD",
     "INTENT_DISCOVERY_VERSION",
     "INTENT_VOCABULARY_VERSION",
@@ -127,6 +137,7 @@ __all__ = [
     "STATISTICAL_EVALUATION_METHOD",
     "STATISTICAL_EVALUATION_VERSION",
     "apply_habit_approval",
+    "apply_intent_approval",
     "calculate_continuity_score",
     "classify_capability_id",
     "compact_experience",
@@ -146,6 +157,7 @@ __all__ = [
     "load_intent_vocabulary",
     "migrate_profile",
     "preview_habit_approval",
+    "preview_intent_approval",
     "registered_capabilities",
     "registered_intent_goals",
     "reserved_namespaces",
