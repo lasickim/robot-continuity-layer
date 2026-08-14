@@ -59,7 +59,7 @@ The package container remains the five-payload `.rcl` format.
 
 ## v0.4 — Behavior Intent / Goal Semantics
 
-Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, discover and explicitly approve reviewable purpose hypotheses, allow those interpretations to be corrected later without erasing history, measure whether a target actually satisfies the declared purpose, and keep long-lived experience storage lightweight enough for real robots.
+Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy, preserve recognizable legacy manner without blindly copying hardware limitations, discover and explicitly approve reviewable purpose hypotheses, allow those interpretations to be corrected later without erasing history, measure whether a target actually satisfies the declared purpose, and keep long-lived experience storage lightweight enough for real robots.
 
 - [x] optional `behavior.intent` block
 - [x] portable goal / trigger / success-condition / failure-action model
@@ -72,6 +72,16 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] required-intent hard migration gate
 - [x] reference V1 → V2 demo where intent is preserved while obsolete expressions are dropped
 - [x] Profile Diff support for intent/expression changes
+- [x] Expressive Timing / Motion Style v0.1
+- [x] optional `expression.temporal_style` with tempo / dwell / transition semantics
+- [x] `naturalize` versus `preserve_style` timing policy
+- [x] source timing observations explicitly non-normative (`normative=false`)
+- [x] source hardware-artifact provenance for motor/gearing/wiring/controller/power limitations
+- [x] target-native timing realization with safety bounds
+- [x] timing migration statuses `naturalized / preserved / approximated / unsupported / blocked_for_safety`
+- [x] V1 hardware-limited 1400 ms → V2 naturalized 380 ms reference case
+- [x] user-valued deliberate tempo preserved on faster target hardware
+- [x] Profile Diff support for expressive temporal-style changes
 - [x] Intent Discovery Dataset v0.1 using generic context-action-outcome episodes
 - [x] Intent Discovery Policy v0.1 with explicit sample/repetition gates
 - [x] Intent Candidate Report v0.1 with `causal_claim=false`
@@ -111,6 +121,7 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] target-native strategy audit metadata excluded from pass/fail logic
 - [x] V1 source-style and V2 target-native fixtures satisfying the same declared intents
 - [x] `rcl evaluate-intent` CLI
+- [ ] explicit legacy-expression optimization/removal approval workflow
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
@@ -125,12 +136,23 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 ```text
 WHY      → intent
 WHAT     → semantic behavior + parameters
-HOW      → embodiment adapter / target strategy
+HOW      → embodiment adapter / target-native functional strategy
 LOOKS    → expression
+TEMPO    → expressive temporal style
 HISTORY  → habit / legacy / prior Intent interpretations
 ```
 
-A target may change HOW and lose an optional LOOKS expression while still preserving WHY. Observed Intent Success then asks whether the target actually satisfied the declared success condition, independently from source-motion similarity.
+RCL's default continuity principle is:
+
+```text
+Use the new body.
+Preserve the old manner.
+Do not preserve the old limitation by accident.
+```
+
+The target may perform the functional check with a newer system first, then reproduce a familiar legacy gesture separately. If source timing was slow only because of old hardware, the target may naturalize the gesture. If the temporal style itself became recognized or user-valued, it may be explicitly preserved.
+
+A target may change HOW while preserving WHY, LOOKS, and recognizable TEMPO. If LOOKS cannot be safely reproduced, WHY remains higher priority.
 
 Intent Discovery, Approval, Revision, Migration, and Observed Intent Success form an auditable meaning lifecycle. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
 
@@ -162,13 +184,16 @@ explicit Intent Revision
 new current Intent + append-only previous Intent history
   ↓
 migration to another embodiment
+  ├─ target-native functional strategy
+  ├─ legacy expression where safe/representable
+  └─ target-native expressive timing realization
   ↓
 Observed Intent Success
   ↓
 separate motion / statistical evaluation
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. None of these operations proves causality or subjective purpose.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. None of these operations proves causality, consciousness, or subjective purpose.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -211,6 +236,8 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] measured before/after manipulation behavior
 - [ ] measured functional-intent success independently from visible expression similarity
 - [ ] source-style versus target-native strategy Intent Success demo on physical robots
+- [ ] physical demo of hardware-limited source timing naturalized on faster target actuators
+- [ ] physical demo of user-valued deliberate timing preserved on faster hardware
 - [ ] live learned-habit capture and promotion demo
 - [ ] live context-action-outcome capture for an emergent behavior
 - [ ] real Intent Candidate generation from longitudinal robot data
@@ -248,6 +275,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] reproducible statistical evaluation protocol
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
+- [ ] expressive timing / temporal-style portability profile
 - [ ] lightweight long-lived experience storage / compaction profile
 - [ ] explicit approved-mutation / snapshot profile
 - [ ] functional-intent preservation profile
@@ -261,4 +289,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, recognizable expression and timing, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.

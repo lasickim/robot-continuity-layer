@@ -1,0 +1,26 @@
+{
+  "expression_id": "observation.brief_rearward_check",
+  "temporal_style": {
+    "tempo": "natural",
+    "dwell": "brief",
+    "transition": "smooth",
+    "timing_policy": "naturalize",
+    "legacy_significance": "recognized",
+    "source_timing_observation": {
+      "motion_duration_ms": 1400,
+      "dwell_duration_ms": 220,
+      "return_duration_ms": 1350,
+      "normative": false
+    },
+    "source_artifacts": [
+      {
+        "artifact": "actuator_speed_limit",
+        "effect": "slower_than_intended"
+      },
+      {
+        "artifact": "wiring_constraint",
+        "effect": "slower_than_intended"
+      }
+    ]
+  }
+}

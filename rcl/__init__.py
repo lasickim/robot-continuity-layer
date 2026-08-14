@@ -1,6 +1,7 @@
 from .adapter import (
     BehaviorMigrationResult,
     ExpressionMigrationResult,
+    ExpressionTimingMigrationResult,
     IntentMigrationResult,
     RCLAdapter,
 )
@@ -33,6 +34,12 @@ from .experience import (
     EXPERIENCE_SUMMARY_VERSION,
     EXPERIENCE_VERSION,
     compact_experience,
+)
+from .expression_timing import (
+    EXPRESSIVE_TIMING_VERSION,
+    realize_temporal_style,
+    validate_behavior_expression_timing_metadata,
+    validate_expression_temporal_style,
 )
 from .habit_approval import (
     HABIT_APPROVAL_APPLY_METHOD,
@@ -124,7 +131,9 @@ __all__ = [
     "EXPERIENCE_COMPACTION_METHOD",
     "EXPERIENCE_SUMMARY_VERSION",
     "EXPERIENCE_VERSION",
+    "EXPRESSIVE_TIMING_VERSION",
     "ExpressionMigrationResult",
+    "ExpressionTimingMigrationResult",
     "HABIT_APPROVAL_APPLY_METHOD",
     "HABIT_APPROVAL_PATCH_METHOD",
     "HABIT_APPROVAL_VERSION",
@@ -180,6 +189,7 @@ __all__ = [
     "preview_habit_approval",
     "preview_intent_approval",
     "preview_intent_revision",
+    "realize_temporal_style",
     "registered_capabilities",
     "registered_intent_goals",
     "reserved_namespaces",
@@ -188,9 +198,11 @@ __all__ = [
     "sample_std",
     "t95_critical",
     "validate_behavior_evaluation_metadata",
+    "validate_behavior_expression_timing_metadata",
     "validate_behavior_habit_metadata",
     "validate_behavior_intent_metadata",
     "validate_capability_id",
     "validate_capability_set",
+    "validate_expression_temporal_style",
     "wasserstein_1d",
 ]

@@ -89,6 +89,7 @@ def _field_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[s
         "expression.description",
         "expression.preservation_priority",
         "expression.required_capabilities",
+        "expression.temporal_style",
         "preservation.priority",
         "preservation.mode",
         "source",

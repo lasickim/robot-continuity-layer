@@ -1,0 +1,17 @@
+{
+  "expression_id": "observation.brief_rearward_check",
+  "temporal_style": {
+    "tempo": "deliberate",
+    "dwell": "brief",
+    "transition": "gentle",
+    "timing_policy": "preserve_style",
+    "legacy_significance": "user_valued",
+    "source_timing_observation": {
+      "motion_duration_ms": 920,
+      "dwell_duration_ms": 180,
+      "return_duration_ms": 880,
+      "normative": false
+    },
+    "source_artifacts": []
+  }
+}

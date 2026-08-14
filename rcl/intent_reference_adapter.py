@@ -5,17 +5,19 @@ from typing import Any
 from .adapter import (
     BehaviorMigrationResult,
     ExpressionMigrationResult,
+    ExpressionTimingMigrationResult,
     IntentMigrationResult,
     RCLAdapter,
 )
+from .expression_timing import realize_temporal_style
 
 
 class IntentReferenceAdapter(RCLAdapter):
-    """Reference v0.4 adapter demonstrating goal preservation across embodiments.
+    """Reference v0.4 adapter demonstrating goal and expressive continuity.
 
-    The adapter intentionally separates a functional goal from a historically
-    recognizable expression. A target can therefore preserve the goal while
-    dropping an obsolete body motion.
+    Functional goals use target-native capabilities. Historical visible
+    expressions can still be retained separately, and optional temporal style is
+    realized using target-native timing rather than source actuator limitations.
     """
 
     adapter_id = "rcl.reference.intent"
@@ -118,7 +120,7 @@ class IntentReferenceAdapter(RCLAdapter):
                 status="preserved",
                 reason=(
                     "Target can verify the sitting area directly; reproducing the source robot's "
-                    "rearward-looking motion is not required to satisfy the goal."
+                    "rearward-looking motion is not required for function, but may remain as a legacy expression."
                 ),
                 target_strategy=strategy,
                 required_capabilities=tuple(sorted(required)),
@@ -166,4 +168,67 @@ class IntentReferenceAdapter(RCLAdapter):
             reason="Target can reproduce the historical visible expression separately from the goal.",
             target_expression=expression["expression_id"],
             required_capabilities=tuple(sorted(required)),
+        )
+
+    def translate_expression_timing(
+        self,
+        behavior: dict[str, Any],
+        source_embodiment: dict[str, Any],
+        target_embodiment: dict[str, Any],
+    ) -> ExpressionTimingMigrationResult | None:
+        expression = behavior.get("expression")
+        style = (expression or {}).get("temporal_style")
+        if expression is None or style is None:
+            return None
+
+        required = self.expression_required_capabilities(behavior)
+        available = set(target_embodiment.get("capabilities", []))
+        missing = required - available
+        if missing:
+            return super().translate_expression_timing(
+                behavior,
+                source_embodiment,
+                target_embodiment,
+            )
+
+        profiles = (
+            target_embodiment.get("limits", {})
+            .get("expression_timing_profiles", {})
+        )
+        timing_profile = profiles.get(expression["expression_id"])
+        semantic_style = {
+            "tempo": style["tempo"],
+            "dwell": style["dwell"],
+            "transition": style["transition"],
+            "legacy_significance": style["legacy_significance"],
+        }
+        if timing_profile is None:
+            return ExpressionTimingMigrationResult(
+                expression_id=expression["expression_id"],
+                status="unsupported",
+                reason="Target has no timing profile for this legacy expression.",
+                timing_policy=style["timing_policy"],
+                semantic_style=semantic_style,
+                source_artifacts=tuple(style.get("source_artifacts", [])),
+            )
+
+        if timing_profile.get("blocked_for_safety") is True:
+            return ExpressionTimingMigrationResult(
+                expression_id=expression["expression_id"],
+                status="blocked_for_safety",
+                reason="Target timing profile explicitly blocks this expression timing for safety.",
+                timing_policy=style["timing_policy"],
+                semantic_style=semantic_style,
+                source_artifacts=tuple(style.get("source_artifacts", [])),
+            )
+
+        realized = realize_temporal_style(style, timing_profile)
+        return ExpressionTimingMigrationResult(
+            expression_id=expression["expression_id"],
+            status=realized["status"],
+            reason=realized["reason"],
+            timing_policy=realized["timing_policy"],
+            semantic_style=realized["semantic_style"],
+            realized_timing=realized["realized_timing"],
+            source_artifacts=tuple(realized["source_artifacts"]),
         )
