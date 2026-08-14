@@ -2,6 +2,16 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Expression Optimization Recommendation Policy v0.1 as a deterministic non-mutating review layer between target functional evidence and explicit expression optimization approval.
+- Added `evaluate_expression_optimization_recommendations()` and a published default policy with `review_removal`, `review_simplification`, `retain`, and `inconclusive` decisions.
+- Added exact profile/target/behavior/goal/trigger/success-condition consistency checks across migration and Observed Intent Success evidence.
+- Required preserved Intent migration, observed Intent `pass`, declared target-native strategy, and by default exact observed-strategy matching before optimization review can be recommended.
+- Added conservative continuity-significance defaults: optional+incidental may review removal, recognized/unspecified defaults to simplification review, preferred defaults to simplification review, and `user_valued` defaults to retain.
+- Added the explicit rule that an expression unsupported on the current target is retained rather than recommended for deletion; target inability is not permission to forget portable continuity.
+- Added safety-block retention and kept every report/recommendation at `non_mutating=true` and `redundancy_proven=false`; Observed Intent Success is not treated as causal proof that the legacy expression contributed nothing.
+- Added deterministic recommendation IDs from current expression SHA-256, target embodiment, migration-report SHA-256, Intent-Success-report SHA-256, and policy SHA-256, excluding report creation time.
+- Added `rcl expression-recommendations PROFILE MIGRATION_REPORT INTENT_SUCCESS_REPORT` with text, JSON, custom-policy, and output-file paths.
+- Added runtime/public policy and recommendation-report schemas, `docs/EXPRESSION_RECOMMENDATION.md`, README/roadmap integration, and regression coverage for unsupported target expressions, failed/mismatched evidence, user-valued retention, and non-mutating behavior.
 - Added Explicit Legacy Expression Optimization / Removal Approval v0.1 so familiar expressions are preserved by default and may be simplified or removed only through an explicit reviewed mutation.
 - Added deterministic `preview_expression_optimization()` and `apply_expression_optimization()` APIs plus `rcl optimize-expression preview|apply`.
 - Added Expression Optimization Candidate, Patch, and Apply Result v0.1 schemas with runtime/public parity coverage.
@@ -71,7 +81,7 @@
 - Added explicit mixed-outcome-type rejection so incompatible evidence is not silently coerced or averaged.
 - Added `rcl compact-experience` plus a mixed object-release / auto-docking reference fixture.
 - Added runtime/public Experience Episode and Experience Summary schemas with parity tests.
-- Made v0.1 compaction explicitly non-destructive with `destructive=false`; summary creation never deletes source episodes or implies retention consent.
+- Made v0.1 compaction explicitly non-destructive with `destructive=false`; summary creation never deletes source episodes or imply retention consent.
 - Documented a three-timescale compute model: real-time control, event-time semantic logging, and idle/charging-window longitudinal compaction.
 - Added Intent Discovery / Intent Candidate v0.1 as a model-independent evidence layer for newly learned behavior.
 - Added a generic context-action-outcome dataset format that does not hardcode specific robot behaviors.
