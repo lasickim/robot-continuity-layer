@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:expression-optimization-recommendation-policy",
+  "title": "RCL Expression Optimization Recommendation Policy v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_version",
+    "policy_id",
+    "require_intent_migration_status",
+    "require_observed_intent_status",
+    "require_strategy_match",
+    "safety_block_decision",
+    "missing_evidence_decision",
+    "decision_matrix"
+  ],
+  "properties": {
+    "policy_version": {"const": "0.1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "require_intent_migration_status": {"const": "preserved"},
+    "require_observed_intent_status": {"const": "pass"},
+    "require_strategy_match": {"type": "boolean"},
+    "safety_block_decision": {"const": "retain"},
+    "missing_evidence_decision": {"const": "inconclusive"},
+    "decision_matrix": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["preferred", "optional"],
+      "properties": {
+        "preferred": {"$ref": "#/$defs/significanceDecisions"},
+        "optional": {"$ref": "#/$defs/significanceDecisions"}
+      }
+    }
+  },
+  "$defs": {
+    "decision": {
+      "type": "string",
+      "enum": ["review_removal", "review_simplification", "retain", "inconclusive"]
+    },
+    "significanceDecisions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["incidental", "recognized", "user_valued", "unspecified"],
+      "properties": {
+        "incidental": {"$ref": "#/$defs/decision"},
+        "recognized": {"$ref": "#/$defs/decision"},
+        "user_valued": {"$ref": "#/$defs/decision"},
+        "unspecified": {"$ref": "#/$defs/decision"}
+      }
+    }
+  }
+}
