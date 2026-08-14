@@ -38,7 +38,14 @@
 - Added non-blocking software, adapter, and sensor metadata differences so different robot implementations can still be compared under the same external scenario.
 - Added reference person-following protocol metadata and context-aware Robot A / Robot B trial fixtures.
 - Added tests for environment mismatch, missing required context, protocol-version mismatch, and informational implementation differences.
-- Expanded the roadmap toward repeated-session uncertainty and real-robot validation.
+- Added Repeated-Session Confidence / Uncertainty v0.1 over equal-weight session-level statistical continuity scores.
+- Added dependency-free 95% Student-t confidence intervals with a minimum of three scorable sessions.
+- Added between-session sample standard deviation and per-metric session similarity uncertainty summaries.
+- Added a strict cross-session series gate for robot identity, embodiment, protocol, comparison fields, and comparison-context values.
+- Added `rcl compare-sessions` with manifest-relative trial paths and a three-session Robot A / Robot B reference fixture set.
+- Added explicit session failure, context mismatch, insufficient-session, and series-mismatch reporting so failures are never silently averaged away.
+- Kept universal continuity acceptance thresholds out of v0.1 pending real-robot evidence and application-specific risk requirements.
+- Expanded the roadmap toward real-robot longitudinal validation.
 
 ## 0.2.0-dev — 2026-08-14
 
