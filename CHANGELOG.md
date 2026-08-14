@@ -45,7 +45,14 @@
 - Added `rcl compare-sessions` with manifest-relative trial paths and a three-session Robot A / Robot B reference fixture set.
 - Added explicit session failure, context mismatch, insufficient-session, and series-mismatch reporting so failures are never silently averaged away.
 - Kept universal continuity acceptance thresholds out of v0.1 pending real-robot evidence and application-specific risk requirements.
-- Expanded the roadmap toward real-robot longitudinal validation.
+- Added optional Behavior Habit History v0.1 inside the existing `behavior.json` payload without changing the five-file `.rcl` layout.
+- Added separate behavior origin and habit lifecycle semantics (`configured`, `learning`, `stable`, `legacy`).
+- Added chronological habit events with optional parameter snapshots, notes, evidence references, and user confirmation metadata.
+- Added cross-field validation for lifecycle timestamps, unique event IDs, and chronological event ordering.
+- Added deterministic Profile Diff Report v0.1 and `diff_profiles()` for semantic profile evolution.
+- Added `rcl diff <before> <after>` with human-readable, JSON, and report-file output.
+- Added earlier/later mobile-base fixtures demonstrating learned parameter drift, learning-to-stable promotion, new history events, and a newly established behavior.
+- Expanded the roadmap toward real-robot longitudinal habit capture and portable history governance.
 
 ## 0.2.0-dev — 2026-08-14
 
