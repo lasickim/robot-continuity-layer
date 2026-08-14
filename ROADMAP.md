@@ -22,16 +22,18 @@ Primary goal: make RCL testable against external implementations instead of only
 - [x] ROS 2 reference adapter (Lyrical mobile-base semantic bridge, v0.3-dev)
 - [x] adapter conformance test kit (`rcl.adapter.mobile_base.v0.3`)
 - [x] machine-readable conformance report schema
+- [x] Capability Registry v0.1 with reserved semantic namespaces
+- [x] extension capability namespace (`x.<owner>.<semantic_path>`)
+- [x] migration-time capability vocabulary validation
 - [ ] profile diff command
-- [ ] formal capability vocabulary
 - [ ] behavior tolerance and evaluation metadata
 - [ ] observed-behavior evaluation protocol
 - [ ] migration report cross-implementation fixtures
-- [ ] extension namespace rules
+- [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, produce a valid migration report, expose capability loss honestly, and pass a shared executable conformance suite.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, and pass a shared executable conformance suite.
 
 ## v0.4 — private continuity and provenance
 
@@ -66,10 +68,12 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] version negotiation
 - [ ] backward-compatibility policy
 - [ ] public adapter registry concept
+- [ ] multi-party capability registry governance experiment
 
 ## v1.0 target — stable continuity interoperability layer
 
 - [ ] stable portable core specification
+- [ ] stable capability vocabulary and extension policy
 - [ ] multi-vendor adapter ecosystem
 - [ ] independent conformance suites for multiple embodiment classes
 - [ ] compatibility/certification profile
