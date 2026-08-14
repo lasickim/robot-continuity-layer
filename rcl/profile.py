@@ -93,7 +93,15 @@ class RCLProfile:
             path = self.root / payload
             if not path.exists():
                 raise RCLValidationError(f"Missing required payload: {payload}")
-            validate_schema(_load_json(path), payload.removesuffix(".json"))
+            instance = _load_json(path)
+            validate_schema(instance, payload.removesuffix(".json"))
+            if payload == "behavior.json":
+                # Local import avoids a module import cycle: evaluation imports
+                # RCLProfile, while profile validation needs only the metadata
+                # cross-reference checker at runtime.
+                from .evaluation import validate_behavior_evaluation_metadata
+
+                validate_behavior_evaluation_metadata(instance)
 
         manifest_path = self.root / "manifest.json"
         if require_manifest:
