@@ -4,14 +4,18 @@
 
 > **Hardware can be replaced. Experience shouldn't be.**
 
-RCL is an open specification and reference implementation for preserving a robot's **experience, preferences, semantic behavior, and skill history independently from its current hardware body**.
+RCL is an open specification and reference implementation for preserving a robot's **experience, preferences, semantic behavior, skill history, and auditable behavioral evolution independently from its current hardware body**.
 
-The project now separates six questions:
+The project now separates seven questions:
 
 ```text
 What should survive?
         ↓
 Portable semantic profile (.rcl)
+        ↓
+How did this behavior evolve over time?
+        ↓
+Habit History + Profile Diff
         ↓
 Can Robot B represent it?
         ↓
@@ -58,18 +62,15 @@ The reference implementation can:
 - perform semantic capability matching;
 - validate capability IDs against Capability Registry v0.1 while allowing isolated `x.<owner>.*` extensions;
 - classify migration results as `preserved`, `approximated`, `unsupported`, or `blocked_for_safety`;
-- generate machine-readable migration reports;
-- calculate the declared Behavior Continuity Score;
-- reject migration success when a required behavior cannot be safely preserved;
-- translate mobile-base continuity behavior into a ROS 2 execution plan through `rcl_ros2`;
+- generate machine-readable migration reports and a declared Behavior Continuity Score;
+- translate mobile-base continuity behavior through a ROS 2 reference adapter;
 - run an executable adapter conformance suite;
-- declare numeric behavior tolerances without duplicating semantic target values;
-- evaluate single target observations against declared tolerances;
+- evaluate single observations against declared tolerances;
 - compare repeated Robot A / Robot B empirical behavior distributions;
-- require declared comparable experiment context before repeated-trial scoring;
-- aggregate multiple comparable sessions with between-session uncertainty;
-- report 95% Student-t confidence intervals without a heavy numerical dependency;
-- calculate experimental observed and statistical continuity measures.
+- require comparable experiment context before repeated-trial scoring;
+- aggregate multiple comparable sessions with Student-t uncertainty reporting;
+- record optional behavior habit/history metadata without changing the five-payload `.rcl` layout;
+- compare two profile snapshots with a deterministic semantic diff.
 
 Reference declared migration:
 
@@ -79,6 +80,98 @@ Migration Success: YES
 - navigation.follow_person: preserved (similarity=1.00)
 - navigation.pre_turn_observation: approximated (similarity=0.65)
 ```
+
+## Behavior Habit History v0.1
+
+RCL separates two questions that are easy to confuse.
+
+`source` says **where a behavior came from**:
+
+```text
+configured
+learned
+imported
+```
+
+`habit.lifecycle` says **how established it has become**:
+
+```text
+configured → learning → stable → legacy
+```
+
+A behavior can therefore remain `source: learned` while moving from `learning` to `stable` and eventually `legacy`.
+
+```json
+{
+  "behavior_id": "navigation.follow_person",
+  "parameters": {
+    "preferred_distance_m": 1.32,
+    "stop_delay_ms": 420
+  },
+  "source": "learned",
+  "habit": {
+    "lifecycle": "stable",
+    "first_observed_at": "2026-01-15T00:00:00Z",
+    "stable_since": "2026-07-01T00:00:00Z",
+    "events": [
+      {
+        "event_id": "follow-003",
+        "observed_at": "2026-07-01T00:00:00Z",
+        "event_type": "stabilized",
+        "parameter_values": {
+          "preferred_distance_m": 1.32,
+          "stop_delay_ms": 420
+        },
+        "evidence_ref": "sessions/person-following-2026H1"
+      }
+    ]
+  }
+}
+```
+
+History is **descriptive, not executable**. The current canonical behavior is always the top-level `parameters` object. Loading a profile never replays history events or mutates current behavior.
+
+`legacy` is also never a safety override.
+
+See [`docs/HABIT_HISTORY.md`](docs/HABIT_HISTORY.md).
+
+## Profile Diff v0.1
+
+Compare two semantic profile snapshots:
+
+```bash
+rcl diff \
+  examples/history/mobile-base-before \
+  examples/history/mobile-base-after
+```
+
+The reference example reports changes such as:
+
+```text
+preferred_distance_m: 1.36 -> 1.32
+stop_delay_ms: 380 -> 420
+habit.lifecycle: learning -> stable
++ history follow-003 [stabilized]
++ history follow-004 [user_confirmed]
++ navigation.pre_turn_observation
+```
+
+The machine-readable diff covers:
+
+- behaviors added / removed / modified;
+- semantic parameter changes;
+- preservation priority and mode changes;
+- source, confidence, required-capability, and evaluation changes;
+- habit lifecycle/timestamp changes;
+- history events added or removed.
+
+JSON mode:
+
+```bash
+rcl diff before-profile after-profile --json
+```
+
+Profile Diff is an audit tool, not a Continuity Score.
 
 ## Capability Registry v0.1
 
@@ -102,12 +195,6 @@ Independent implementations can experiment with:
 
 ```text
 x.<owner>.<semantic_path>
-```
-
-Example:
-
-```text
-x.acme.stereo_person_tracking
 ```
 
 Capabilities describe **what an embodiment can semantically provide**, not how it is implemented.
@@ -148,11 +235,7 @@ A behavior can declare measurable numeric metrics that reference its existing se
 }
 ```
 
-`min_trials` is used by repeated-trial evaluation and defaults to 5 when omitted.
-
 ## Observed-vs-declared evaluation v0.1
-
-A single Robot B observation can be evaluated against the declared semantic target.
 
 ```bash
 rcl evaluate \
@@ -172,21 +255,7 @@ See [`docs/OBSERVED_EVALUATION.md`](docs/OBSERVED_EVALUATION.md).
 
 ## Statistical Continuity Evaluation v0.2
 
-RCL can compare repeated Robot A and Robot B measurements for the same semantic metric.
-
-```text
-Robot A repeated trials
-        ↓
-empirical distribution
-        ↘
-          exact 1D Wasserstein distance
-        ↗
-empirical distribution
-        ↑
-Robot B repeated trials
-```
-
-Run the bundled example:
+RCL compares repeated Robot A and Robot B measurements using exact one-dimensional empirical Wasserstein-1 distance.
 
 ```bash
 rcl compare-trials \
@@ -195,9 +264,7 @@ rcl compare-trials \
   examples/trials/demo-rover-b.trials.json
 ```
 
-The report includes sample counts, means, sample standard deviations, Wasserstein-1 distance, and similarity for each metric.
-
-The distribution distance remains in the original metric unit. The same tolerance policy is therefore reused:
+The distribution distance remains in the original metric unit:
 
 ```text
 W1 <= tolerance      → similarity 1.0
@@ -205,51 +272,15 @@ tolerance < W1 < z   → linear falloff
 W1 >= z              → similarity 0.0
 ```
 
-This catches cases where averages match but behavior shape differs:
-
-```text
-Robot A: 1.40, 1.40, 1.40, 1.40, 1.40
-Robot B: 1.20, 1.20, 1.40, 1.60, 1.60
-
-mean(A) = mean(B) = 1.40 m
-```
-
-The means match, but the empirical distributions do not.
+This catches cases where averages match but the behavioral spread or shape differs.
 
 See [`docs/STATISTICAL_CONTINUITY.md`](docs/STATISTICAL_CONTINUITY.md).
 
 ## Experiment Context / Measurement Protocol v0.1
 
-Repeated-trial scoring is gated by declared experiment context. A trial capture contains a shared protocol and session-specific context:
+Repeated-trial scoring is gated by declared experiment context. Protocol ID/version and protocol-selected fields must match before distribution scoring.
 
-```json
-{
-  "experiment": {
-    "protocol": {
-      "protocol_id": "rcl.person_following.baseline",
-      "protocol_version": "0.1",
-      "comparison_fields": [
-        "task_id",
-        "environment_id",
-        "subject_ref",
-        "start_condition_id"
-      ]
-    },
-    "context": {
-      "session_id": "robot-a-session-001",
-      "task_id": "follow-person-straight-5m",
-      "environment_id": "demo-lab-a-layout-01",
-      "subject_ref": "subject-demo-01",
-      "start_condition_id": "stationary-2m-behind-subject",
-      "software_ref": "controller@1.0",
-      "adapter_ref": "adapter@1.0",
-      "sensor_config_ref": "sensor-set@1"
-    }
-  }
-}
-```
-
-Protocol ID/version and protocol-selected context fields must match before Wasserstein scoring. If they do not:
+If they do not:
 
 ```text
 Context Comparable: NO
@@ -257,9 +288,7 @@ Statistical Continuity Score: N/A
 Status: context_mismatch
 ```
 
-No distribution score is calculated. This reduces the risk of interpreting room, subject, task, or starting-condition differences as robot behavior differences.
-
-If `comparison_fields` is omitted, the default strict key is:
+The default strict comparison key is:
 
 ```text
 task_id
@@ -267,25 +296,13 @@ environment_id
 start_condition_id
 ```
 
-`software_ref`, `adapter_ref`, and `sensor_config_ref` are recorded as informational metadata by default because Robot A and Robot B may legitimately use different implementations.
+Protocols may additionally require `subject_ref` or `operator_ref`. Robot-internal metadata such as software, adapter, and sensor configuration is informational by default because different embodiments may legitimately use different implementations.
 
-See [`docs/EXPERIMENT_PROTOCOL.md`](docs/EXPERIMENT_PROTOCOL.md) and [`examples/protocols/person-following-baseline.protocol.json`](examples/protocols/person-following-baseline.protocol.json).
+See [`docs/EXPERIMENT_PROTOCOL.md`](docs/EXPERIMENT_PROTOCOL.md).
 
 ## Repeated-Session Confidence / Uncertainty v0.1
 
-A single repeated-trial session can still be unusually good or bad. RCL can now aggregate a **comparable series of sessions** while keeping every session equally weighted.
-
-```text
-Day 1 Statistical Continuity Score ┐
-Day 2 Statistical Continuity Score ├─ equal-weight sessions
-Day 3 Statistical Continuity Score ┘
-                    ↓
-       mean + between-session std
-                    ↓
-           95% Student-t CI
-```
-
-Run the reference three-session set:
+A single repeated-trial session can still be unusually good or bad. RCL can aggregate a comparable series of sessions while keeping every session equally weighted.
 
 ```bash
 rcl compare-sessions \
@@ -309,19 +326,15 @@ SE   = s / sqrt(n)
 CI   = mean ± t(0.975, n-1) × SE
 ```
 
-Small samples therefore receive a wider interval. For three sessions, `df=2` and the two-sided 95% Student-t critical value is `4.303`, not the large-sample normal value `1.96`.
+For three sessions, `df=2` and the two-sided 95% Student-t critical value is `4.303`, not `1.96`.
 
-Before aggregation, RCL also verifies that all sessions describe the same source robot, target robot, protocol, comparison fields, and comparison-context values. A changed environment or subject is reported as `series_mismatch` instead of being mixed into longitudinal uncertainty.
+Required-metric failures, context mismatches, and cross-session experiment drift remain explicit instead of being hidden by an average.
 
-Required-metric failures and context mismatches remain explicit and make repeated-session `evaluation_success=false`; they are never hidden by a high average.
-
-v0.1 deliberately **does not define a universal score threshold** for whether two robots should be considered the same. It reports uncertainty first; application-specific acceptance policy comes later.
+v0.1 deliberately does **not define a universal acceptance threshold** for whether two robots are the same.
 
 See [`docs/SESSION_CONFIDENCE.md`](docs/SESSION_CONFIDENCE.md).
 
 ## ROS 2 reference adapter
-
-RCL's first middleware integration keeps ROS-specific details outside the portable profile:
 
 ```text
 portable .rcl profile
@@ -335,7 +348,7 @@ TwistPublisher / controller
 mobile base
 ```
 
-The reference target is a ROS 2 Lyrical mobile base using `geometry_msgs/msg/Twist` for planar velocity. Semantic styles are mapped relative to the **target robot's declared limits**, rather than copying source motor percentages.
+The reference target is a ROS 2 Lyrical mobile base using `geometry_msgs/msg/Twist` for planar velocity. Semantic styles are mapped relative to the target robot's declared limits rather than copying source motor percentages.
 
 See [`docs/ROS2_REFERENCE_ADAPTER.md`](docs/ROS2_REFERENCE_ADAPTER.md).
 
@@ -357,7 +370,7 @@ Reporting    PASS
 Result: RCL Migration Compatible (experimental v0.3)
 ```
 
-This is experimental protocol conformance, not physical robot safety certification. See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
+See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
 
 ## Four continuity measures
 
@@ -379,7 +392,9 @@ RCL intentionally keeps these concepts separate.
 
 > Across multiple comparable sessions, how stable is that statistical continuity estimate and how uncertain is its mean?
 
-None of these measures define identity, consciousness, personhood, or emotional authenticity.
+Habit history and Profile Diff describe behavioral evolution; they are not additional scores.
+
+None of these constructs define identity, consciousness, personhood, or emotional authenticity.
 
 ## Core principles
 
@@ -387,20 +402,21 @@ None of these measures define identity, consciousness, personhood, or emotional 
 2. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
 3. **User-owned and portable** — continuity should export without requiring a vendor cloud.
 4. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-5. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
-6. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
-7. **Comparable context before statistics** — do not score Robot A vs Robot B distributions when declared test conditions do not match.
-8. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
-9. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
-10. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
+5. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
+6. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+7. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
+8. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+9. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
+10. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
+11. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
 
 ## Experimental compatibility levels
 
 | Level | Meaning |
 |---|---|
-| **RCL Profile Compatible** | Can read, validate, preserve, and write the portable profile format. |
+| **RCL Profile Compatible** | Can read, validate, preserve, write, and inspect the portable profile format. |
 | **RCL Migration Compatible** | Can translate semantic behavior, expose degradation, and produce a valid migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, context-controlled repeated-trial and repeated-session evaluation, and broader conformance. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, portable habit history, context-controlled repeated evaluation, and broader conformance. |
 
 These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
@@ -411,8 +427,12 @@ python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 
-rcl capabilities list
 rcl validate examples/mobile-base
+rcl capabilities list
+
+rcl diff \
+  examples/history/mobile-base-before \
+  examples/history/mobile-base-after
 
 rcl migrate \
   examples/mobile-base \
@@ -446,11 +466,13 @@ robot-continuity-layer/
 │   ├── CAPABILITY_REGISTRY.md
 │   ├── CONFORMANCE.md
 │   ├── EXPERIMENT_PROTOCOL.md
+│   ├── HABIT_HISTORY.md
 │   ├── OBSERVED_EVALUATION.md
 │   ├── SESSION_CONFIDENCE.md
 │   ├── STATISTICAL_CONTINUITY.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── examples/
+│   ├── history/
 │   ├── mobile-base/
 │   ├── observations/
 │   ├── protocols/
@@ -463,6 +485,8 @@ robot-continuity-layer/
 │   ├── conformance.py
 │   ├── evaluation.py
 │   ├── experiment_context.py
+│   ├── history.py
+│   ├── profile_diff.py
 │   ├── session_evaluation.py
 │   ├── statistical_evaluation.py
 │   ├── migration.py
@@ -473,7 +497,7 @@ robot-continuity-layer/
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, physical identity of experimental environments, universal longitudinal acceptance thresholds, or certified physical safety. It provides explicit experimental measures of portable, declared, observed, statistical, and repeated-session robot behavior continuity.
+RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, physical identity of experimental environments, universal longitudinal acceptance thresholds, or certified physical safety. It provides explicit experimental constructs for portable, auditable, declared, observed, statistical, and longitudinal robot behavior continuity.
 
 ## License
 
