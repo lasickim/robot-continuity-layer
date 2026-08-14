@@ -2,6 +2,16 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Expressive Timing / Motion Style v0.1 so recognizable temporal behavior can survive embodiment changes without making source hardware delay normative.
+- Added optional `behavior.expression.temporal_style` with portable `tempo`, `dwell`, `transition`, `timing_policy`, and `legacy_significance` semantics.
+- Added `naturalize` for target-native realization of a familiar gesture and `preserve_style` for explicitly recognized or user-valued temporal mannerisms.
+- Required every historical `source_timing_observation` to remain descriptive with `normative=false`; observed source milliseconds are never automatically target requirements.
+- Added source timing-artifact provenance for actuator speed, gearing, wiring, controller latency, power, and unknown hardware constraints.
+- Added `realize_temporal_style()` with target-native timing profiles and safety bounds, including explicit `approximated` results when target limits clamp the requested semantic style.
+- Added `ExpressionTimingMigrationResult` and separate migration-report timing statuses: `naturalized`, `preserved`, `approximated`, `unsupported`, and `blocked_for_safety`.
+- Extended `IntentReferenceAdapter` so V2 may use a target-native functional strategy first while independently reproducing a legacy expression with target-native timing.
+- Added reference cases where a hardware-limited V1 rearward glance observed at 1400 ms becomes a naturalized 380 ms V2 glance, while a user-valued deliberate tempo remains deliberately slow on faster hardware.
+- Extended Profile Diff and runtime/public v0.4 schema parity coverage for expressive temporal-style changes; added `docs/EXPRESSIVE_TIMING.md` and documented the principle “Preserve the gesture, not the limitation.”
 - Added Observed Intent Success v0.1 to evaluate whether a robot actually satisfies a declared `behavior.intent.success_condition` independently from source-motion similarity or visible expression.
 - Added deterministic `evaluate_observed_intent_success()` with per-intent `pass`, `fail`, `not_observable`, and `not_triggered` results.
 - Added required-intent aggregate rules: required failure makes the report `failed`, while missing/unobservable/untriggered required evidence makes it `inconclusive`; preferred/advisory failures remain explicit but nonblocking.
