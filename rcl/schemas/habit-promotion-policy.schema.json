@@ -63,14 +63,16 @@
       }
     },
     "evidence_transition": {
-      "allOf": [
-        {"$ref": "#/$defs/basic_transition"},
-        {
-          "type": "object",
-          "required": ["evidence"],
-          "properties": {"evidence": {"$ref": "#/$defs/evidence"}}
-        }
-      ]
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_sources", "min_observation_days", "min_history_events", "min_confidence", "evidence"],
+      "properties": {
+        "allowed_sources": {"$ref": "#/$defs/allowed_sources"},
+        "min_observation_days": {"type": "number", "minimum": 0},
+        "min_history_events": {"type": "integer", "minimum": 0},
+        "min_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
     },
     "legacy_transition": {
       "type": "object",
