@@ -12,6 +12,8 @@
     "candidate_id",
     "policy",
     "hypothesis",
+    "evidence_basis",
+    "evidence_provenance",
     "evidence",
     "gates",
     "status",
@@ -45,6 +47,13 @@
         "outcome": {"type": "object"},
         "proposed_intent": {"type": "object"}
       }
+    },
+    "evidence_basis": {"type": "string", "enum": ["raw", "aggregate"]},
+    "evidence_provenance": {
+      "oneOf": [
+        {"$ref": "#/$defs/rawEvidenceProvenance"},
+        {"$ref": "#/$defs/aggregateEvidenceProvenance"}
+      ]
     },
     "evidence": {
       "type": "object",
@@ -100,5 +109,54 @@
     "recommended_next_action": {"type": "string", "enum": ["review_candidate", "collect_more_evidence"]},
     "causal_claim": {"const": false},
     "disclaimer": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"evidence_basis": {"const": "raw"}}},
+      "then": {"properties": {"evidence_provenance": {"$ref": "#/$defs/rawEvidenceProvenance"}}}
+    },
+    {
+      "if": {"properties": {"evidence_basis": {"const": "aggregate"}}},
+      "then": {"properties": {"evidence_provenance": {"$ref": "#/$defs/aggregateEvidenceProvenance"}}}
+    }
+  ],
+  "$defs": {
+    "rawEvidenceProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["basis", "dataset_digest_sha256", "source_episode_count"],
+      "properties": {
+        "basis": {"const": "raw"},
+        "dataset_digest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_episode_count": {"type": "integer", "minimum": 2}
+      }
+    },
+    "aggregateEvidenceProvenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "basis",
+        "summary_id",
+        "summary_method",
+        "store_id",
+        "source_digest_sha256",
+        "source_episode_count",
+        "group_ids"
+      ],
+      "properties": {
+        "basis": {"const": "aggregate"},
+        "summary_id": {"type": "string", "minLength": 1},
+        "summary_method": {"const": "rcl.experience.compaction.semantic_groups.v0.1"},
+        "store_id": {"type": "string", "minLength": 1},
+        "source_digest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_episode_count": {"type": "integer", "minimum": 2},
+        "group_ids": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        }
+      }
+    }
   }
 }
