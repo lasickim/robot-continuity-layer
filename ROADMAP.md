@@ -91,6 +91,16 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] expressive timing and source hardware-artifact provenance retained after simplification/removal
 - [x] `rcl optimize-expression preview|apply` CLI
 - [x] Profile Diff support for expression-history changes
+- [x] Expression Optimization Recommendation Policy v0.1
+- [x] non-mutating migration + Observed Intent Success recommendation evaluator
+- [x] `review_removal / review_simplification / retain / inconclusive` decisions
+- [x] exact target-native strategy / observed-strategy evidence gate
+- [x] conservative legacy-significance defaults (`user_valued` retains; unspecified does not default to removal)
+- [x] target expression incompatibility explicitly retains continuity instead of authorizing forgetting
+- [x] safety-block retention rule and `redundancy_proven=false` epistemic boundary
+- [x] deterministic recommendation IDs and evidence/policy SHA-256 provenance
+- [x] `rcl expression-recommendations` CLI
+- [x] explicit handoff from advisory recommendation to existing reviewed `optimize-expression` workflow
 - [x] Intent Discovery Dataset v0.1 using generic context-action-outcome episodes
 - [x] Intent Discovery Policy v0.1 with explicit sample/repetition gates
 - [x] Intent Candidate Report v0.1 with `causal_claim=false`
@@ -157,15 +167,18 @@ Use the new body.
 Preserve the old manner.
 Do not preserve the old limitation by accident.
 Preserve by default; optimize only by explicit approval.
+Recommend automatically; change only by explicit approval.
 ```
 
 The target may perform the functional check with a newer system first, then reproduce a familiar legacy gesture separately. If source timing was slow only because of old hardware, the target may naturalize the gesture. If the temporal style itself became recognized or user-valued, it may be explicitly preserved.
 
-A behavior becoming functionally unnecessary is not permission to forget it. Simplifying or removing an active legacy expression is a separate reviewed mutation. The current expression may change, but the exact prior expression remains in append-only `expression_history` with a validated digest chain.
+A behavior becoming functionally unnecessary is not permission to forget it. RCL may recommend reviewing optimization from compatible migration + Observed Intent Success evidence, but recommendations are non-mutating and keep `redundancy_proven=false`. A target that cannot reproduce an expression retains that expression in continuity data rather than treating embodiment limitation as permission to erase it.
+
+Simplifying or removing an active legacy expression is a separate reviewed mutation. The current expression may change, but the exact prior expression remains in append-only `expression_history` with a validated digest chain.
 
 A target may change HOW while preserving WHY, LOOKS, and recognizable TEMPO. If LOOKS cannot be safely reproduced, WHY remains higher priority.
 
-Intent Discovery, Approval, Revision, Migration, Observed Intent Success, and Expression Optimization form auditable continuity lifecycles. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
+Intent Discovery, Approval, Revision, Migration, Observed Intent Success, Expression Recommendation, and Expression Optimization form auditable continuity lifecycles. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
 
 ```text
 experience
@@ -201,6 +214,10 @@ migration to another embodiment
   ↓
 Observed Intent Success
   ↓
+non-mutating Expression Optimization Recommendation
+  ↓
+review
+  ↓
 optional Expression Optimization Candidate
   ↓
 explicit simplify/remove approval
@@ -210,7 +227,7 @@ new snapshot + append-only previous Expression history
 separate motion / statistical evaluation
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. Expression Optimization records a reviewed continuity decision without erasing the old manner from history. None of these operations proves causality, consciousness, or subjective purpose.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. Expression Recommendation creates a review suggestion without proving causal redundancy or user preference. Expression Optimization records a reviewed continuity decision without erasing the old manner from history. None of these operations proves causality, consciousness, or subjective purpose.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -255,6 +272,8 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] source-style versus target-native strategy Intent Success demo on physical robots
 - [ ] physical demo of hardware-limited source timing naturalized on faster target actuators
 - [ ] physical demo of user-valued deliberate timing preserved on faster hardware
+- [ ] physical demo of non-mutating expression optimization recommendation before any user-approved change
+- [ ] physical demo that an unsupported target expression remains retained in portable continuity
 - [ ] physical demo of explicit legacy-expression simplify/remove approval while preserving expression history
 - [ ] live learned-habit capture and promotion demo
 - [ ] live context-action-outcome capture for an emergent behavior
@@ -294,6 +313,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
 - [ ] expressive timing / temporal-style portability profile
+- [ ] auditable expression-recommendation / review policy profile
 - [ ] auditable expression-history / explicit expression-optimization profile
 - [ ] lightweight long-lived experience storage / compaction profile
 - [ ] explicit approved-mutation / snapshot profile
@@ -308,4 +328,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, automatically erase a familiar expression merely because it became functionally redundant, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, recognizable expression and timing, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, prove an expression causally redundant merely because target-native Intent Success passed, treat target inability as permission to forget a legacy expression, automatically erase a familiar expression merely because it became functionally redundant, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, recognizable expression and timing, reviewable purpose/optimization recommendations, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
