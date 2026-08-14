@@ -27,6 +27,13 @@ from .experiment_context import (
     DEFAULT_COMPARISON_FIELDS,
     compare_experiment_context,
 )
+from .experience import (
+    DEFAULT_RETAINED_EXEMPLARS,
+    EXPERIENCE_COMPACTION_METHOD,
+    EXPERIENCE_SUMMARY_VERSION,
+    EXPERIENCE_VERSION,
+    compact_experience,
+)
 from .habit_approval import (
     HABIT_APPROVAL_APPLY_METHOD,
     HABIT_APPROVAL_PATCH_METHOD,
@@ -91,8 +98,12 @@ __all__ = [
     "DEFAULT_COMPARISON_FIELDS",
     "DEFAULT_MIN_SESSIONS",
     "DEFAULT_MIN_TRIALS",
+    "DEFAULT_RETAINED_EXEMPLARS",
     "EVALUATION_METHOD",
     "EVALUATION_VERSION",
+    "EXPERIENCE_COMPACTION_METHOD",
+    "EXPERIENCE_SUMMARY_VERSION",
+    "EXPERIENCE_VERSION",
     "ExpressionMigrationResult",
     "HABIT_APPROVAL_APPLY_METHOD",
     "HABIT_APPROVAL_PATCH_METHOD",
@@ -118,6 +129,7 @@ __all__ = [
     "apply_habit_approval",
     "calculate_continuity_score",
     "classify_capability_id",
+    "compact_experience",
     "compare_experiment_context",
     "compare_trial_distributions",
     "confidence_interval_95",

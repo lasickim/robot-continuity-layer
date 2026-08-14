@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:experience-episode-set",
+  "title": "RCL Experience Episode Set v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["experience_version", "store_id", "episodes"],
+  "properties": {
+    "experience_version": {"const": "0.1"},
+    "store_id": {"type": "string", "minLength": 1},
+    "episodes": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["episode_id", "observed_at", "context", "action", "outcomes"],
+        "properties": {
+          "episode_id": {"type": "string", "minLength": 1},
+          "observed_at": {"type": "string", "format": "date-time"},
+          "session_ref": {"type": "string", "minLength": 1},
+          "context": {
+            "type": "object",
+            "additionalProperties": {"type": ["string", "number", "boolean"]}
+          },
+          "action": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["action_id", "performed"],
+            "properties": {
+              "action_id": {"type": "string", "minLength": 1},
+              "performed": {"type": "boolean"},
+              "parameters": {"type": "object"}
+            }
+          },
+          "outcomes": {
+            "type": "object",
+            "minProperties": 1,
+            "additionalProperties": {
+              "oneOf": [
+                {"type": "number"},
+                {"type": "boolean"}
+              ]
+            }
+          },
+          "evidence_refs": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    }
+  }
+}

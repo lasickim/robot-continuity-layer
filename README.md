@@ -17,6 +17,8 @@ Portable semantic profile (.rcl)
         ↓
 A new repeated behavior appears
         ↓
+Lightweight Context + Action + Outcome experience
+        ↓
 What purpose might explain it?
         ↓
 Intent Discovery / Intent Candidate
@@ -85,6 +87,9 @@ The reference implementation can:
 - evaluate a proposed intent hypothesis from generic context-action-outcome episodes without hardcoding a specific behavior;
 - generate an **Intent Candidate** or `insufficient_evidence` result without mutating a profile;
 - support numeric/binary and higher-is-better/lower-is-better discovery outcomes;
+- record lightweight semantic Experience Episodes without embedding raw media;
+- compact long-lived experience into deterministic numeric/binary summaries during idle or charging windows;
+- preserve source/provenance digests and longitudinal exemplar IDs while keeping compaction non-destructive;
 - translate mobile-base behavior through a ROS 2 Lyrical reference adapter;
 - run executable adapter conformance checks;
 - evaluate single observations against declared tolerances;
@@ -282,6 +287,74 @@ Intent Discovery never writes `behavior.intent` and never approves a candidate. 
 
 See [`docs/INTENT_DISCOVERY.md`](docs/INTENT_DISCOVERY.md).
 
+## Lightweight Experience Store + Compaction v0.1
+
+RCL does not require a robot to retrain a model continuously just to preserve experience. Normal operation can record small semantic events while longitudinal analysis runs later.
+
+```text
+real-time control / perception
+        ↓
+semantic event
+Context + Action + Outcome
+        ↓
+Experience Store
+        ↓
+idle / charging window
+        ↓
+compact-experience
+        ↓
+long-lived aggregate evidence
+        ↓
+Habit / Intent analysis
+```
+
+A compact episode can contain an optional external evidence reference without embedding raw video/audio/image bytes:
+
+```json
+{
+  "episode_id": "release-001",
+  "observed_at": "2026-08-10T09:00:00Z",
+  "context": {
+    "task": "object_release",
+    "surface": "table"
+  },
+  "action": {
+    "action_id": "interaction.post_release_hold",
+    "performed": true,
+    "parameters": {
+      "duration_ms": 420
+    }
+  },
+  "outcomes": {
+    "object_stability": 0.96,
+    "object_settled": true
+  },
+  "evidence_refs": ["sensor://release-001"]
+}
+```
+
+Compaction is generic. Episodes are grouped by exact semantic context, action ID, and outcome-key set. Numeric outcomes retain count / mean / sample standard deviation / min / max; binary outcomes retain true/false counts and true rate.
+
+```bash
+rcl compact-experience \
+  examples/experience/mixed-robot-life.episodes.json \
+  --output /tmp/experience-summary.json
+```
+
+Every v0.1 summary explicitly contains:
+
+```json
+{
+  "destructive": false
+}
+```
+
+Compaction never deletes source episodes and never interprets summary creation as consent to prune evidence. Explicit retention/deletion policy is a separate future operation.
+
+The summary records a digest of the complete source store, a per-group source episode-ID digest, source counts, and deterministic early/late exemplar IDs. This makes provenance auditable while still distinguishing aggregate evidence from raw episodes.
+
+See [`docs/EXPERIENCE_STORE.md`](docs/EXPERIENCE_STORE.md).
+
 ## Behavior Habit History v0.1
 
 RCL separates behavior origin from habit maturity.
@@ -469,6 +542,8 @@ See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
 
 RCL intentionally keeps these concepts separate.
 
+**Experience Store / Compaction** records and summarizes neutral semantic evidence. It is a storage/evidence optimization layer, not a learning claim.
+
 **Intent Discovery** asks whether observed context-action-outcome association is strong enough to review a proposed goal hypothesis. It does not assert causality or mutate the profile.
 
 **Behavior Intent** asks whether the target can preserve the declared purpose, trigger, and success condition.
@@ -491,19 +566,21 @@ None of these constructs define consciousness, personhood, subjective identity, 
 
 1. **Preserve why before copying how** — portable goal semantics outrank source-body implementation details.
 2. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
-3. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
-4. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
-5. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
-6. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
-7. **User-owned and portable** — continuity should export without requiring a vendor cloud.
-8. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-9. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
-10. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
-11. **Approval is explicit and immutable-by-default** — lifecycle mutation creates a new validated snapshot.
-12. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
-13. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-14. **Safety outranks continuity** — a legacy expression never overrides target safety constraints.
-15. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
+3. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
+4. **Compaction is not deletion** — a v0.1 experience summary never authorizes pruning source evidence.
+5. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
+6. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
+7. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
+8. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
+9. **User-owned and portable** — continuity should export without requiring a vendor cloud.
+10. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
+11. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
+12. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
+13. **Approval is explicit and immutable-by-default** — lifecycle mutation creates a new validated snapshot.
+14. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+15. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+16. **Safety outranks continuity** — a legacy expression never overrides target safety constraints.
+17. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
 
 ## Quick start
 
@@ -514,6 +591,10 @@ pip install -e ".[dev]"
 
 rcl validate examples/mobile-base
 rcl capabilities list
+
+rcl compact-experience \
+  examples/experience/mixed-robot-life.episodes.json \
+  --output /tmp/experience-summary.json
 
 rcl discover-intent \
   examples/intent-discovery/object-release-stability.dataset.json
@@ -563,6 +644,7 @@ robot-continuity-layer/
 ├── ROADMAP.md
 ├── docs/
 │   ├── BEHAVIOR_INTENT.md
+│   ├── EXPERIENCE_STORE.md
 │   ├── INTENT_DISCOVERY.md
 │   ├── CAPABILITY_REGISTRY.md
 │   ├── CONFORMANCE.md
@@ -575,6 +657,7 @@ robot-continuity-layer/
 │   ├── STATISTICAL_CONTINUITY.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── examples/
+│   ├── experience/
 │   ├── intent/
 │   ├── intent-discovery/
 │   ├── history/
@@ -586,6 +669,7 @@ robot-continuity-layer/
 │   ├── trials/
 │   └── targets/
 ├── rcl/
+│   ├── experience.py
 │   ├── intent.py
 │   ├── intent_discovery.py
 │   ├── intent_reference_adapter.py
@@ -603,7 +687,7 @@ robot-continuity-layer/
 
 RCL does **not** claim to measure consciousness, personhood, subjective motivation, free will, emotional authenticity, causal truth from observational association, universal statistical equivalence, universal habit thresholds, or certified physical safety.
 
-Behavior Intent represents declared engineering goal semantics. Intent Discovery produces an association-backed engineering hypothesis for review. Neither means the robot experiences or understands a goal in a human subjective sense.
+Behavior Intent represents declared engineering goal semantics. Intent Discovery produces an association-backed engineering hypothesis for review. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal in a human subjective sense.
 
 ## License
 
