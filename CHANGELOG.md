@@ -2,6 +2,16 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Explicit Intent Approval / Profile Patch v0.1 as the reviewed mutation boundary after Intent Discovery.
+- Added deterministic `preview_intent_approval()` and `apply_intent_approval()` APIs that accept only schema-valid candidates with all evidence gates passing.
+- Added exact candidate-action / target-behavior matching and explicit rejection of existing intent overwrite in v0.1.
+- Added discovered-intent provenance with candidate ID, dataset ID, discovery policy/method, canonical candidate-report SHA-256, approval actor/time, and `causal_claim=false`.
+- Added canonical source-behavior SHA-256 preconditions so stale profile changes invalidate an approval patch instead of being silently applied.
+- Added immutable approved-snapshot creation with fresh manifest hashes, source-payload immutability verification, and rejection of any non-intent behavior change.
+- Added `rcl approve-intent preview|apply` and machine-readable intent approval patch/apply-result schemas.
+- Extended Profile Diff to expose `intent.provenance` changes.
+- Added an intent-less learned object-release reference profile and end-to-end discovery → candidate → approval → declared-intent tests.
+- Added `docs/INTENT_APPROVAL.md` and documented that approval selects an engineering hypothesis for continuity without converting association into causal proof.
 - Added Lightweight Experience Store + Compaction v0.1 for low-overhead long-lived context-action-outcome evidence.
 - Added Experience Episode Set v0.1 with timestamped semantic context, action, outcomes, optional session refs, parameters, and external evidence refs without embedding raw media.
 - Added deterministic `compact_experience()` grouping by exact semantic context, action ID, and outcome-key set with no behavior-specific hardcoding.
@@ -23,7 +33,7 @@
 - Added a numeric object-release stability fixture and an unrelated binary auto-docking fixture to demonstrate that discovery is generic rather than behavior-specific.
 - Added published/runtime schema and policy parity checks for Intent Discovery artifacts.
 - Documented that `strong` means strong evidence relative to the declared policy, not a probability that the proposed intent is true.
-- Documented that Intent Discovery never writes `behavior.intent`; explicit Intent Approval remains a separate future step.
+- Documented that Intent Discovery never writes `behavior.intent`; Explicit Intent Approval is the separate reviewed mutation boundary.
 - Added Behavior Intent / Goal Semantics v0.1 so portable behavior can declare why it exists independently from source-body execution details.
 - Added optional `behavior.intent` metadata for goal ID, trigger, success condition, failure action, criticality, semantic capabilities, and constraints.
 - Added optional `behavior.expression` metadata so recognizable visible motions can be preserved separately from functional purpose.
@@ -36,7 +46,7 @@
 - Added `IntentReferenceAdapter` demonstrating target-native strategy selection for goal preservation.
 - Added a V1 → V2 pre-sit reference example where V1's rearward-looking motion is not required on V2 because V2 can perform direct rear clearance sensing.
 - Added a handover reference example where the handover-orientation goal survives even when V1's recognizable wrist-roll expression cannot be reproduced.
-- Extended Profile Diff to expose intent and expression changes, including goal, trigger, success condition, failure action, criticality, capabilities, and expression preservation fields.
+- Extended Profile Diff to expose intent and expression changes, including goal, trigger, success condition, failure action, criticality, capabilities, provenance, and expression preservation fields.
 - Added validation that unknown standard-looking goal IDs are rejected while `x.<owner>.<semantic_path>` intent extensions remain available for experimentation.
 - Preserved backward compatibility for existing profiles without intent/expression metadata and kept the `.rcl` five-payload package container at its existing format version.
 - Added `docs/BEHAVIOR_INTENT.md` and moved the project package version to `0.4.0.dev0`.
