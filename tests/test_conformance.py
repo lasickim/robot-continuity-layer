@@ -29,6 +29,13 @@ class BrokenPreserveEverythingAdapter(RCLAdapter):
         )
 
 
+class UnknownReservedCapabilityAdapter(ROS2MobileBaseAdapter):
+    adapter_id = "test.invalid.unknown_reserved_capability"
+
+    def required_capabilities(self, behavior):
+        return super().required_capabilities(behavior) | {"perception.telepathy"}
+
+
 def test_ros2_reference_adapter_passes_conformance():
     report = run_adapter_conformance(ROS2MobileBaseAdapter())
 
@@ -54,6 +61,22 @@ def test_conformance_catches_adapter_that_hides_missing_capabilities():
     assert "required_capability.honest_failure" in failed
     assert "required_capability.blocks_migration" in failed
     assert "migration_report.degradation_visible" in failed
+
+
+def test_conformance_rejects_unknown_reserved_capability_vocabulary():
+    report = run_adapter_conformance(UnknownReservedCapabilityAdapter())
+
+    assert report["passed"] is False
+    assert report["compatibility_level"] is None
+    assert report["groups"]["Reporting"] is False
+
+    failed = {
+        item["check_id"]: item["message"]
+        for item in report["checks"]
+        if not item["passed"]
+    }
+    assert "migration_report.valid" in failed
+    assert "reserved namespace" in failed["migration_report.valid"]
 
 
 def test_adapter_loader_resolves_reference_class():
