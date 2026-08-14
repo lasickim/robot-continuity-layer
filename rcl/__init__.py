@@ -66,6 +66,7 @@ from .intent_discovery import (
     INTENT_DISCOVERY_METHOD,
     INTENT_DISCOVERY_VERSION,
     discover_intent_candidate,
+    discover_intent_candidate_from_summary,
     load_default_intent_discovery_policy,
 )
 from .intent_reference_adapter import IntentReferenceAdapter
@@ -157,6 +158,7 @@ __all__ = [
     "confidence_interval_95",
     "diff_profiles",
     "discover_intent_candidate",
+    "discover_intent_candidate_from_summary",
     "evaluate_habit_promotion_candidates",
     "evaluate_observed_continuity",
     "evaluate_repeated_sessions",
