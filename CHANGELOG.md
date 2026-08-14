@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0-dev — 2026-08-14
+
+- Added the first ROS 2 reference integration as a separate `rcl_ros2` package.
+- Added `ROS2MobileBaseAdapter` for semantic mobile-base migration plans.
+- Added a lazy `geometry_msgs/msg/Twist` runtime publisher bridge.
+- Added a ROS 2 Lyrical mobile-base target embodiment example.
+- Added unit tests that validate ROS-facing migration behavior without requiring ROS 2 or physical hardware.
+- Added public compatibility levels, contribution guidance, issue templates, and pull request guidance.
+- Expanded the public roadmap toward adapter conformance and real-robot evaluation.
+
 ## 0.2.0-dev — 2026-08-14
 
 - Added explicit `RCLAdapter` interface.

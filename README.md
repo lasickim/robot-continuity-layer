@@ -1,6 +1,6 @@
 # Robot Continuity Layer (RCL)
 
-**Experimental open specification · draft v0.2**
+**Experimental open specification · draft v0.3-dev**
 
 > **Hardware can be replaced. Experience shouldn't be.**
 
@@ -43,9 +43,9 @@ handover:
 
 A target adapter decides how its own hardware can reproduce that behavior and must explicitly report any degradation.
 
-## What works today — v0.2
+## What works today — v0.3-dev
 
-The current reference implementation can:
+The reference implementation can:
 
 - validate and package portable `.rcl` profiles;
 - verify profile integrity with SHA-256 manifests;
@@ -54,9 +54,10 @@ The current reference implementation can:
 - classify migration results as `preserved`, `approximated`, `unsupported`, or `blocked_for_safety`;
 - generate a machine-readable migration report;
 - calculate a transparent Behavior Continuity Score;
-- reject overall migration success when a required behavior cannot be safely preserved.
+- reject overall migration success when a required behavior cannot be safely preserved;
+- translate mobile-base continuity behavior into a ROS 2 execution plan through the experimental `rcl_ros2` integration.
 
-Reference result:
+Reference migration result:
 
 ```text
 Continuity Score: 88.33%
@@ -64,6 +65,28 @@ Migration Success: YES
 - navigation.follow_person: preserved (similarity=1.00)
 - navigation.pre_turn_observation: approximated (similarity=0.65)
 ```
+
+## ROS 2 reference adapter
+
+The v0.3-dev branch adds the first middleware integration while keeping ROS-specific details outside the portable profile:
+
+```text
+portable .rcl profile
+        ↓
+ROS2MobileBaseAdapter
+        ↓
+ROS-facing execution plan
+        ↓
+TwistPublisher / controller
+        ↓
+mobile base
+```
+
+The first reference target is a ROS 2 Lyrical mobile base using `geometry_msgs/msg/Twist` for planar velocity. A semantic style such as `gentle` is mapped relative to the **target robot's declared limits**, rather than copying source motor percentages.
+
+The ROS runtime dependency is lazy: importing and unit-testing the adapter does not require ROS 2 to be installed.
+
+See [`docs/ROS2_REFERENCE_ADAPTER.md`](docs/ROS2_REFERENCE_ADAPTER.md).
 
 ## Core principles
 
@@ -123,9 +146,19 @@ rcl report /tmp/migration-report.json
 pytest -q
 ```
 
+Minimal ROS 2 semantic translation:
+
+```python
+from rcl_ros2 import ROS2MobileBaseAdapter
+
+adapter = ROS2MobileBaseAdapter(cmd_vel_topic="/cmd_vel")
+result = adapter.translate_behavior(behavior, source_embodiment, target_embodiment)
+print(result.mapped_parameters)
+```
+
 ## Continuity Score v0.2
 
-The v0.2 score intentionally stays simple and auditable:
+The current score intentionally stays simple and auditable:
 
 ```text
 required  = weight 4
@@ -158,9 +191,9 @@ Good first contributions include:
 - implementing adapters for real or simulated robots;
 - designing migration evaluation scenarios;
 - finding ambiguous or unsafe parts of the draft specification;
-- helping build the ROS 2 reference adapter and future conformance suite.
+- helping build the adapter conformance suite.
 
-See [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [`ROADMAP.md`](ROADMAP.md).
+See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`ROADMAP.md`](ROADMAP.md), and the open GitHub issues.
 
 ## Repository layout
 
@@ -170,18 +203,18 @@ robot-continuity-layer/
 ├── CONTRIBUTING.md
 ├── ROADMAP.md
 ├── docs/
-│   └── COMPATIBILITY.md
+│   ├── COMPATIBILITY.md
+│   └── ROS2_REFERENCE_ADAPTER.md
 ├── spec/
-│   ├── rcl-spec-v0.1.md
-│   ├── rcl-spec-v0.2.md
-│   └── schemas/
 ├── examples/
 ├── rcl/
 │   ├── adapter.py
 │   ├── migration.py
 │   ├── profile.py
-│   ├── score.py
-│   └── schemas/
+│   └── score.py
+├── rcl_ros2/
+│   ├── adapter.py
+│   └── runtime.py
 └── tests/
 ```
 
