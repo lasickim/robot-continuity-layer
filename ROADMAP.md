@@ -59,7 +59,7 @@ The package container remains the five-payload `.rcl` format.
 
 ## v0.4 — Behavior Intent / Goal Semantics
 
-Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, begin discovering reviewable purpose hypotheses from new learned behavior, and keep long-lived experience storage lightweight enough for real robots.
+Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, discover and explicitly approve reviewable purpose hypotheses, allow those interpretations to be corrected later without erasing history, and keep long-lived experience storage lightweight enough for real robots.
 
 - [x] optional `behavior.intent` block
 - [x] portable goal / trigger / success-condition / failure-action model
@@ -92,6 +92,13 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] deterministic candidate-report and source-behavior SHA-256 provenance
 - [x] immutable approved snapshot with `behavior.intent` provenance and `causal_claim=false`
 - [x] `rcl approve-intent preview|apply` CLI
+- [x] Intent Revision / Correction v0.1
+- [x] append-only `behavior.intent_history` preserving complete previous Intent snapshots
+- [x] multi-revision SHA-256 digest-chain and historical-snapshot tamper validation
+- [x] stale-current-intent and semantic no-op revision rejection
+- [x] revised-intent provenance with reason, evidence refs, approval actor/time, and `causal_claim=false`
+- [x] `rcl revise-intent preview|apply` CLI
+- [x] Profile Diff support for current Intent replacement plus Intent-history addition
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
@@ -100,7 +107,6 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
 - [ ] explicit retention / prune / archive policy after verified compaction
 - [ ] summary-aware Habit / Intent evidence evaluation with raw-vs-aggregate provenance distinction
-- [ ] intent correction/replacement workflow with preserved provenance
 
 ### v0.4 semantic rule
 
@@ -109,12 +115,12 @@ WHY      → intent
 WHAT     → semantic behavior + parameters
 HOW      → embodiment adapter / target strategy
 LOOKS    → expression
-HISTORY  → habit / legacy
+HISTORY  → habit / legacy / prior Intent interpretations
 ```
 
 A target may change HOW and lose an optional LOOKS expression while still preserving WHY.
 
-Intent Discovery and Approval now close the lifecycle before intent is declared:
+Intent Discovery, Approval, and Revision now form an auditable meaning lifecycle:
 
 ```text
 experience
@@ -135,10 +141,18 @@ new immutable snapshot
   ↓
 declared intent + provenance
   ↓
+more experience / better evidence
+  ↓
+Revision Candidate
+  ↓
+explicit Intent Revision
+  ↓
+new current Intent + append-only previous Intent history
+  ↓
 continuity
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity, not that causality was proven.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Neither operation proves causality, and revision never silently erases the previous interpretation.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -163,7 +177,7 @@ Long-lived intent/history profiles will also need stronger provenance and privac
 - [ ] memory namespaces
 - [ ] encrypted private sections
 - [ ] profile signing
-- [ ] provenance metadata beyond current experience/intent approval digests
+- [ ] provenance metadata beyond current experience / approval / revision digests
 - [ ] selective export
 - [ ] retained-history archival / deletion policy
 
@@ -182,7 +196,8 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] live learned-habit capture and promotion demo
 - [ ] live context-action-outcome capture for an emergent behavior
 - [ ] real Intent Candidate generation from longitudinal robot data
-- [ ] explicit human approval of a discovered intent candidate into a real snapshot
+- [ ] explicit human approval of a discovered Intent Candidate into a real snapshot
+- [ ] later evidence causing an explicit real-world Intent revision while preserving the original interpretation
 - [ ] multi-session Statistical Continuity Score on physical robots
 - [ ] controlled experiment context capture from real sessions
 - [ ] uncertainty and confidence reporting on real robot data
@@ -219,6 +234,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] functional-intent preservation profile
 - [ ] model-independent intent-discovery evidence profile
 - [ ] explicit intent-candidate approval profile
+- [ ] auditable Intent revision / prior-interpretation history profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
@@ -226,4 +242,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, declare an approved/revised Intent to be eternal truth, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation of robot continuity data.
