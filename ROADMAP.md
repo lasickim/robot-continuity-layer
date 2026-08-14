@@ -49,12 +49,16 @@ Primary goal: make RCL testable against external implementations and begin separ
 - [x] non-mutating configured → learning / learning → stable / stable → legacy review recommendations
 - [x] behavior-specific repeated-session evidence gates for stable and legacy review
 - [x] machine-readable habit-promotion policy and report schemas
+- [x] Explicit Habit Approval / Profile Patch v0.1
+- [x] deterministic approval preview with candidate/lifecycle/timestamp preconditions
+- [x] immutable new-snapshot apply with regenerated SHA-256 manifest
+- [x] approval-history audit event and semantic-parameter immutability check
 - [ ] migration report cross-implementation fixtures
 - [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, report uncertainty across a comparable series of repeated sessions, expose auditable semantic profile evolution without replaying historical events as commands, and produce transparent non-mutating habit-promotion review recommendations from versioned evidence gates.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, report uncertainty across a comparable series of repeated sessions, expose auditable semantic profile evolution without replaying historical events as commands, produce transparent non-mutating habit-promotion review recommendations from versioned evidence gates, and apply an explicitly approved lifecycle transition only into a new validated RCL snapshot without changing semantic behavior parameters.
 
 ## v0.4 — private continuity and provenance
 
@@ -82,6 +86,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] controlled experiment context capture from real sessions
 - [ ] uncertainty and confidence reporting on real robot data
 - [ ] user-reviewed habit promotion on real longitudinal evidence
+- [ ] explicit approval creating a new real-robot profile snapshot
 - [ ] video demo
 - [ ] reproducible test procedure and dataset
 
@@ -91,6 +96,8 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] simulator reference adapters
 - [ ] multiple independently maintained robot adapters
 - [ ] cross-vendor migration demo
+- [ ] migration report cross-implementation fixtures
+- [ ] registry proposal / review workflow
 - [ ] version negotiation
 - [ ] backward-compatibility policy
 - [ ] public adapter registry concept
@@ -107,6 +114,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
 - [ ] evidence-backed habit-promotion profile
+- [ ] explicit approved-mutation / snapshot profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
