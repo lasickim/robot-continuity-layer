@@ -21,6 +21,10 @@ Is there enough evidence to review a habit-state promotion?
         ↓
 Habit Promotion Policy
         ↓
+Was that promotion explicitly approved?
+        ↓
+Habit Approval + new immutable snapshot
+        ↓
 Can Robot B represent the behavior?
         ↓
 Migration + Declared Continuity
@@ -60,7 +64,9 @@ The reference implementation can:
 - aggregate comparable sessions with Student-t uncertainty reporting;
 - record optional behavior habit/history metadata without changing the five-payload `.rcl` layout;
 - compare two profile snapshots with deterministic semantic diffing;
-- generate **non-mutating habit lifecycle promotion candidates** from explicit versioned evidence gates.
+- generate **non-mutating habit lifecycle promotion candidates** from explicit versioned evidence gates;
+- preview an explicit lifecycle approval as a deterministic patch;
+- apply an approved lifecycle transition only into a new validated snapshot while keeping semantic behavior parameters unchanged.
 
 ## Behavior Habit History v0.1
 
@@ -194,15 +200,44 @@ spec/policies/habit-promotion-policy-v0.1.json
 
 They are explicit versioned engineering defaults, not universal truths. A custom policy can be supplied with `--policy`.
 
-```bash
-rcl habit-candidates my-profile session-report.json \
-  --policy my-policy.json \
-  --json
-```
-
 Important boundary: habit history supplies formation evidence. The current Robot A ↔ Robot B repeated-session report supplies **supporting reproducibility evidence only**; it is not direct proof that a source habit formed by itself.
 
 See [`docs/HABIT_PROMOTION.md`](docs/HABIT_PROMOTION.md).
+
+## Explicit Habit Approval / Profile Patch v0.1
+
+A promotion candidate is only a recommendation. Lifecycle state changes require a separate explicit approval operation.
+
+Preview without modifying any files:
+
+```bash
+rcl approve-habit preview \
+  my-profile \
+  promotion-report.json \
+  navigation.follow_person \
+  --approved-at 2026-08-14T06:00:00Z \
+  --approved-by local-user
+```
+
+Apply into a **new** snapshot directory:
+
+```bash
+rcl approve-habit apply \
+  my-profile \
+  promotion-report.json \
+  navigation.follow_person \
+  my-profile-approved \
+  --approved-at 2026-08-14T06:00:00Z \
+  --approved-by local-user
+```
+
+Approval re-validates that the promotion report is still an eligible candidate for the exact current lifecycle. It rejects stale reports, blocked decisions, backwards timestamps, existing output paths, and output paths inside the source profile.
+
+Apply copies the five payloads, changes only the selected behavior's habit lifecycle/timestamp/history metadata, adds one deterministic `promotion_approved` audit event, regenerates `manifest.json` with fresh SHA-256 hashes, validates the new profile, runs Profile Diff, and rejects any semantic `behavior.parameters` change.
+
+The source profile is never overwritten.
+
+See [`docs/HABIT_APPROVAL.md`](docs/HABIT_APPROVAL.md).
 
 ## Capability Registry v0.1
 
@@ -358,7 +393,7 @@ RCL intentionally keeps these concepts separate.
 
 **Repeated-Session Confidence v0.1** asks how stable that continuity estimate remains across comparable sessions.
 
-**Habit History**, **Profile Diff**, and **Habit Promotion Policy** are audit/review constructs, not extra identity scores.
+**Habit History**, **Profile Diff**, **Habit Promotion Policy**, and **Explicit Habit Approval** are audit/review/mutation constructs, not extra identity scores.
 
 None of these constructs define identity, consciousness, personhood, or emotional authenticity.
 
@@ -370,12 +405,13 @@ None of these constructs define identity, consciousness, personhood, or emotiona
 4. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
 5. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
 6. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
-7. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
-8. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
-9. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-10. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
-11. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
-12. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
+7. **Approval is explicit and immutable-by-default** — lifecycle mutation creates a new validated snapshot rather than overwriting the source.
+8. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+9. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
+10. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+11. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
+12. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
+13. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
 
 ## Experimental compatibility levels
 
@@ -383,7 +419,7 @@ None of these constructs define identity, consciousness, personhood, or emotiona
 |---|---|
 | **RCL Profile Compatible** | Can read, validate, preserve, write, and inspect the portable profile format. |
 | **RCL Migration Compatible** | Can translate semantic behavior, expose degradation, and produce a valid migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, portable habit history, reviewed promotion, context-controlled repeated evaluation, and broader conformance. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, portable habit history, reviewed promotion/approval, context-controlled repeated evaluation, and broader conformance. |
 
 These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
@@ -403,7 +439,21 @@ rcl diff \
 
 rcl habit-candidates \
   examples/history/mobile-base-before \
-  examples/policy/demo-follow-person.session-report.json
+  examples/policy/demo-follow-person.session-report.json \
+  --output /tmp/promotion-report.json
+
+rcl approve-habit preview \
+  examples/history/mobile-base-before \
+  /tmp/promotion-report.json \
+  navigation.follow_person \
+  --approved-at 2026-08-14T06:00:00Z
+
+rcl approve-habit apply \
+  examples/history/mobile-base-before \
+  /tmp/promotion-report.json \
+  navigation.follow_person \
+  /tmp/mobile-base-approved \
+  --approved-at 2026-08-14T06:00:00Z
 
 rcl migrate \
   examples/mobile-base \
@@ -437,6 +487,7 @@ robot-continuity-layer/
 │   ├── CAPABILITY_REGISTRY.md
 │   ├── CONFORMANCE.md
 │   ├── EXPERIMENT_PROTOCOL.md
+│   ├── HABIT_APPROVAL.md
 │   ├── HABIT_HISTORY.md
 │   ├── HABIT_PROMOTION.md
 │   ├── OBSERVED_EVALUATION.md
@@ -453,6 +504,7 @@ robot-continuity-layer/
 │   ├── trials/
 │   └── targets/
 ├── rcl/
+│   ├── habit_approval.py
 │   ├── habit_policy.py
 │   ├── history.py
 │   ├── profile_diff.py
@@ -464,7 +516,7 @@ robot-continuity-layer/
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, universal statistical equivalence, universal habit-promotion thresholds, physical safety, or user consent. It provides explicit experimental constructs for portable, auditable, declared, observed, statistical, longitudinal, and reviewable robot behavior continuity.
+RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, universal statistical equivalence, universal habit-promotion thresholds, physical safety, or implied user consent. It provides explicit experimental constructs for portable, auditable, declared, observed, statistical, longitudinal, reviewable, and explicitly approved robot behavior continuity.
 
 ## License
 
