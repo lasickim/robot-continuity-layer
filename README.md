@@ -15,7 +15,13 @@ What should survive?
         ↓
 Portable semantic profile (.rcl)
         ↓
-Why does this behavior exist?
+A new repeated behavior appears
+        ↓
+What purpose might explain it?
+        ↓
+Intent Discovery / Intent Candidate
+        ↓
+What purpose is actually declared for continuity?
         ↓
 Behavior Intent / Goal Semantics
         ↓
@@ -76,6 +82,9 @@ The reference implementation can:
 - preserve and migrate **Behavior Intent / Goal Semantics** separately from visible expression;
 - hard-fail migration when a `required` intent cannot be satisfied;
 - allow an obsolete optional expression to disappear while the functional goal remains preserved;
+- evaluate a proposed intent hypothesis from generic context-action-outcome episodes without hardcoding a specific behavior;
+- generate an **Intent Candidate** or `insufficient_evidence` result without mutating a profile;
+- support numeric/binary and higher-is-better/lower-is-better discovery outcomes;
 - translate mobile-base behavior through a ROS 2 Lyrical reference adapter;
 - run executable adapter conformance checks;
 - evaluate single observations against declared tolerances;
@@ -183,6 +192,95 @@ examples/intent/sit-assistant-v1
 examples/targets/intent-demo-v2.embodiment.json
 rcl.intent_reference_adapter.IntentReferenceAdapter
 ```
+
+## Intent Discovery / Intent Candidate v0.1
+
+Behavior Intent stores a declared purpose. Intent Discovery addresses the earlier question:
+
+> A robot has started repeating a new behavior. Is there enough evidence to review a proposed explanation for why that behavior exists?
+
+v0.1 intentionally separates **hypothesis proposal** from **evidence evaluation**:
+
+```text
+learning system / LLM / VLM / human
+        ↓
+proposed goal hypothesis
+        ↓
+RCL deterministic evidence engine
+        ↓
+Intent Candidate
+```
+
+The core discovery engine does **not** contain behavior-specific logic such as:
+
+```python
+if action == "post_release_hold":
+    goal = "stabilize_released_object"
+```
+
+Instead, the dataset declares one context, one candidate action, one outcome, and one proposed intent. The same engine then compares action-present and action-absent episodes.
+
+Numeric example:
+
+```bash
+rcl discover-intent \
+  examples/intent-discovery/object-release-stability.dataset.json
+```
+
+Unrelated binary example using the exact same engine:
+
+```bash
+rcl discover-intent \
+  examples/intent-discovery/dock-alignment.dataset.json
+```
+
+Default common evidence gates are published at:
+
+```text
+spec/policies/intent-discovery-policy-v0.1.json
+```
+
+```text
+context episodes       >= 10
+action-present samples >= 4
+action-absent samples  >= 4
+action repeat rate     >= 0.30
+beneficial effect      >= dataset minimum_meaningful_effect
+```
+
+The effect threshold is dataset-specific because a distance, stability score, success rate, and temperature do not share one universal meaningful scale.
+
+Possible results:
+
+```text
+status=candidate
+confidence=moderate|strong
+recommended_next_action=review_candidate
+```
+
+or:
+
+```text
+status=insufficient_evidence
+confidence=insufficient
+recommended_next_action=collect_more_evidence
+```
+
+`strong` is an evidence-strength label. It is **not** a probability that the proposed intent is true.
+
+Every report explicitly contains:
+
+```json
+{
+  "causal_claim": false
+}
+```
+
+because association between an action and a better outcome does not prove that the action caused the outcome or that the proposed semantic purpose is correct.
+
+Intent Discovery never writes `behavior.intent` and never approves a candidate. An explicit Intent Approval step remains a future v0.4 task.
+
+See [`docs/INTENT_DISCOVERY.md`](docs/INTENT_DISCOVERY.md).
 
 ## Behavior Habit History v0.1
 
@@ -371,11 +469,13 @@ See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
 
 RCL intentionally keeps these concepts separate.
 
-**Declared Behavior Continuity Score** asks whether Robot B can represent the semantic behavior.
+**Intent Discovery** asks whether observed context-action-outcome association is strong enough to review a proposed goal hypothesis. It does not assert causality or mutate the profile.
 
 **Behavior Intent** asks whether the target can preserve the declared purpose, trigger, and success condition.
 
 **Expression** asks whether a recognizable source-body motion can also be retained.
+
+**Declared Behavior Continuity Score** asks whether Robot B can represent the semantic behavior.
 
 **Observed Continuity Score v0.1** asks whether measured behavior stayed close to the declared target.
 
@@ -385,23 +485,25 @@ RCL intentionally keeps these concepts separate.
 
 **Habit History**, **Profile Diff**, **Habit Promotion**, and **Explicit Habit Approval** are audit/review/mutation constructs, not extra identity scores.
 
-None of these constructs define consciousness, personhood, or subjective identity.
+None of these constructs define consciousness, personhood, subjective identity, or subjective motivation.
 
 ## Core principles
 
 1. **Preserve why before copying how** — portable goal semantics outrank source-body implementation details.
-2. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
-3. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
-4. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
-5. **User-owned and portable** — continuity should export without requiring a vendor cloud.
-6. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-7. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
-8. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
-9. **Approval is explicit and immutable-by-default** — lifecycle mutation creates a new validated snapshot.
-10. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
-11. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-12. **Safety outranks continuity** — a legacy expression never overrides target safety constraints.
-13. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
+2. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
+3. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
+4. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
+5. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
+6. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
+7. **User-owned and portable** — continuity should export without requiring a vendor cloud.
+8. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
+9. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
+10. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
+11. **Approval is explicit and immutable-by-default** — lifecycle mutation creates a new validated snapshot.
+12. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+13. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+14. **Safety outranks continuity** — a legacy expression never overrides target safety constraints.
+15. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
 
 ## Quick start
 
@@ -412,6 +514,9 @@ pip install -e ".[dev]"
 
 rcl validate examples/mobile-base
 rcl capabilities list
+
+rcl discover-intent \
+  examples/intent-discovery/object-release-stability.dataset.json
 
 rcl diff \
   examples/history/mobile-base-before \
@@ -458,6 +563,7 @@ robot-continuity-layer/
 ├── ROADMAP.md
 ├── docs/
 │   ├── BEHAVIOR_INTENT.md
+│   ├── INTENT_DISCOVERY.md
 │   ├── CAPABILITY_REGISTRY.md
 │   ├── CONFORMANCE.md
 │   ├── EXPERIMENT_PROTOCOL.md
@@ -470,6 +576,7 @@ robot-continuity-layer/
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── examples/
 │   ├── intent/
+│   ├── intent-discovery/
 │   ├── history/
 │   ├── mobile-base/
 │   ├── observations/
@@ -480,6 +587,7 @@ robot-continuity-layer/
 │   └── targets/
 ├── rcl/
 │   ├── intent.py
+│   ├── intent_discovery.py
 │   ├── intent_reference_adapter.py
 │   ├── habit_approval.py
 │   ├── habit_policy.py
@@ -493,9 +601,9 @@ robot-continuity-layer/
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective motivation, free will, emotional authenticity, universal statistical equivalence, universal habit thresholds, or certified physical safety.
+RCL does **not** claim to measure consciousness, personhood, subjective motivation, free will, emotional authenticity, causal truth from observational association, universal statistical equivalence, universal habit thresholds, or certified physical safety.
 
-Behavior Intent represents declared engineering goal semantics. Saying that RCL preserves a goal does not mean the robot experiences or understands that goal in a human subjective sense.
+Behavior Intent represents declared engineering goal semantics. Intent Discovery produces an association-backed engineering hypothesis for review. Neither means the robot experiences or understands a goal in a human subjective sense.
 
 ## License
 
