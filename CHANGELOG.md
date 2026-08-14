@@ -19,7 +19,14 @@
 - Added `rcl capabilities list/show/validate` CLI commands.
 - Added migration-time validation for source, target, and adapter-required capability IDs.
 - Added conformance coverage that rejects unknown IDs inside reserved capability namespaces.
-- Expanded the public roadmap toward cross-implementation fixtures and real-robot evaluation.
+- Added optional numeric behavior evaluation metadata with parameter references, tolerance bands, weights, and required/optional observations.
+- Added Observation Input v0.1 and a machine-readable Observed Continuity Evaluation Report v0.1.
+- Added `evaluate_observed_continuity()` and `rcl evaluate` for observed-vs-declared behavior scoring.
+- Added a transparent full-credit / linear-falloff / zero-credit numeric scoring rule.
+- Added profile validation for invalid evaluation parameter references and invalid tolerance falloff ranges.
+- Added a Robot B observation example (`1.37 m`, `372 ms`) and observed evaluation documentation.
+- Added tests for within-tolerance, partial-credit, zero-credit, missing-required, missing-optional, and invalid metadata cases.
+- Expanded the public roadmap toward repeated-trial source-vs-target observed evaluation and real-robot validation.
 
 ## 0.2.0-dev — 2026-08-14
 
