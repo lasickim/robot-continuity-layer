@@ -36,14 +36,18 @@ Primary goal: make RCL testable against external implementations and begin separ
 - [x] Experiment Context / Measurement Protocol v0.1
 - [x] strict context gate before statistical scoring
 - [x] protocol-selected comparison fields plus informational robot metadata
+- [x] Repeated-Session Confidence / Uncertainty v0.1
+- [x] equal-weight session aggregation with between-session sample standard deviation
+- [x] dependency-free 95% Student-t confidence intervals with a minimum of 3 scorable sessions
+- [x] strict cross-session robot/protocol/context series consistency gate
+- [x] per-metric session-level similarity uncertainty summaries
 - [ ] profile diff command
-- [ ] repeated-session confidence / uncertainty metadata
 - [ ] migration report cross-implementation fixtures
 - [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, and participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, emit observations that can be evaluated against declared tolerances, participate in repeated-trial source-vs-target behavior comparison under a declared comparable experiment context, and report uncertainty across a comparable series of repeated sessions.
 
 ## v0.4 — private continuity and provenance
 
@@ -65,9 +69,9 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
 - [ ] measured before/after manipulation behavior
-- [ ] multi-session Statistical Continuity Score
-- [ ] controlled experiment context capture
-- [ ] uncertainty and confidence reporting
+- [ ] multi-session Statistical Continuity Score on physical robots
+- [ ] controlled experiment context capture from real sessions
+- [ ] uncertainty and confidence reporting on real robot data
 - [ ] video demo
 - [ ] reproducible test procedure and dataset
 
@@ -90,6 +94,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] independent conformance suites for multiple embodiment classes
 - [ ] measured continuity evaluation profile
 - [ ] reproducible statistical evaluation protocol
+- [ ] longitudinal uncertainty profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
