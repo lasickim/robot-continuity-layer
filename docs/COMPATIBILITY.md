@@ -4,7 +4,7 @@ RCL compatibility is intended to describe an implementation's ability to preserv
 
 ## Experimental compatibility levels
 
-These labels are draft concepts for discussion during the v0.x series. They are not a certification program yet.
+These labels are draft concepts for discussion during the v0.x series. They are not a formal certification program.
 
 ### RCL Profile Compatible
 
@@ -25,6 +25,18 @@ An implementation satisfies Profile Compatible requirements and can additionally
 - produce a machine-readable migration report;
 - fail migration success when a required behavior cannot be safely preserved.
 
+Beginning with v0.3, the repository includes an **experimental executable conformance suite** for mobile-base adapters. A passing implementation may describe itself as:
+
+> RCL Migration Compatible — experimental v0.3 mobile-base conformance suite
+
+The current suite ID is:
+
+```text
+rcl.adapter.mobile_base.v0.3
+```
+
+See [`CONFORMANCE.md`](CONFORMANCE.md). Passing this suite is a protocol compatibility result, not a physical safety or product certification.
+
 ### RCL Continuity Ready
 
 A future conformance level intended for real robots. In addition to Migration Compatible requirements, an implementation will be expected to:
@@ -33,7 +45,7 @@ A future conformance level intended for real robots. In addition to Migration Co
 - restore continuity data to another supported embodiment;
 - run a reproducible before/after evaluation;
 - report measured continuity separately from declared configuration similarity;
-- pass an RCL conformance test kit.
+- pass an observed-behavior conformance profile.
 
 ## What compatibility does not mean
 
@@ -61,6 +73,8 @@ Target-specific command / policy / controller
 
 The adapter should preserve meaning where possible and report degradation where exact preservation is impossible.
 
-## Toward `RCL Compatible`
+## Conformance before branding
 
-The long-term goal is for `RCL Compatible` to become a useful interoperability claim backed by an open conformance suite rather than a marketing-only label. Until that suite exists, projects should describe exactly which experimental compatibility level and RCL version they implement.
+The long-term goal is for `RCL Compatible` to become a useful interoperability claim backed by open, versioned conformance suites rather than a marketing-only label.
+
+During the v0.x series, implementations should publish the exact RCL version, conformance suite ID, adapter version, and result instead of presenting the experimental label as formal certification.
