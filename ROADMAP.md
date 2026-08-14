@@ -19,7 +19,7 @@ RCL is being developed from a small, testable continuity core toward real multi-
 
 Primary goal: make RCL testable against external implementations instead of only the bundled reference adapter.
 
-- [ ] ROS 2 reference adapter
+- [x] ROS 2 reference adapter (Lyrical mobile-base semantic bridge, v0.3-dev)
 - [ ] adapter conformance test kit
 - [ ] profile diff command
 - [ ] formal capability vocabulary
