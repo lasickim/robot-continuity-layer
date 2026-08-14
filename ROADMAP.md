@@ -17,7 +17,7 @@ RCL is being developed from a small, testable continuity core toward real multi-
 
 ## v0.3 — interoperability and evaluation
 
-Primary goal: make RCL testable against external implementations instead of only the bundled reference adapter.
+Primary goal: make RCL testable against external implementations and begin separating declared continuity from measured continuity.
 
 - [x] ROS 2 reference adapter (Lyrical mobile-base semantic bridge, v0.3-dev)
 - [x] adapter conformance test kit (`rcl.adapter.mobile_base.v0.3`)
@@ -25,15 +25,19 @@ Primary goal: make RCL testable against external implementations instead of only
 - [x] Capability Registry v0.1 with reserved semantic namespaces
 - [x] extension capability namespace (`x.<owner>.<semantic_path>`)
 - [x] migration-time capability vocabulary validation
+- [x] numeric behavior tolerance and evaluation metadata
+- [x] observation input format v0.1
+- [x] Observed Continuity Evaluation v0.1 (observed-vs-declared)
+- [x] machine-readable observed evaluation report schema
 - [ ] profile diff command
-- [ ] behavior tolerance and evaluation metadata
-- [ ] observed-behavior evaluation protocol
+- [ ] source-vs-target repeated-trial evaluation protocol
+- [ ] distribution / confidence metadata for observed behavior
 - [ ] migration report cross-implementation fixtures
 - [ ] registry proposal / review workflow
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, and pass a shared executable conformance suite.
+An independently implemented adapter should be able to consume the same semantic fixture, use a shared capability vocabulary, produce a valid migration report, expose capability loss honestly, pass a shared executable conformance suite, and emit observations that can be evaluated against declared semantic tolerances.
 
 ## v0.4 — private continuity and provenance
 
@@ -48,14 +52,15 @@ Primary goal: support long-lived profiles that may contain user-specific continu
 
 ## v0.5 — real robot reference migration
 
-Primary goal: replace configuration-only similarity with measured physical behavior continuity.
+Primary goal: replace configuration-only similarity with measured physical behavior continuity across actual source and target robots.
 
 - [ ] Robot A live behavior capture
 - [ ] `.rcl` export
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
 - [ ] measured before/after manipulation behavior
-- [ ] observed Continuity Score prototype
+- [ ] source-vs-target Observed Continuity Score
+- [ ] repeated-trial statistics and confidence
 - [ ] video demo
 - [ ] reproducible test procedure and dataset
 
@@ -76,6 +81,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] stable capability vocabulary and extension policy
 - [ ] multi-vendor adapter ecosystem
 - [ ] independent conformance suites for multiple embodiment classes
+- [ ] measured continuity evaluation profile
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism

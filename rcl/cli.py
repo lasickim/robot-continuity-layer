@@ -12,6 +12,7 @@ from .capabilities import (
     registered_capabilities,
     validate_capability_id,
 )
+from .evaluation import evaluate_observed_continuity
 from .example_adapter import ExampleMobileBaseAdapter
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, validate_schema
@@ -71,6 +72,36 @@ def _cmd_report(args: argparse.Namespace) -> int:
     for item in report["behavior_results"]:
         print(f"- {item['behavior_id']}: {item['status']} (similarity={item['similarity']:.2f})")
     return 0
+
+
+def _cmd_evaluate(args: argparse.Namespace) -> int:
+    profile = RCLProfile.open(args.source)
+    observations = _read_json(args.observations)
+    report = evaluate_observed_continuity(profile, observations)
+
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(
+            json.dumps(report, indent=2, ensure_ascii=False) + "\n",
+            encoding="utf-8",
+        )
+        print(output)
+    elif args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print(f"Observed Continuity Score: {report['score']:.2f}%")
+        print(f"Evaluation Success: {'YES' if report['evaluation_success'] else 'NO'}")
+        print(f"Status: {report['status']}")
+        print(f"Required Failures: {len(report['required_failures'])}")
+        for item in report["metric_results"]:
+            observed = "MISSING" if item["observed"] is None else item["observed"]
+            similarity = "N/A" if item["similarity"] is None else f"{item['similarity']:.2f}"
+            print(
+                f"- {item['behavior_id']}.{item['metric_id']}: {item['status']} "
+                f"(observed={observed}, target={item['target']}, similarity={similarity})"
+            )
+    return 0 if report["evaluation_success"] else 4
 
 
 def _cmd_capabilities_list(args: argparse.Namespace) -> int:
@@ -163,6 +194,13 @@ def main() -> int:
     p_report = sub.add_parser("report")
     p_report.add_argument("path")
     p_report.set_defaults(func=_cmd_report)
+
+    p_evaluate = sub.add_parser("evaluate")
+    p_evaluate.add_argument("source")
+    p_evaluate.add_argument("observations")
+    p_evaluate.add_argument("--output")
+    p_evaluate.add_argument("--json", action="store_true")
+    p_evaluate.set_defaults(func=_cmd_evaluate)
 
     p_capabilities = sub.add_parser("capabilities")
     capability_sub = p_capabilities.add_subparsers(dest="capability_command", required=True)

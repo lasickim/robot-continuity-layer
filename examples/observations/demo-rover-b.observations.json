@@ -1,0 +1,15 @@
+{
+  "observation_version": "0.1",
+  "robot_id": "RCL-DEMO-ROVER-B",
+  "embodiment_id": "demo-rover-b-v1",
+  "captured_at": "2026-08-14T00:30:00Z",
+  "behavior_observations": [
+    {
+      "behavior_id": "navigation.follow_person",
+      "metrics": {
+        "following_distance_m": 1.37,
+        "stop_delay_ms": 372
+      }
+    }
+  ]
+}
