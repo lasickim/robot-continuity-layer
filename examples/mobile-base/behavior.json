@@ -5,6 +5,30 @@
       "description": "Maintain the learned following style without preserving raw motor commands.",
       "parameters": {"preferred_distance_m": 1.4, "speed_style": "gentle", "turn_style": "cautious", "stop_delay_ms": 350},
       "preservation": {"priority": "preferred", "mode": "semantic"},
+      "evaluation": {
+        "metrics": [
+          {
+            "metric_id": "following_distance",
+            "observable": "following_distance_m",
+            "target_parameter": "preferred_distance_m",
+            "unit": "m",
+            "tolerance": 0.1,
+            "zero_credit_at": 0.3,
+            "weight": 2.0,
+            "required": true
+          },
+          {
+            "metric_id": "stop_delay",
+            "observable": "stop_delay_ms",
+            "target_parameter": "stop_delay_ms",
+            "unit": "ms",
+            "tolerance": 80,
+            "zero_credit_at": 240,
+            "weight": 1.0,
+            "required": false
+          }
+        ]
+      },
       "source": "learned",
       "confidence": 0.91,
       "required_capabilities": ["navigation.planar_velocity", "perception.person_tracking"]
