@@ -1,0 +1,17 @@
+{
+  "behaviors": [
+    {
+      "behavior_id": "interaction.post_release_hold",
+      "description": "Briefly maintain support after releasing an object before withdrawing the manipulator.",
+      "parameters": {
+        "hold_ms": 410
+      },
+      "preservation": {
+        "priority": "preferred",
+        "mode": "semantic"
+      },
+      "source": "learned",
+      "confidence": 0.91
+    }
+  ]
+}
