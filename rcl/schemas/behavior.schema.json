@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.4:behavior",
-  "title": "RCL Behavior v0.4-dev with intent, evaluation, and habit metadata",
+  "title": "RCL Behavior v0.4-dev with intent, revision, evaluation, and habit metadata",
   "type": "object",
   "additionalProperties": false,
   "required": ["behaviors"],
@@ -31,21 +31,63 @@
               "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
               "constraints": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"}, "uniqueItems": true},
               "provenance": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["source", "candidate_id", "dataset_id", "discovery_method", "policy_id", "policy_version", "candidate_report_sha256", "approved_at", "approved_by", "causal_claim"],
-                "properties": {
-                  "source": {"const": "discovered"},
-                  "candidate_id": {"type": "string", "minLength": 1},
-                  "dataset_id": {"type": "string", "minLength": 1},
-                  "discovery_method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
-                  "policy_id": {"type": "string", "minLength": 1},
-                  "policy_version": {"const": "0.1"},
-                  "candidate_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-                  "approved_at": {"type": "string", "format": "date-time"},
-                  "approved_by": {"type": ["string", "null"]},
-                  "causal_claim": {"const": false}
-                }
+                "oneOf": [
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["source", "candidate_id", "dataset_id", "discovery_method", "policy_id", "policy_version", "candidate_report_sha256", "approved_at", "approved_by", "causal_claim"],
+                    "properties": {
+                      "source": {"const": "discovered"},
+                      "candidate_id": {"type": "string", "minLength": 1},
+                      "dataset_id": {"type": "string", "minLength": 1},
+                      "discovery_method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
+                      "policy_id": {"type": "string", "minLength": 1},
+                      "policy_version": {"const": "0.1"},
+                      "candidate_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                      "approved_at": {"type": "string", "format": "date-time"},
+                      "approved_by": {"type": ["string", "null"]},
+                      "causal_claim": {"const": false}
+                    }
+                  },
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["source", "revision_id", "revision_candidate_id", "revision_candidate_sha256", "previous_intent_sha256", "reason", "evidence_refs", "approved_at", "approved_by", "causal_claim"],
+                    "properties": {
+                      "source": {"const": "revised"},
+                      "revision_id": {"type": "string", "minLength": 1},
+                      "revision_candidate_id": {"type": "string", "minLength": 1},
+                      "revision_candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                      "previous_intent_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                      "reason": {"type": "string", "minLength": 1},
+                      "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+                      "approved_at": {"type": "string", "format": "date-time"},
+                      "approved_by": {"type": ["string", "null"]},
+                      "causal_claim": {"const": false}
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "intent_history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["revision_id", "revised_at", "revised_by", "candidate_id", "candidate_sha256", "reason", "evidence_refs", "from_intent_sha256", "to_intent_sha256", "intent_snapshot", "causal_claim"],
+              "properties": {
+                "revision_id": {"type": "string", "minLength": 1},
+                "revised_at": {"type": "string", "format": "date-time"},
+                "revised_by": {"type": ["string", "null"]},
+                "candidate_id": {"type": "string", "minLength": 1},
+                "candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "reason": {"type": "string", "minLength": 1},
+                "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+                "from_intent_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "to_intent_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "intent_snapshot": {"type": "object"},
+                "causal_claim": {"const": false}
               }
             }
           },
