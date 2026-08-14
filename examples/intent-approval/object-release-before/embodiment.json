@@ -1,0 +1,15 @@
+{
+  "embodiment_id": "intent-approval-demo-manipulator",
+  "vendor": "RCL Demo",
+  "model": "Approval V1",
+  "class": "mobile_manipulator",
+  "capabilities": [
+    "x.rcl-demo.object_stability_observation"
+  ],
+  "sensors": ["gripper_force", "object_motion_estimator"],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.intent",
+    "adapter_version": "0.4-dev"
+  }
+}
