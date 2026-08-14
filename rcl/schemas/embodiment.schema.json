@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.2:embodiment",
+  "title": "RCL Embodiment v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["embodiment_id", "class", "capabilities"],
+  "properties": {
+    "embodiment_id": {"type": "string", "minLength": 1},
+    "vendor": {"type": "string"},
+    "model": {"type": "string"},
+    "class": {"type": "string", "enum": ["mobile_base", "manipulator", "mobile_manipulator", "humanoid", "other"]},
+    "capabilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+    "limits": {"type": "object"},
+    "sensors": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "adapter": {"type": "object", "additionalProperties": false, "properties": {"adapter_id": {"type": "string"}, "adapter_version": {"type": "string"}}}
+  }
+}

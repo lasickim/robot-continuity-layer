@@ -1,0 +1,16 @@
+{
+  "rcl_version": "0.2",
+  "report_version": "0.2",
+  "created_at": "2026-08-14T00:00:00Z",
+  "source": {"robot_id": "RCL-DEMO-ROVER-A", "profile_id": "RCL-DEMO-PROFILE-002", "embodiment_id": "demo-rover-a-v1"},
+  "target": {"embodiment_id": "demo-rover-b-v1", "vendor": "example", "model": "compact-fixed-camera-rover"},
+  "adapter": {"adapter_id": "rcl.example.mobile_base", "adapter_version": "0.2"},
+  "behavior_results": [
+    {"behavior_id": "navigation.follow_person", "status": "preserved", "similarity": 1.0, "reason": "Semantic following behavior is directly representable on the target.", "required_capabilities": ["navigation.planar_velocity", "perception.person_tracking"], "missing_capabilities": [], "mapped_parameters": {"following_distance_m": 1.4, "linear_speed_limit_mps": 0.315, "angular_speed_limit_rps": 0.675, "stop_delay_ms": 350}},
+    {"behavior_id": "navigation.pre_turn_observation", "status": "approximated", "similarity": 0.65, "reason": "Target lacks directional attention; adapter approximates the legacy pre-turn observation with a small base-yaw preview.", "required_capabilities": ["perception.directional_attention"], "missing_capabilities": ["perception.directional_attention"], "mapped_parameters": {"minimum_turn_deg": 70, "observation_pause_ms": 250, "fallback": "base_yaw_preview", "preview_yaw_deg": 8}}
+  ],
+  "continuity": {"method": "rcl.behavior.weighted_similarity.v0.2", "score": 88.33, "migration_success": true, "required_failures": [], "safety_blocks": [], "details": [
+    {"behavior_id": "navigation.follow_person", "priority": "preferred", "weight": 2.0, "status": "preserved", "similarity": 1.0, "weighted_similarity": 2.0},
+    {"behavior_id": "navigation.pre_turn_observation", "priority": "optional", "weight": 1.0, "status": "approximated", "similarity": 0.65, "weighted_similarity": 0.65}
+  ]}
+}

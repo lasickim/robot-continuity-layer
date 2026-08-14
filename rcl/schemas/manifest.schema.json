@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.2:manifest",
+  "title": "RCL Manifest v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rcl_version", "profile_id", "created_at", "files"],
+  "properties": {
+    "rcl_version": {"const": "0.2"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "files": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["path", "sha256"],
+        "properties": {
+          "path": {"type": "string", "enum": ["identity.json", "preferences.json", "behavior.json", "skills.json", "embodiment.json"]},
+          "sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"}
+        }
+      }
+    }
+  }
+}

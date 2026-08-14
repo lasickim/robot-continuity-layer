@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.2:skills",
+  "title": "RCL Skills v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["skills"],
+  "properties": {
+    "skills": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["skill_id", "experience_count"], "properties": {"skill_id": {"type": "string", "minLength": 1}, "skill_version": {"type": "string"}, "experience_count": {"type": "integer", "minimum": 0}, "success_count": {"type": "integer", "minimum": 0}, "confidence": {"type": "number", "minimum": 0, "maximum": 1}, "adaptation": {"type": "object"}, "implementation_ref": {"type": ["string", "null"]}}}}
+  }
+}

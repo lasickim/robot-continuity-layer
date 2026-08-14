@@ -1,0 +1,22 @@
+{
+  "behaviors": [
+    {
+      "behavior_id": "navigation.follow_person",
+      "description": "Maintain the learned following style without preserving raw motor commands.",
+      "parameters": {"preferred_distance_m": 1.4, "speed_style": "gentle", "turn_style": "cautious", "stop_delay_ms": 350},
+      "preservation": {"priority": "preferred", "mode": "semantic"},
+      "source": "learned",
+      "confidence": 0.91,
+      "required_capabilities": ["navigation.planar_velocity", "perception.person_tracking"]
+    },
+    {
+      "behavior_id": "navigation.pre_turn_observation",
+      "description": "Briefly orient sensing toward the intended turn direction before a large turn.",
+      "parameters": {"minimum_turn_deg": 70, "observation_pause_ms": 250},
+      "preservation": {"priority": "optional", "mode": "legacy"},
+      "source": "learned",
+      "confidence": 0.84,
+      "required_capabilities": ["perception.directional_attention"]
+    }
+  ]
+}

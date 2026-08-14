@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.2:identity",
+  "title": "RCL Identity v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["robot_id", "continuity_generation", "first_activated_at"],
+  "properties": {
+    "robot_id": {"type": "string", "minLength": 1},
+    "display_name": {"type": "string"},
+    "continuity_generation": {"type": "integer", "minimum": 1},
+    "first_activated_at": {"type": "string", "format": "date-time"},
+    "previous_profile_id": {"type": ["string", "null"]},
+    "notes": {"type": "string"}
+  }
+}

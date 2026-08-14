@@ -1,0 +1,10 @@
+{
+  "embodiment_id": "demo-rover-b-v1",
+  "vendor": "example",
+  "model": "compact-fixed-camera-rover",
+  "class": "mobile_base",
+  "capabilities": ["navigation.planar_velocity", "perception.person_tracking", "perception.forward_range"],
+  "limits": {"max_linear_speed_mps": 0.9, "max_angular_speed_rps": 1.5},
+  "sensors": ["fixed_rgb_camera", "range_sensor"],
+  "adapter": {"adapter_id": "rcl.example.mobile_base", "adapter_version": "0.2"}
+}

@@ -1,0 +1,3 @@
+{
+  "skills": [{"skill_id": "navigation.follow_person", "skill_version": "demo-1", "experience_count": 138, "success_count": 130, "confidence": 0.91, "adaptation": {"comfortable_distance_m": 1.4, "occlusion_recovery_style": "slow_reacquire"}, "implementation_ref": null}]
+}
