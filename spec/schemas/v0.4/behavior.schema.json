@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.4:behavior",
-  "title": "RCL Behavior v0.4-dev with intent, revision, evaluation, and habit metadata",
+  "title": "RCL Behavior v0.4-dev with intent, expressive timing, revision, evaluation, and habit metadata",
   "type": "object",
   "additionalProperties": false,
   "required": ["behaviors"],
@@ -99,7 +99,43 @@
               "expression_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
               "description": {"type": "string", "minLength": 1},
               "preservation_priority": {"type": "string", "enum": ["preferred", "optional"]},
-              "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true}
+              "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+              "temporal_style": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tempo", "dwell", "transition", "timing_policy", "legacy_significance"],
+                "properties": {
+                  "tempo": {"type": "string", "enum": ["deliberate", "relaxed", "natural", "quick"]},
+                  "dwell": {"type": "string", "enum": ["none", "brief", "natural", "held"]},
+                  "transition": {"type": "string", "enum": ["gentle", "smooth", "direct", "crisp"]},
+                  "timing_policy": {"type": "string", "enum": ["naturalize", "preserve_style"]},
+                  "legacy_significance": {"type": "string", "enum": ["incidental", "recognized", "user_valued"]},
+                  "source_timing_observation": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["motion_duration_ms", "dwell_duration_ms", "return_duration_ms", "normative"],
+                    "properties": {
+                      "motion_duration_ms": {"type": "number", "exclusiveMinimum": 0},
+                      "dwell_duration_ms": {"type": "number", "minimum": 0},
+                      "return_duration_ms": {"type": "number", "exclusiveMinimum": 0},
+                      "normative": {"const": false}
+                    }
+                  },
+                  "source_artifacts": {
+                    "type": "array",
+                    "uniqueItems": true,
+                    "items": {
+                      "type": "object",
+                      "additionalProperties": false,
+                      "required": ["artifact", "effect"],
+                      "properties": {
+                        "artifact": {"type": "string", "enum": ["actuator_speed_limit", "gearing_limit", "wiring_constraint", "controller_latency", "power_limit", "unknown_hardware_constraint"]},
+                        "effect": {"type": "string", "enum": ["slower_than_intended", "delayed_start", "uneven_motion"]}
+                      }
+                    }
+                  }
+                }
+              }
             }
           },
           "preservation": {
