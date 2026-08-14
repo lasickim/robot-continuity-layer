@@ -245,7 +245,15 @@ def _derive_output_profile_id(profile: RCLProfile, patch: dict[str, Any]) -> str
 def _assert_only_expression_changed(
     before_behavior: dict[str, Any],
     after_behavior: dict[str, Any],
+    history_entry: dict[str, Any],
 ) -> None:
+    before_history = copy.deepcopy(before_behavior.get("expression_history", []))
+    after_history = copy.deepcopy(after_behavior.get("expression_history", []))
+    if after_history != before_history + [history_entry]:
+        raise RCLValidationError(
+            "Expression optimization history must be append-only with exactly one new entry"
+        )
+
     before = copy.deepcopy(before_behavior)
     after = copy.deepcopy(after_behavior)
     before.pop("expression", None)
@@ -313,7 +321,11 @@ def apply_expression_optimization(
 
         output_profile = RCLProfile.open(temp)
         after_behavior = _find_behavior(output_profile.load("behavior.json"), behavior_id)
-        _assert_only_expression_changed(before_behavior, after_behavior)
+        _assert_only_expression_changed(
+            before_behavior,
+            after_behavior,
+            patch["history_entry"],
+        )
 
         diff = diff_profiles(profile, output_profile)
         if diff["summary"] != {
