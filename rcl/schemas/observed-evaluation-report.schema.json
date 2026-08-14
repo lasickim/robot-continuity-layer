@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3-dev:observed-evaluation-report",
+  "title": "RCL Observed Continuity Evaluation Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evaluation_version", "method", "created_at", "source", "target", "score", "evaluation_success", "status", "required_failures", "metric_results"],
+  "properties": {
+    "evaluation_version": {"const": "0.1"},
+    "method": {"const": "rcl.observed.numeric_tolerance.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "embodiment_id"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "embodiment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "embodiment_id", "captured_at"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "embodiment_id": {"type": "string", "minLength": 1},
+        "captured_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "score": {"type": "number", "minimum": 0, "maximum": 100},
+    "evaluation_success": {"type": "boolean"},
+    "status": {"type": "string", "enum": ["within_tolerance", "degraded", "failed"]},
+    "required_failures": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "metric_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["behavior_id", "metric_id", "observable", "target", "observed", "unit", "tolerance", "zero_credit_at", "priority", "metric_weight", "effective_weight", "status", "similarity", "absolute_error", "required"],
+        "properties": {
+          "behavior_id": {"type": "string", "minLength": 1},
+          "metric_id": {"type": "string", "minLength": 1},
+          "observable": {"type": "string", "minLength": 1},
+          "target": {"type": "number"},
+          "observed": {"type": ["number", "null"]},
+          "unit": {"type": "string", "minLength": 1},
+          "tolerance": {"type": "number", "minimum": 0},
+          "zero_credit_at": {"type": "number", "exclusiveMinimum": 0},
+          "priority": {"type": "string", "enum": ["required", "preferred", "optional"]},
+          "metric_weight": {"type": "number", "exclusiveMinimum": 0},
+          "effective_weight": {"type": "number", "exclusiveMinimum": 0},
+          "status": {"type": "string", "enum": ["within_tolerance", "partial", "outside_limit", "missing", "missing_optional"]},
+          "similarity": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+          "absolute_error": {"type": ["number", "null"], "minimum": 0},
+          "required": {"type": "boolean"}
+        }
+      }
+    },
+    "disclaimer": {"type": "string"}
+  }
+}
