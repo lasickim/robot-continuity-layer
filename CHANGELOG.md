@@ -12,6 +12,13 @@
 - Added `rcl-conformance test module.path:AdapterClass` with text and JSON output.
 - Added a machine-readable conformance report schema.
 - Added negative conformance tests that reject adapters which hide missing required capabilities.
+- Added Capability Registry v0.1 with the initial standard capability vocabulary.
+- Reserved `navigation`, `perception`, `manipulation`, `interaction`, `mobility`, `safety`, and `system` standard namespaces.
+- Added the `x.<owner>.<semantic_path>` extension capability namespace.
+- Added Python APIs for capability lookup, classification, and validation.
+- Added `rcl capabilities list/show/validate` CLI commands.
+- Added migration-time validation for source, target, and adapter-required capability IDs.
+- Added conformance coverage that rejects unknown IDs inside reserved capability namespaces.
 - Expanded the public roadmap toward cross-implementation fixtures and real-robot evaluation.
 
 ## 0.2.0-dev — 2026-08-14
