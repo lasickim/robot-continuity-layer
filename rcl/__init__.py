@@ -48,6 +48,12 @@ from .intent import (
     registered_intent_goals,
     validate_behavior_intent_metadata,
 )
+from .intent_discovery import (
+    INTENT_DISCOVERY_METHOD,
+    INTENT_DISCOVERY_VERSION,
+    discover_intent_candidate,
+    load_default_intent_discovery_policy,
+)
 from .intent_reference_adapter import IntentReferenceAdapter
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
@@ -94,6 +100,8 @@ __all__ = [
     "HABIT_LIFECYCLES",
     "HABIT_PROMOTION_METHOD",
     "HABIT_PROMOTION_VERSION",
+    "INTENT_DISCOVERY_METHOD",
+    "INTENT_DISCOVERY_VERSION",
     "INTENT_VOCABULARY_VERSION",
     "IntentMigrationResult",
     "IntentReferenceAdapter",
@@ -114,6 +122,7 @@ __all__ = [
     "compare_trial_distributions",
     "confidence_interval_95",
     "diff_profiles",
+    "discover_intent_candidate",
     "evaluate_habit_promotion_candidates",
     "evaluate_observed_continuity",
     "evaluate_repeated_sessions",
@@ -121,6 +130,7 @@ __all__ = [
     "get_intent_goal",
     "load_capability_registry",
     "load_default_habit_promotion_policy",
+    "load_default_intent_discovery_policy",
     "load_intent_vocabulary",
     "migrate_profile",
     "preview_habit_approval",
