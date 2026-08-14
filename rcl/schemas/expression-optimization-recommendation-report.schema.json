@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:expression-optimization-recommendation-report",
+  "title": "RCL Expression Optimization Recommendation Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "recommendation_version",
+    "method",
+    "created_at",
+    "policy",
+    "source_profile",
+    "target",
+    "migration_report_sha256",
+    "intent_success_report_sha256",
+    "recommendations",
+    "summary",
+    "non_mutating",
+    "redundancy_proven",
+    "disclaimer"
+  ],
+  "properties": {
+    "recommendation_version": {"const": "0.1"},
+    "method": {"const": "rcl.expression.optimization.recommendation.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version", "policy_sha256"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"const": "0.1"},
+        "policy_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "source_profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "embodiment_id"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "embodiment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "target": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["embodiment_id", "observed_robot_id"],
+      "properties": {
+        "embodiment_id": {"type": "string", "minLength": 1},
+        "observed_robot_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "migration_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "intent_success_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "recommendation_id",
+          "behavior_id",
+          "expression_id",
+          "preservation_priority",
+          "legacy_significance",
+          "decision",
+          "suggested_action",
+          "recommended_next_action",
+          "reason",
+          "gates",
+          "intent_evidence",
+          "expression_evidence",
+          "evidence_refs",
+          "redundancy_proven"
+        ],
+        "properties": {
+          "recommendation_id": {"type": "string", "minLength": 1},
+          "behavior_id": {"type": "string", "minLength": 1},
+          "expression_id": {"type": "string", "minLength": 1},
+          "preservation_priority": {"type": "string", "enum": ["preferred", "optional"]},
+          "legacy_significance": {"type": "string", "enum": ["incidental", "recognized", "user_valued", "unspecified"]},
+          "decision": {"type": "string", "enum": ["review_removal", "review_simplification", "retain", "inconclusive"]},
+          "suggested_action": {"type": ["string", "null"], "enum": ["remove", "simplify", null]},
+          "recommended_next_action": {"type": "string", "enum": ["review_remove_candidate", "design_replacement_then_review", "retain_expression", "collect_more_evidence"]},
+          "reason": {"type": "string", "minLength": 1},
+          "gates": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["gate", "passed", "actual", "required"],
+              "properties": {
+                "gate": {"type": "string", "minLength": 1},
+                "passed": {"type": "boolean"},
+                "actual": {},
+                "required": {}
+              }
+            }
+          },
+          "intent_evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["goal_id", "success_condition", "migration_status", "target_strategy", "observed_status", "observed_strategy_id"],
+            "properties": {
+              "goal_id": {"type": ["string", "null"]},
+              "success_condition": {"type": ["string", "null"]},
+              "migration_status": {"type": ["string", "null"]},
+              "target_strategy": {"type": ["string", "null"]},
+              "observed_status": {"type": ["string", "null"]},
+              "observed_strategy_id": {"type": ["string", "null"]}
+            }
+          },
+          "expression_evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["migration_status", "timing_status"],
+            "properties": {
+              "migration_status": {"type": ["string", "null"]},
+              "timing_status": {"type": ["string", "null"]}
+            }
+          },
+          "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "redundancy_proven": {"const": false}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "review_removal", "review_simplification", "retain", "inconclusive"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 0},
+        "review_removal": {"type": "integer", "minimum": 0},
+        "review_simplification": {"type": "integer", "minimum": 0},
+        "retain": {"type": "integer", "minimum": 0},
+        "inconclusive": {"type": "integer", "minimum": 0}
+      }
+    },
+    "non_mutating": {"const": true},
+    "redundancy_proven": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
