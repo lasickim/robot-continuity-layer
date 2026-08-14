@@ -59,7 +59,7 @@ The package container remains the five-payload `.rcl` format.
 
 ## v0.4 — Behavior Intent / Goal Semantics
 
-Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, and begin discovering reviewable purpose hypotheses from new learned behavior.
+Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, begin discovering reviewable purpose hypotheses from new learned behavior, and keep long-lived experience storage lightweight enough for real robots.
 
 - [x] optional `behavior.intent` block
 - [x] portable goal / trigger / success-condition / failure-action model
@@ -81,6 +81,13 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] model-independent `rcl discover-intent` CLI
 - [x] reference object-release and unrelated auto-docking discovery fixtures
 - [x] strong/moderate evidence labels explicitly separated from probability claims
+- [x] lightweight Experience Episode Set v0.1
+- [x] deterministic non-destructive Experience Summary v0.1
+- [x] generic semantic grouping by context + action + outcome shape
+- [x] numeric and binary outcome compaction using dependency-light statistics
+- [x] source/provenance digests plus early/late retained exemplars
+- [x] `rcl compact-experience` CLI
+- [x] explicit `destructive=false` compaction boundary; no automatic source deletion
 - [ ] Explicit Intent Approval / Profile Patch that converts an accepted candidate into a new immutable snapshot
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
@@ -88,6 +95,8 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [ ] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
 - [ ] observed intent-success evidence model distinct from motion similarity
 - [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
+- [ ] explicit retention / prune / archive policy after verified compaction
+- [ ] summary-aware Habit / Intent evidence evaluation with raw-vs-aggregate provenance distinction
 
 ### v0.4 semantic rule
 
@@ -123,6 +132,22 @@ continuity
 
 An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation.
 
+Long-lived experience handling is deliberately split by compute timescale:
+
+```text
+real-time / event time
+  ↓
+small semantic Experience Episode
+  ↓
+idle / charging window
+  ↓
+non-destructive compaction
+  ↓
+long-lived aggregate evidence
+  ↓
+Habit / Intent analysis
+```
+
 ### v0.4 privacy/provenance follow-on
 
 Long-lived intent/history profiles will also need stronger provenance and privacy controls:
@@ -130,15 +155,17 @@ Long-lived intent/history profiles will also need stronger provenance and privac
 - [ ] memory namespaces
 - [ ] encrypted private sections
 - [ ] profile signing
-- [ ] provenance metadata
+- [ ] provenance metadata beyond current experience digests
 - [ ] selective export
-- [ ] retained-history compaction / archival policy
+- [ ] retained-history archival / deletion policy
 
 ## v0.5 — real robot reference migration
 
 Primary goal: replace configuration-only similarity with measured physical behavior continuity across actual source and target robots.
 
 - [ ] Robot A live behavior capture
+- [ ] lightweight semantic experience logging on physical Robot A
+- [ ] idle/charging-window compaction on physical hardware
 - [ ] `.rcl` export
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
@@ -179,6 +206,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] reproducible statistical evaluation protocol
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
+- [ ] lightweight long-lived experience storage / compaction profile
 - [ ] explicit approved-mutation / snapshot profile
 - [ ] functional-intent preservation profile
 - [ ] model-independent intent-discovery evidence profile
@@ -190,4 +218,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, history, declared purpose, reviewable purpose hypotheses, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, and measurable preservation of robot continuity data.
