@@ -61,6 +61,10 @@ Did Robot B actually satisfy the declared goal conditions?
         ↓
 Observed Intent Success
         ↓
+Should a familiar expression intentionally be simplified or removed?
+        ↓
+Explicit Expression Optimization + append-only expression history
+        ↓
 Did Robot B reproduce declared/observed behavior closely?
         ↓
 Observed / Statistical / Repeated-Session Evaluation
@@ -89,16 +93,20 @@ WHAT     -> semantic behavior + parameters
 HOW      -> embodiment adapter / target-native strategy
 LOOKS    -> expression
 TEMPO    -> expressive temporal style
-HISTORY  -> habit / legacy / prior intent interpretations
+HISTORY  -> habit / legacy / prior intent and expression interpretations
 ```
 
-Two continuity principles follow from that separation:
+Three continuity principles follow from that separation:
 
 > **Use the new body. Preserve the old manner.**
 >
 > **Preserve the gesture, not the limitation.**
+>
+> **Preserve by default. Optimize only by explicit approval.**
 
 A V2 robot should use better sensors, motors, controllers, and wiring for the actual function. A familiar V1 gesture may still remain as a legacy expression. If V1 was slow only because of a motor or wiring limitation, V2 does not have to copy that delay. If the slow tempo itself became a recognized or user-valued mannerism, that temporal character can be preserved explicitly.
+
+A behavior becoming functionally unnecessary is **not** the same as permission to forget it. Simplifying or removing a familiar expression is a separate reviewed continuity mutation; the current expression may change, but its complete previous snapshot remains in append-only history.
 
 ## What works today — v0.4-dev
 
@@ -116,6 +124,10 @@ The reference implementation can:
 - explicitly preserve deliberate timing when the temporal style itself is recognized or user-valued;
 - keep historical source timing descriptive with `normative=false` rather than silently treating measured milliseconds as target commands;
 - report expression timing separately as naturalized / preserved / approximated / unsupported / safety-blocked;
+- preview and explicitly apply legacy-expression `simplify` / `remove` mutations only into a new immutable snapshot;
+- preserve every previous expression snapshot in append-only `expression_history`, including temporal style and source hardware-artifact provenance;
+- validate multi-step expression-history SHA-256 chains and use canonical JSON `null` as the terminal digest after approved removal;
+- reject stale expression-optimization candidates and semantic no-op simplifications;
 - evaluate a proposed intent hypothesis from generic context-action-outcome episodes without hardcoding a specific behavior;
 - evaluate the same hypothesis from compatible action-stratified Experience Summary evidence without reconstructing fake episodes;
 - keep raw and aggregate Intent Discovery evidence provenance explicit;
@@ -340,6 +352,82 @@ examples/expression-timing/naturalized-rearward-glance.json
 examples/expression-timing/deliberate-rearward-glance.json
 examples/targets/intent-demo-v2-expressive.embodiment.json
 ```
+
+## Explicit Legacy Expression Optimization / Removal Approval v0.1
+
+A legacy expression remains active by default even when a newer target body no longer needs it for the underlying function. **Functional redundancy is not permission to erase a familiar manner.**
+
+```text
+Legacy Expression
+        ↓
+Optimization Candidate
+        ↓
+preview
+        ↓
+explicit approval
+        ↓
+new immutable snapshot
+        ↓
+active expression simplified/removed
+        +
+previous expression retained in expression_history
+```
+
+v0.1 supports:
+
+```text
+simplify
+→ replace the current expression with a complete reviewed replacement
+
+remove
+→ remove the expression from current continuity behavior
+```
+
+`retain` is intentionally not a mutation action. Declining an optimization leaves the current snapshot unchanged.
+
+Candidates bind to the exact active expression SHA-256, so a candidate becomes stale if the expression changes before approval. A no-op `simplify` is rejected.
+
+Preview:
+
+```bash
+rcl optimize-expression preview \
+  PROFILE \
+  expression-candidate.json \
+  safety.pre_sit_clearance_check \
+  --approved-at 2026-08-15T03:00:00+09:00 \
+  --approved-by local-user
+```
+
+Apply:
+
+```bash
+rcl optimize-expression apply \
+  PROFILE \
+  expression-candidate.json \
+  safety.pre_sit_clearance_check \
+  PROFILE_OPTIMIZED \
+  --approved-at 2026-08-15T03:00:00+09:00 \
+  --approved-by local-user
+```
+
+Every accepted change appends the exact previous expression to `behavior.expression_history`. Successive changes form a SHA-256 chain. After approved removal, the chain terminates at SHA-256 of canonical JSON `null`.
+
+```text
+Expression v1
+   ↓ simplify
+Expression v2
+   ↓ remove
+active expression = absent
+
+history[0] = complete v1 snapshot
+history[1] = complete v2 snapshot
+```
+
+If those expressions contained `temporal_style`, the full tempo, timing policy, source observation, and hardware-artifact provenance remain in history. Removing a gesture therefore means **“the robot no longer performs it now,” not “the robot never had it.”**
+
+History is descriptive and auditable, not executable. Removed gestures are never replayed automatically from history.
+
+See [`docs/EXPRESSION_OPTIMIZATION.md`](docs/EXPRESSION_OPTIMIZATION.md).
 
 ## Intent Discovery / Intent Candidate v0.1
 
@@ -607,7 +695,7 @@ rcl diff \
   examples/history/mobile-base-after
 ```
 
-Profile Diff reports behavior, parameter, preservation, history, **intent**, **intent provenance**, **intent revision history**, **expression**, and **expressive temporal-style** changes. It is an audit tool, not a Continuity Score.
+Profile Diff reports behavior, parameter, preservation, history, **intent**, **intent provenance**, **intent revision history**, **expression**, **expression history**, and **expressive temporal-style** changes. It is an audit tool, not a Continuity Score.
 
 ## Habit Promotion Policy v0.1
 
@@ -806,6 +894,8 @@ RCL intentionally keeps these concepts separate.
 
 **Expressive Timing** asks what recognizable temporal character that expression should retain, while distinguishing target-native timing from historical hardware delay.
 
+**Explicit Expression Optimization** is the reviewed mutation that may simplify or remove a current expression while preserving the complete previous expression in append-only history. It is not automatic obsolescence detection or permission to forget historical manner.
+
 **Observed Intent Success** asks whether the declared success condition was actually observed as satisfied on a robot, independently from how that robot physically achieved it.
 
 **Declared Behavior Continuity Score** asks whether Robot B can represent the semantic behavior.
@@ -816,7 +906,7 @@ RCL intentionally keeps these concepts separate.
 
 **Repeated-Session Confidence v0.1** reports longitudinal uncertainty.
 
-**Habit History**, **Profile Diff**, **Habit Promotion**, and **Explicit Habit Approval** are audit/review/mutation constructs, not extra identity scores.
+**Habit History**, **Profile Diff**, **Habit Promotion**, **Explicit Habit Approval**, and **Expression History** are audit/review/mutation constructs, not extra identity scores.
 
 None of these constructs define consciousness, personhood, subjective identity, or subjective motivation.
 
@@ -825,26 +915,28 @@ None of these constructs define consciousness, personhood, subjective identity, 
 1. **Preserve why before copying how** — portable goal semantics outrank source-body implementation details.
 2. **Use the new body; preserve the old manner** — improved target capabilities should perform the function, while familiar expressions may remain where safe and representable.
 3. **Preserve the gesture, not the limitation** — source actuator, wiring, gearing, power, or controller delay is not automatically a target timing requirement.
-4. **Purpose success is not motion similarity** — a target may use a different strategy and still satisfy the same declared success condition.
-5. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
-6. **Intent approval is explicit** — discovery may recommend a goal, but only an explicit approval operation may add it to continuity data.
-7. **Corrections preserve history** — later evidence may revise a declared purpose, but previous Intent snapshots are retained rather than silently erased.
-8. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
-9. **Compaction is not deletion** — an experience summary never authorizes pruning source evidence.
-10. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
-11. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
-12. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
-13. **Timing observations are descriptive by default** — measured source milliseconds are history, not portable commands; intentionally preserved tempo must be represented semantically.
-14. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
-15. **User-owned and portable** — continuity should export without requiring a vendor cloud.
-16. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-17. **History is descriptive, not executable** — historical events and historical Intent snapshots explain evolution but never silently override current behavior.
-18. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
-19. **Approval is explicit and immutable-by-default** — reviewed continuity mutations create new validated snapshots rather than overwriting the source.
-20. **Declared, observed, and functional success are different** — representability, motion fidelity, and goal achievement are separate evaluation questions.
-21. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-22. **Safety outranks continuity** — a legacy expression, temporal style, approved intent, revised intent, or observed-success result never overrides target safety constraints.
-23. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
+4. **Preserve by default; optimize only by explicit approval** — functional redundancy does not authorize silent simplification or removal of familiar expression.
+5. **Removal is not forgetting** — an approved removal clears the active expression while retaining its complete historical snapshot and digest-chain provenance.
+6. **Purpose success is not motion similarity** — a target may use a different strategy and still satisfy the same declared success condition.
+7. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
+8. **Intent approval is explicit** — discovery may recommend a goal, but only an explicit approval operation may add it to continuity data.
+9. **Corrections preserve history** — later evidence may revise a declared purpose, but previous Intent snapshots are retained rather than silently erased.
+10. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
+11. **Compaction is not deletion** — an experience summary never authorizes pruning source evidence.
+12. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
+13. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
+14. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
+15. **Timing observations are descriptive by default** — measured source milliseconds are history, not portable commands; intentionally preserved tempo must be represented semantically.
+16. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
+17. **User-owned and portable** — continuity should export without requiring a vendor cloud.
+18. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
+19. **History is descriptive, not executable** — historical events, historical Intent snapshots, and historical Expression snapshots explain evolution but never silently override current behavior or replay removed gestures.
+20. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
+21. **Approval is explicit and immutable-by-default** — reviewed continuity mutations create new validated snapshots rather than overwriting the source.
+22. **Declared, observed, and functional success are different** — representability, motion fidelity, and goal achievement are separate evaluation questions.
+23. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+24. **Safety outranks continuity** — a legacy expression, temporal style, approved intent, revised intent, expression-optimization result, or observed-success result never overrides target safety constraints.
+25. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
 
 ## Quick start
 
@@ -884,6 +976,12 @@ rcl evaluate-intent \
   examples/intent/sit-assistant-v1 \
   examples/intent-observations/sit-assistant-v2.observations.json
 
+rcl optimize-expression preview \
+  examples/intent/sit-assistant-v1 \
+  expression-candidate.json \
+  safety.pre_sit_clearance_check \
+  --approved-at 2026-08-15T03:00:00+09:00
+
 rcl diff \
   examples/history/mobile-base-before \
   examples/history/mobile-base-after
@@ -913,6 +1011,7 @@ robot-continuity-layer/
 │   ├── BEHAVIOR_INTENT.md
 │   ├── EXPERIENCE_STORE.md
 │   ├── EXPRESSIVE_TIMING.md
+│   ├── EXPRESSION_OPTIMIZATION.md
 │   ├── INTENT_APPROVAL.md
 │   ├── INTENT_DISCOVERY.md
 │   ├── INTENT_REVISION.md
@@ -945,6 +1044,9 @@ robot-continuity-layer/
 │   └── targets/
 ├── rcl/
 │   ├── experience.py
+│   ├── expression_history.py
+│   ├── expression_optimization.py
+│   ├── expression_optimization_cli.py
 │   ├── expression_timing.py
 │   ├── intent.py
 │   ├── intent_approval.py
@@ -969,7 +1071,7 @@ robot-continuity-layer/
 
 RCL does **not** claim to measure consciousness, personhood, subjective motivation, free will, emotional authenticity, causal truth from observational association, universal statistical equivalence, universal habit thresholds, one universal natural movement speed, or certified physical safety.
 
-Behavior Intent represents declared engineering goal semantics. Expression and Expressive Timing can preserve recognizable manner without turning source hardware defects into target requirements. Historical timing observations are descriptive and must remain non-normative. Intent Discovery produces an association-backed engineering hypothesis for review. Summary-Aware Intent Discovery evaluates compatible aggregate evidence without pretending it is raw observation. Explicit Intent Approval records a reviewed selection. Intent Revision records a reviewed correction while preserving the earlier interpretation. Observed Intent Success records whether a declared success condition was observed, independently from physical strategy, but it is not safety certification or proof of subjective purpose. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal or gesture in a human subjective sense.
+Behavior Intent represents declared engineering goal semantics. Expression and Expressive Timing can preserve recognizable manner without turning source hardware defects into target requirements. Historical timing observations are descriptive and must remain non-normative. Explicit Expression Optimization records a reviewed simplify/remove decision into a new snapshot while preserving the previous expression in append-only history; it does not automatically decide that a gesture is obsolete, prove removal safe, or erase the historical manner. Intent Discovery produces an association-backed engineering hypothesis for review. Summary-Aware Intent Discovery evaluates compatible aggregate evidence without pretending it is raw observation. Explicit Intent Approval records a reviewed selection. Intent Revision records a reviewed correction while preserving the earlier interpretation. Observed Intent Success records whether a declared success condition was observed, independently from physical strategy, but it is not safety certification or proof of subjective purpose. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal or gesture in a human subjective sense.
 
 ## License
 
