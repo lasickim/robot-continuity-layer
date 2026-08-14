@@ -37,7 +37,6 @@ def migrate_profile(
     has_intent = False
 
     for item in source_behavior["behaviors"]:
-        # Validate every semantic capability set exposed by the adapter/profile.
         validate_capability_set(adapter.required_capabilities(item))
         validate_capability_set(adapter.intent_required_capabilities(item))
         validate_capability_set(adapter.expression_required_capabilities(item))
@@ -70,6 +69,14 @@ def migrate_profile(
         )
         if expression_result is not None:
             behavior_result["expression_result"] = expression_result.to_dict()
+
+        expression_timing_result = adapter.translate_expression_timing(
+            item,
+            source_embodiment,
+            target_embodiment,
+        )
+        if expression_timing_result is not None:
+            behavior_result["expression_timing_result"] = expression_timing_result.to_dict()
 
         results.append(behavior_result)
 
