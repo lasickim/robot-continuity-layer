@@ -1,0 +1,34 @@
+{
+  "trial_observation_version": "0.2",
+  "robot_id": "RCL-DEMO-ROVER-A",
+  "embodiment_id": "demo-rover-a-v1",
+  "captured_at": "2026-08-16T03:10:00Z",
+  "experiment": {
+    "protocol": {
+      "protocol_id": "rcl.person_following.baseline",
+      "protocol_version": "0.1",
+      "comparison_fields": ["task_id", "environment_id", "subject_ref", "start_condition_id"],
+      "description": "Baseline repeated-trial person-following continuity protocol."
+    },
+    "context": {
+      "session_id": "demo-rover-a-session-003",
+      "task_id": "follow-person-straight-5m",
+      "environment_id": "demo-lab-a-layout-01",
+      "subject_ref": "subject-demo-01",
+      "start_condition_id": "stationary-2m-behind-subject",
+      "software_ref": "demo-rover-a-controller@1.0",
+      "adapter_ref": "rcl.example.mobile_base@0.2",
+      "sensor_config_ref": "demo-rover-a-sensors@1",
+      "notes": "Source robot repeated-session day 3."
+    }
+  },
+  "behavior_trials": [
+    {
+      "behavior_id": "navigation.follow_person",
+      "metrics": {
+        "following_distance_m": [1.33, 1.35, 1.37, 1.38, 1.39, 1.40, 1.41, 1.42, 1.44, 1.46],
+        "stop_delay_ms": [318, 328, 336, 345, 350, 358, 366, 375, 384, 392]
+      }
+    }
+  ]
+}
