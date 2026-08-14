@@ -25,6 +25,15 @@ from .experiment_context import (
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
 from .score import calculate_continuity_score
+from .session_evaluation import (
+    CONFIDENCE_LEVEL,
+    DEFAULT_MIN_SESSIONS,
+    SESSION_EVALUATION_METHOD,
+    SESSION_EVALUATION_VERSION,
+    confidence_interval_95,
+    evaluate_repeated_sessions,
+    t95_critical,
+)
 from .statistical_evaluation import (
     DEFAULT_MIN_TRIALS,
     STATISTICAL_EVALUATION_METHOD,
@@ -39,8 +48,10 @@ __all__ = [
     "BehaviorMigrationResult",
     "CapabilityClassification",
     "CapabilityValidationError",
+    "CONFIDENCE_LEVEL",
     "CONTEXT_VERSION",
     "DEFAULT_COMPARISON_FIELDS",
+    "DEFAULT_MIN_SESSIONS",
     "DEFAULT_MIN_TRIALS",
     "EVALUATION_METHOD",
     "EVALUATION_VERSION",
@@ -48,13 +59,17 @@ __all__ = [
     "RCLProfile",
     "RCLValidationError",
     "RCL_VERSION",
+    "SESSION_EVALUATION_METHOD",
+    "SESSION_EVALUATION_VERSION",
     "STATISTICAL_EVALUATION_METHOD",
     "STATISTICAL_EVALUATION_VERSION",
     "calculate_continuity_score",
     "classify_capability_id",
     "compare_experiment_context",
     "compare_trial_distributions",
+    "confidence_interval_95",
     "evaluate_observed_continuity",
+    "evaluate_repeated_sessions",
     "get_capability",
     "load_capability_registry",
     "migrate_profile",
@@ -63,6 +78,7 @@ __all__ = [
     "run_adapter_conformance",
     "sample_mean",
     "sample_std",
+    "t95_critical",
     "validate_behavior_evaluation_metadata",
     "validate_capability_id",
     "validate_capability_set",

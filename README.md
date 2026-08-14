@@ -6,7 +6,7 @@
 
 RCL is an open specification and reference implementation for preserving a robot's **experience, preferences, semantic behavior, and skill history independently from its current hardware body**.
 
-The project now separates five questions:
+The project now separates six questions:
 
 ```text
 What should survive?
@@ -28,6 +28,10 @@ Experiment Context Gate
 Does Robot B behave statistically like Robot A over repeated trials?
         ↓
 Statistical Continuity Evaluation
+        ↓
+Does that similarity remain stable across multiple sessions?
+        ↓
+Repeated-Session Confidence / Uncertainty
 ```
 
 ## Why RCL exists
@@ -63,7 +67,9 @@ The reference implementation can:
 - evaluate single target observations against declared tolerances;
 - compare repeated Robot A / Robot B empirical behavior distributions;
 - require declared comparable experiment context before repeated-trial scoring;
-- calculate experimental observed and statistical continuity scores.
+- aggregate multiple comparable sessions with between-session uncertainty;
+- report 95% Student-t confidence intervals without a heavy numerical dependency;
+- calculate experimental observed and statistical continuity measures.
 
 Reference declared migration:
 
@@ -214,7 +220,7 @@ See [`docs/STATISTICAL_CONTINUITY.md`](docs/STATISTICAL_CONTINUITY.md).
 
 ## Experiment Context / Measurement Protocol v0.1
 
-Repeated-trial scoring is now gated by declared experiment context. A trial capture contains a shared protocol and session-specific context:
+Repeated-trial scoring is gated by declared experiment context. A trial capture contains a shared protocol and session-specific context:
 
 ```json
 {
@@ -265,6 +271,54 @@ start_condition_id
 
 See [`docs/EXPERIMENT_PROTOCOL.md`](docs/EXPERIMENT_PROTOCOL.md) and [`examples/protocols/person-following-baseline.protocol.json`](examples/protocols/person-following-baseline.protocol.json).
 
+## Repeated-Session Confidence / Uncertainty v0.1
+
+A single repeated-trial session can still be unusually good or bad. RCL can now aggregate a **comparable series of sessions** while keeping every session equally weighted.
+
+```text
+Day 1 Statistical Continuity Score ┐
+Day 2 Statistical Continuity Score ├─ equal-weight sessions
+Day 3 Statistical Continuity Score ┘
+                    ↓
+       mean + between-session std
+                    ↓
+           95% Student-t CI
+```
+
+Run the reference three-session set:
+
+```bash
+rcl compare-sessions \
+  examples/mobile-base \
+  examples/sessions/demo-rover-a-b.sessions.json
+```
+
+The experimental default is:
+
+```text
+min_sessions = 3
+confidence_level = 0.95
+```
+
+For session scores `x1 ... xn`:
+
+```text
+mean = Σxi / n
+s    = sample standard deviation
+SE   = s / sqrt(n)
+CI   = mean ± t(0.975, n-1) × SE
+```
+
+Small samples therefore receive a wider interval. For three sessions, `df=2` and the two-sided 95% Student-t critical value is `4.303`, not the large-sample normal value `1.96`.
+
+Before aggregation, RCL also verifies that all sessions describe the same source robot, target robot, protocol, comparison fields, and comparison-context values. A changed environment or subject is reported as `series_mismatch` instead of being mixed into longitudinal uncertainty.
+
+Required-metric failures and context mismatches remain explicit and make repeated-session `evaluation_success=false`; they are never hidden by a high average.
+
+v0.1 deliberately **does not define a universal score threshold** for whether two robots should be considered the same. It reports uncertainty first; application-specific acceptance policy comes later.
+
+See [`docs/SESSION_CONFIDENCE.md`](docs/SESSION_CONFIDENCE.md).
+
 ## ROS 2 reference adapter
 
 RCL's first middleware integration keeps ROS-specific details outside the portable profile:
@@ -305,7 +359,7 @@ Result: RCL Migration Compatible (experimental v0.3)
 
 This is experimental protocol conformance, not physical robot safety certification. See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
 
-## Three continuity measures
+## Four continuity measures
 
 RCL intentionally keeps these concepts separate.
 
@@ -321,7 +375,11 @@ RCL intentionally keeps these concepts separate.
 
 > Across repeated measurements under declared comparable context, how close is Robot B's empirical behavior distribution to Robot A's?
 
-None of these scores define identity, consciousness, personhood, or emotional authenticity.
+**Repeated-Session Confidence v0.1** asks:
+
+> Across multiple comparable sessions, how stable is that statistical continuity estimate and how uncertain is its mean?
+
+None of these measures define identity, consciousness, personhood, or emotional authenticity.
 
 ## Core principles
 
@@ -332,8 +390,9 @@ None of these scores define identity, consciousness, personhood, or emotional au
 5. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
 6. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
 7. **Comparable context before statistics** — do not score Robot A vs Robot B distributions when declared test conditions do not match.
-8. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
-9. **Scores do not define identity** — continuity scores only quantify declared or observed behavior preservation.
+8. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
+9. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
+10. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
 
 ## Experimental compatibility levels
 
@@ -341,7 +400,7 @@ None of these scores define identity, consciousness, personhood, or emotional au
 |---|---|
 | **RCL Profile Compatible** | Can read, validate, preserve, and write the portable profile format. |
 | **RCL Migration Compatible** | Can translate semantic behavior, expose degradation, and produce a valid migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, context-controlled repeated-trial evaluation, and broader conformance. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, context-controlled repeated-trial and repeated-session evaluation, and broader conformance. |
 
 These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
@@ -369,6 +428,10 @@ rcl compare-trials \
   examples/trials/demo-rover-a.trials.json \
   examples/trials/demo-rover-b.trials.json
 
+rcl compare-sessions \
+  examples/mobile-base \
+  examples/sessions/demo-rover-a-b.sessions.json
+
 rcl-conformance test rcl_ros2:ROS2MobileBaseAdapter
 pytest -q
 ```
@@ -384,12 +447,14 @@ robot-continuity-layer/
 │   ├── CONFORMANCE.md
 │   ├── EXPERIMENT_PROTOCOL.md
 │   ├── OBSERVED_EVALUATION.md
+│   ├── SESSION_CONFIDENCE.md
 │   ├── STATISTICAL_CONTINUITY.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── examples/
 │   ├── mobile-base/
 │   ├── observations/
 │   ├── protocols/
+│   ├── sessions/
 │   ├── trials/
 │   └── targets/
 ├── rcl/
@@ -398,6 +463,7 @@ robot-continuity-layer/
 │   ├── conformance.py
 │   ├── evaluation.py
 │   ├── experiment_context.py
+│   ├── session_evaluation.py
 │   ├── statistical_evaluation.py
 │   ├── migration.py
 │   └── score.py
@@ -407,7 +473,7 @@ robot-continuity-layer/
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, physical identity of experimental environments, or certified physical safety. It provides explicit experimental measures of portable, declared, and observed robot behavior continuity.
+RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, physical identity of experimental environments, universal longitudinal acceptance thresholds, or certified physical safety. It provides explicit experimental measures of portable, declared, observed, statistical, and repeated-session robot behavior continuity.
 
 ## License
 

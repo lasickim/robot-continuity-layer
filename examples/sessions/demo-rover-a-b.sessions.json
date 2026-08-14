@@ -1,0 +1,22 @@
+{
+  "session_manifest_version": "0.1",
+  "confidence_level": 0.95,
+  "min_sessions": 3,
+  "sessions": [
+    {
+      "session_id": "day-1",
+      "source_trials": "../trials/demo-rover-a.trials.json",
+      "target_trials": "../trials/demo-rover-b.trials.json"
+    },
+    {
+      "session_id": "day-2",
+      "source_trials": "day2-rover-a.trials.json",
+      "target_trials": "day2-rover-b.trials.json"
+    },
+    {
+      "session_id": "day-3",
+      "source_trials": "day3-rover-a.trials.json",
+      "target_trials": "day3-rover-b.trials.json"
+    }
+  ]
+}
