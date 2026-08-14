@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.2:migration-report",
-  "title": "RCL Migration Report v0.2 with v0.4 intent/expression facets",
+  "title": "RCL Migration Report v0.2 with v0.4 intent/expression/timing facets",
   "type": "object",
   "additionalProperties": false,
   "required": ["rcl_version", "report_version", "created_at", "source", "target", "adapter", "behavior_results", "continuity"],
@@ -76,6 +76,56 @@
               "target_expression": {"type": ["string", "null"]},
               "required_capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
               "missing_capabilities": {"type": "array", "items": {"type": "string"}, "uniqueItems": true}
+            }
+          },
+          "expression_timing_result": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["expression_id", "status", "reason", "timing_policy", "semantic_style", "realized_timing", "source_artifacts"],
+            "properties": {
+              "expression_id": {"type": "string"},
+              "status": {"type": "string", "enum": ["naturalized", "preserved", "approximated", "unsupported", "blocked_for_safety"]},
+              "reason": {"type": "string"},
+              "timing_policy": {"type": "string", "enum": ["naturalize", "preserve_style"]},
+              "semantic_style": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["tempo", "dwell", "transition", "legacy_significance"],
+                "properties": {
+                  "tempo": {"type": "string", "enum": ["deliberate", "relaxed", "natural", "quick"]},
+                  "dwell": {"type": "string", "enum": ["none", "brief", "natural", "held"]},
+                  "transition": {"type": "string", "enum": ["gentle", "smooth", "direct", "crisp"]},
+                  "legacy_significance": {"type": "string", "enum": ["incidental", "recognized", "user_valued"]}
+                }
+              },
+              "realized_timing": {
+                "oneOf": [
+                  {"type": "null"},
+                  {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": ["motion_duration_ms", "dwell_duration_ms", "return_duration_ms", "transition"],
+                    "properties": {
+                      "motion_duration_ms": {"type": "integer", "minimum": 1},
+                      "dwell_duration_ms": {"type": "integer", "minimum": 0},
+                      "return_duration_ms": {"type": "integer", "minimum": 1},
+                      "transition": {"type": "string", "enum": ["gentle", "smooth", "direct", "crisp"]}
+                    }
+                  }
+                ]
+              },
+              "source_artifacts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": ["artifact", "effect"],
+                  "properties": {
+                    "artifact": {"type": "string"},
+                    "effect": {"type": "string"}
+                  }
+                }
+              }
             }
           }
         }
