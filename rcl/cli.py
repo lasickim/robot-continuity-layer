@@ -14,6 +14,10 @@ from .capabilities import (
 )
 from .evaluation import evaluate_observed_continuity
 from .example_adapter import ExampleMobileBaseAdapter
+from .habit_policy import (
+    evaluate_habit_promotion_candidates,
+    load_default_habit_promotion_policy,
+)
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, validate_schema
 from .profile_diff import diff_profiles
@@ -273,6 +277,50 @@ def _cmd_diff(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_habit_candidates(args: argparse.Namespace) -> int:
+    profile = RCLProfile.open(args.source)
+    session_report = _read_json(args.session_report)
+    policy = _read_json(args.policy) if args.policy else load_default_habit_promotion_policy()
+    report = evaluate_habit_promotion_candidates(
+        profile,
+        session_report,
+        policy=policy,
+        as_of=args.as_of,
+    )
+    if args.output:
+        _write_or_print_json(report, args.output)
+    elif args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print("RCL Habit Promotion Review")
+        print(f"Policy: {report['policy']['policy_id']}@{report['policy']['policy_version']}")
+        print(f"As Of: {report['as_of']}")
+        evidence = report["evidence_report"]
+        print(
+            "Evidence: "
+            f"status={evidence['status']} sessions={evidence['scorable_session_count']} "
+            f"mean={evidence['mean_score']} std={evidence['score_std']} "
+            f"ci_half_width={evidence['score_ci_half_width']}"
+        )
+        print(
+            f"Decisions: candidates={report['eligible_count']} "
+            f"blocked={report['blocked_count']} terminal={report['terminal_count']}"
+        )
+        for item in report["decisions"]:
+            target = item["recommended_lifecycle"] or "-"
+            print(
+                f"- {item['behavior_id']}: {item['current_lifecycle']} -> {target} "
+                f"[{item['decision'].upper()}]"
+            )
+            for gate in item["gates"]:
+                if not gate["passed"]:
+                    print(
+                        f"    BLOCK {gate['gate']}: actual={gate['actual']!r} "
+                        f"required={gate['required']!r}"
+                    )
+    return 0
+
+
 def _cmd_capabilities_list(args: argparse.Namespace) -> int:
     registry = load_capability_registry()
     capabilities = registered_capabilities()
@@ -332,6 +380,7 @@ def main() -> int:
     p_trials = sub.add_parser("compare-trials"); p_trials.add_argument("source"); p_trials.add_argument("source_trials"); p_trials.add_argument("target_trials"); p_trials.add_argument("--output"); p_trials.add_argument("--json", action="store_true"); p_trials.set_defaults(func=_cmd_compare_trials)
     p_sessions = sub.add_parser("compare-sessions"); p_sessions.add_argument("source"); p_sessions.add_argument("session_manifest"); p_sessions.add_argument("--output"); p_sessions.add_argument("--json", action="store_true"); p_sessions.set_defaults(func=_cmd_compare_sessions)
     p_diff = sub.add_parser("diff"); p_diff.add_argument("before"); p_diff.add_argument("after"); p_diff.add_argument("--output"); p_diff.add_argument("--json", action="store_true"); p_diff.set_defaults(func=_cmd_diff)
+    p_habit = sub.add_parser("habit-candidates"); p_habit.add_argument("source"); p_habit.add_argument("session_report"); p_habit.add_argument("--policy"); p_habit.add_argument("--as-of"); p_habit.add_argument("--output"); p_habit.add_argument("--json", action="store_true"); p_habit.set_defaults(func=_cmd_habit_candidates)
 
     p_capabilities = sub.add_parser("capabilities")
     capability_sub = p_capabilities.add_subparsers(dest="capability_command", required=True)

@@ -1,0 +1,46 @@
+{
+  "policy_version": "0.1",
+  "policy_id": "rcl.habit.promotion.default.v0.1",
+  "description": "Conservative review policy for detecting habit lifecycle promotion candidates. Recommendations never mutate the profile.",
+  "transitions": {
+    "configured_to_learning": {
+      "allowed_sources": ["configured", "learned"],
+      "min_observation_days": 14,
+      "min_history_events": 2,
+      "min_confidence": 0.5
+    },
+    "learning_to_stable": {
+      "allowed_sources": ["learned"],
+      "min_observation_days": 30,
+      "min_history_events": 2,
+      "min_confidence": 0.8,
+      "evidence": {
+        "min_scorable_sessions": 3,
+        "require_evaluation_success": true,
+        "min_mean_score": 90.0,
+        "max_score_std": 5.0,
+        "max_score_ci_half_width": 5.0,
+        "min_behavior_metric_count": 1,
+        "min_metric_mean_similarity": 0.9,
+        "max_metric_ci_half_width": 0.1
+      }
+    },
+    "stable_to_legacy": {
+      "allowed_sources": ["learned", "imported"],
+      "min_stable_days": 180,
+      "min_history_events": 3,
+      "min_confidence": 0.8,
+      "require_user_confirmation": true,
+      "evidence": {
+        "min_scorable_sessions": 5,
+        "require_evaluation_success": true,
+        "min_mean_score": 90.0,
+        "max_score_std": 5.0,
+        "max_score_ci_half_width": 5.0,
+        "min_behavior_metric_count": 1,
+        "min_metric_mean_similarity": 0.9,
+        "max_metric_ci_half_width": 0.1
+      }
+    }
+  }
+}

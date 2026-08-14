@@ -6,36 +6,28 @@
 
 RCL is an open specification and reference implementation for preserving a robot's **experience, preferences, semantic behavior, skill history, and auditable behavioral evolution independently from its current hardware body**.
 
-The project now separates seven questions:
+The project now separates these questions:
 
 ```text
 What should survive?
         ↓
 Portable semantic profile (.rcl)
         ↓
-How did this behavior evolve over time?
+How did this behavior evolve?
         ↓
 Habit History + Profile Diff
         ↓
-Can Robot B represent it?
+Is there enough evidence to review a habit-state promotion?
         ↓
-Migration Report + Declared Continuity Score
+Habit Promotion Policy
         ↓
-Did Robot B hit the declared behavior target?
+Can Robot B represent the behavior?
         ↓
-Observed-vs-declared Evaluation
+Migration + Declared Continuity
         ↓
-Were Robot A and Robot B measured under comparable conditions?
+Did Robot B actually reproduce it?
         ↓
-Experiment Context Gate
-        ↓
-Does Robot B behave statistically like Robot A over repeated trials?
-        ↓
-Statistical Continuity Evaluation
-        ↓
-Does that similarity remain stable across multiple sessions?
-        ↓
-Repeated-Session Confidence / Uncertainty
+Observed / Statistical / Repeated-Session Evaluation
 ```
 
 ## Why RCL exists
@@ -56,36 +48,25 @@ An embodiment adapter decides how its own hardware can reproduce that behavior a
 
 The reference implementation can:
 
-- validate and package portable `.rcl` profiles;
-- verify profile integrity with SHA-256 manifests;
-- describe source and target embodiments;
-- perform semantic capability matching;
-- validate capability IDs against Capability Registry v0.1 while allowing isolated `x.<owner>.*` extensions;
-- classify migration results as `preserved`, `approximated`, `unsupported`, or `blocked_for_safety`;
-- generate machine-readable migration reports and a declared Behavior Continuity Score;
-- translate mobile-base continuity behavior through a ROS 2 reference adapter;
-- run an executable adapter conformance suite;
+- validate and package portable `.rcl` profiles with SHA-256 integrity manifests;
+- describe source and target embodiments through a shared capability vocabulary;
+- migrate semantic behavior and report preserved / approximated / unsupported / safety-blocked results;
+- calculate a declared Behavior Continuity Score;
+- translate mobile-base behavior through a ROS 2 Lyrical reference adapter;
+- run executable adapter conformance checks;
 - evaluate single observations against declared tolerances;
-- compare repeated Robot A / Robot B empirical behavior distributions;
-- require comparable experiment context before repeated-trial scoring;
-- aggregate multiple comparable sessions with Student-t uncertainty reporting;
+- compare Robot A / Robot B repeated-trial distributions;
+- require comparable experiment context before statistical scoring;
+- aggregate comparable sessions with Student-t uncertainty reporting;
 - record optional behavior habit/history metadata without changing the five-payload `.rcl` layout;
-- compare two profile snapshots with a deterministic semantic diff.
-
-Reference declared migration:
-
-```text
-Continuity Score: 88.33%
-Migration Success: YES
-- navigation.follow_person: preserved (similarity=1.00)
-- navigation.pre_turn_observation: approximated (similarity=0.65)
-```
+- compare two profile snapshots with deterministic semantic diffing;
+- generate **non-mutating habit lifecycle promotion candidates** from explicit versioned evidence gates.
 
 ## Behavior Habit History v0.1
 
-RCL separates two questions that are easy to confuse.
+RCL separates behavior origin from habit maturity.
 
-`source` says **where a behavior came from**:
+`source` says **where the behavior came from**:
 
 ```text
 configured
@@ -99,7 +80,7 @@ imported
 configured → learning → stable → legacy
 ```
 
-A behavior can therefore remain `source: learned` while moving from `learning` to `stable` and eventually `legacy`.
+A behavior can remain `source: learned` while moving from `learning` to `stable` and eventually `legacy`.
 
 ```json
 {
@@ -129,9 +110,7 @@ A behavior can therefore remain `source: learned` while moving from `learning` t
 }
 ```
 
-History is **descriptive, not executable**. The current canonical behavior is always the top-level `parameters` object. Loading a profile never replays history events or mutates current behavior.
-
-`legacy` is also never a safety override.
+History is **descriptive, not executable**. The current canonical behavior is always the top-level `parameters` object. Loading a profile never replays history events or mutates current behavior. `legacy` is never a safety override.
 
 See [`docs/HABIT_HISTORY.md`](docs/HABIT_HISTORY.md).
 
@@ -156,22 +135,74 @@ habit.lifecycle: learning -> stable
 + navigation.pre_turn_observation
 ```
 
-The machine-readable diff covers:
-
-- behaviors added / removed / modified;
-- semantic parameter changes;
-- preservation priority and mode changes;
-- source, confidence, required-capability, and evaluation changes;
-- habit lifecycle/timestamp changes;
-- history events added or removed.
-
-JSON mode:
+The machine-readable diff covers behavior add/remove/modify, semantic parameter changes, preservation/source/confidence changes, habit lifecycle changes, and history event additions/removals.
 
 ```bash
 rcl diff before-profile after-profile --json
 ```
 
 Profile Diff is an audit tool, not a Continuity Score.
+
+## Habit Promotion Policy v0.1
+
+Habit Promotion Policy asks whether the **declared evidence is strong enough to review the next lifecycle transition**.
+
+```text
+history + confidence + supporting repeated-session evidence
+                         ↓
+                 versioned gates
+                         ↓
+                candidate / blocked
+                         ↓
+                   human review
+```
+
+The evaluator never changes `behavior.parameters`, `habit.lifecycle`, timestamps, or history events.
+
+Run the reference learning-profile example:
+
+```bash
+rcl habit-candidates \
+  examples/history/mobile-base-before \
+  examples/policy/demo-follow-person.session-report.json
+```
+
+Default `learning → stable` review gates include:
+
+```text
+source                         = learned
+observation age                >= 30 days
+history events                 >= 2
+behavior confidence            >= 0.80
+scorable repeated sessions     >= 3
+session evaluation status      = estimated
+mean continuity score          >= 90
+between-session std            <= 5
+95% score CI half-width        <= 5
+qualifying behavior metrics    >= 1
+metric mean similarity         >= 0.90
+metric 95% CI half-width       <= 0.10
+```
+
+Default `stable → legacy` review is stricter: at least **5 scorable sessions**, **180 stable days**, and **explicit user confirmation**.
+
+The thresholds are published in:
+
+```text
+spec/policies/habit-promotion-policy-v0.1.json
+```
+
+They are explicit versioned engineering defaults, not universal truths. A custom policy can be supplied with `--policy`.
+
+```bash
+rcl habit-candidates my-profile session-report.json \
+  --policy my-policy.json \
+  --json
+```
+
+Important boundary: habit history supplies formation evidence. The current Robot A ↔ Robot B repeated-session report supplies **supporting reproducibility evidence only**; it is not direct proof that a source habit formed by itself.
+
+See [`docs/HABIT_PROMOTION.md`](docs/HABIT_PROMOTION.md).
 
 ## Capability Registry v0.1
 
@@ -184,20 +215,11 @@ perception.forward_range
 perception.directional_attention
 ```
 
-Reserved RCL namespaces reject invented standard-looking IDs:
-
-```text
-perception.person_tracking   VALID
-perception.telepathy         INVALID — reserved but unregistered
-```
-
-Independent implementations can experiment with:
+Reserved RCL namespaces reject invented standard-looking IDs, while independent extensions use:
 
 ```text
 x.<owner>.<semantic_path>
 ```
-
-Capabilities describe **what an embodiment can semantically provide**, not how it is implemented.
 
 ```bash
 rcl capabilities list
@@ -207,35 +229,9 @@ rcl capabilities validate x.acme.stereo_person_tracking
 
 See [`docs/CAPABILITY_REGISTRY.md`](docs/CAPABILITY_REGISTRY.md).
 
-## Behavior tolerance metadata
-
-A behavior can declare measurable numeric metrics that reference its existing semantic parameters:
-
-```json
-{
-  "parameters": {
-    "preferred_distance_m": 1.4,
-    "stop_delay_ms": 350
-  },
-  "evaluation": {
-    "metrics": [
-      {
-        "metric_id": "following_distance",
-        "observable": "following_distance_m",
-        "target_parameter": "preferred_distance_m",
-        "unit": "m",
-        "tolerance": 0.10,
-        "zero_credit_at": 0.30,
-        "weight": 2.0,
-        "required": true,
-        "min_trials": 5
-      }
-    ]
-  }
-}
-```
-
 ## Observed-vs-declared evaluation v0.1
+
+A behavior can declare numeric evaluation metrics referencing its semantic parameters.
 
 ```bash
 rcl evaluate \
@@ -264,23 +260,19 @@ rcl compare-trials \
   examples/trials/demo-rover-b.trials.json
 ```
 
-The distribution distance remains in the original metric unit:
-
 ```text
 W1 <= tolerance      → similarity 1.0
 tolerance < W1 < z   → linear falloff
 W1 >= z              → similarity 0.0
 ```
 
-This catches cases where averages match but the behavioral spread or shape differs.
+This catches cases where averages match but behavioral spread or distribution shape differs.
 
 See [`docs/STATISTICAL_CONTINUITY.md`](docs/STATISTICAL_CONTINUITY.md).
 
 ## Experiment Context / Measurement Protocol v0.1
 
 Repeated-trial scoring is gated by declared experiment context. Protocol ID/version and protocol-selected fields must match before distribution scoring.
-
-If they do not:
 
 ```text
 Context Comparable: NO
@@ -296,13 +288,13 @@ environment_id
 start_condition_id
 ```
 
-Protocols may additionally require `subject_ref` or `operator_ref`. Robot-internal metadata such as software, adapter, and sensor configuration is informational by default because different embodiments may legitimately use different implementations.
+Protocols may additionally require `subject_ref` or `operator_ref`. Robot-internal software/adapter/sensor metadata is informational by default because different embodiments may legitimately use different implementations.
 
 See [`docs/EXPERIMENT_PROTOCOL.md`](docs/EXPERIMENT_PROTOCOL.md).
 
 ## Repeated-Session Confidence / Uncertainty v0.1
 
-A single repeated-trial session can still be unusually good or bad. RCL can aggregate a comparable series of sessions while keeping every session equally weighted.
+A single repeated-trial session can still be unusually good or bad. RCL aggregates comparable sessions while keeping every session equally weighted.
 
 ```bash
 rcl compare-sessions \
@@ -310,27 +302,9 @@ rcl compare-sessions \
   examples/sessions/demo-rover-a-b.sessions.json
 ```
 
-The experimental default is:
-
-```text
-min_sessions = 3
-confidence_level = 0.95
-```
-
-For session scores `x1 ... xn`:
-
-```text
-mean = Σxi / n
-s    = sample standard deviation
-SE   = s / sqrt(n)
-CI   = mean ± t(0.975, n-1) × SE
-```
-
-For three sessions, `df=2` and the two-sided 95% Student-t critical value is `4.303`, not `1.96`.
+The experimental default is three sessions and a 95% Student-t confidence interval. For three sessions, `df=2` and the two-sided 95% critical value is `4.303`, not the large-sample normal value `1.96`.
 
 Required-metric failures, context mismatches, and cross-session experiment drift remain explicit instead of being hidden by an average.
-
-v0.1 deliberately does **not define a universal acceptance threshold** for whether two robots are the same.
 
 See [`docs/SESSION_CONFIDENCE.md`](docs/SESSION_CONFIDENCE.md).
 
@@ -348,7 +322,7 @@ TwistPublisher / controller
 mobile base
 ```
 
-The reference target is a ROS 2 Lyrical mobile base using `geometry_msgs/msg/Twist` for planar velocity. Semantic styles are mapped relative to the target robot's declared limits rather than copying source motor percentages.
+The reference target is a ROS 2 Lyrical mobile base using `geometry_msgs/msg/Twist`. ROS-specific execution details remain outside the portable RCL profile.
 
 See [`docs/ROS2_REFERENCE_ADAPTER.md`](docs/ROS2_REFERENCE_ADAPTER.md).
 
@@ -372,27 +346,19 @@ Result: RCL Migration Compatible (experimental v0.3)
 
 See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
 
-## Four continuity measures
+## Continuity measures and audit tools
 
 RCL intentionally keeps these concepts separate.
 
-**Declared Behavior Continuity Score** asks:
+**Declared Behavior Continuity Score** asks whether Robot B can represent the semantic behavior.
 
-> Can Robot B represent the semantic behavior, and how much degradation did the adapter declare?
+**Observed Continuity Score v0.1** asks whether a measured Robot B behavior stayed close to the declared target.
 
-**Observed Continuity Score v0.1** asks:
+**Statistical Continuity Score v0.2** asks how close Robot B's empirical behavior distribution is to Robot A's under comparable context.
 
-> Did a measured Robot B behavior stay close to the declared target?
+**Repeated-Session Confidence v0.1** asks how stable that continuity estimate remains across comparable sessions.
 
-**Statistical Continuity Score v0.2** asks:
-
-> Across repeated measurements under declared comparable context, how close is Robot B's empirical behavior distribution to Robot A's?
-
-**Repeated-Session Confidence v0.1** asks:
-
-> Across multiple comparable sessions, how stable is that statistical continuity estimate and how uncertain is its mean?
-
-Habit history and Profile Diff describe behavioral evolution; they are not additional scores.
+**Habit History**, **Profile Diff**, and **Habit Promotion Policy** are audit/review constructs, not extra identity scores.
 
 None of these constructs define identity, consciousness, personhood, or emotional authenticity.
 
@@ -403,12 +369,13 @@ None of these constructs define identity, consciousness, personhood, or emotiona
 3. **User-owned and portable** — continuity should export without requiring a vendor cloud.
 4. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
 5. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
-6. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
-7. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
-8. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-9. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
-10. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
-11. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
+6. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
+7. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+8. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
+9. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+10. **Longitudinal uncertainty must be visible** — a high mean without session-to-session uncertainty is incomplete evidence.
+11. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
+12. **Scores do not define identity** — continuity measures only quantify declared or observed behavior preservation.
 
 ## Experimental compatibility levels
 
@@ -416,7 +383,7 @@ None of these constructs define identity, consciousness, personhood, or emotiona
 |---|---|
 | **RCL Profile Compatible** | Can read, validate, preserve, write, and inspect the portable profile format. |
 | **RCL Migration Compatible** | Can translate semantic behavior, expose degradation, and produce a valid migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, portable habit history, context-controlled repeated evaluation, and broader conformance. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, portable habit history, reviewed promotion, context-controlled repeated evaluation, and broader conformance. |
 
 These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
@@ -433,6 +400,10 @@ rcl capabilities list
 rcl diff \
   examples/history/mobile-base-before \
   examples/history/mobile-base-after
+
+rcl habit-candidates \
+  examples/history/mobile-base-before \
+  examples/policy/demo-follow-person.session-report.json
 
 rcl migrate \
   examples/mobile-base \
@@ -467,6 +438,7 @@ robot-continuity-layer/
 │   ├── CONFORMANCE.md
 │   ├── EXPERIMENT_PROTOCOL.md
 │   ├── HABIT_HISTORY.md
+│   ├── HABIT_PROMOTION.md
 │   ├── OBSERVED_EVALUATION.md
 │   ├── SESSION_CONFIDENCE.md
 │   ├── STATISTICAL_CONTINUITY.md
@@ -475,29 +447,24 @@ robot-continuity-layer/
 │   ├── history/
 │   ├── mobile-base/
 │   ├── observations/
+│   ├── policy/
 │   ├── protocols/
 │   ├── sessions/
 │   ├── trials/
 │   └── targets/
 ├── rcl/
-│   ├── adapter.py
-│   ├── capabilities.py
-│   ├── conformance.py
-│   ├── evaluation.py
-│   ├── experiment_context.py
+│   ├── habit_policy.py
 │   ├── history.py
 │   ├── profile_diff.py
 │   ├── session_evaluation.py
-│   ├── statistical_evaluation.py
-│   ├── migration.py
-│   └── score.py
+│   └── ...
 ├── rcl_ros2/
 └── tests/
 ```
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, physical identity of experimental environments, universal longitudinal acceptance thresholds, or certified physical safety. It provides explicit experimental constructs for portable, auditable, declared, observed, statistical, and longitudinal robot behavior continuity.
+RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, universal statistical equivalence, universal habit-promotion thresholds, physical safety, or user consent. It provides explicit experimental constructs for portable, auditable, declared, observed, statistical, longitudinal, and reviewable robot behavior continuity.
 
 ## License
 

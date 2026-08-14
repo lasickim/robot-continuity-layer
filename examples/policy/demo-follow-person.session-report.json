@@ -1,0 +1,91 @@
+{
+  "session_evaluation_version": "0.1",
+  "method": "rcl.observed.session_mean_t95.v0.1",
+  "created_at": "2026-08-14T05:20:00Z",
+  "confidence_level": 0.95,
+  "min_sessions": 3,
+  "total_session_count": 3,
+  "scorable_session_count": 3,
+  "successful_session_count": 3,
+  "failed_session_count": 0,
+  "failed_session_ids": [],
+  "context_mismatch_session_ids": [],
+  "series_comparison": {
+    "compatible": true,
+    "reference_session_id": "day-1",
+    "mismatches": []
+  },
+  "mean_score": 98.67,
+  "score_std": 1.154701,
+  "confidence_interval_95": {
+    "low": 95.801209,
+    "high": 100.0,
+    "half_width": 2.868791,
+    "critical_value": 4.303
+  },
+  "evaluation_success": true,
+  "status": "estimated",
+  "session_results": [
+    {
+      "session_id": "day-1",
+      "score": 100.0,
+      "evaluation_success": true,
+      "status": "matched",
+      "context_compatible": true,
+      "required_failures": [],
+      "source_session_id": "demo-rover-a-session-001",
+      "target_session_id": "demo-rover-b-session-001"
+    },
+    {
+      "session_id": "day-2",
+      "score": 98.0,
+      "evaluation_success": true,
+      "status": "degraded",
+      "context_compatible": true,
+      "required_failures": [],
+      "source_session_id": "demo-rover-a-session-002",
+      "target_session_id": "demo-rover-b-session-002"
+    },
+    {
+      "session_id": "day-3",
+      "score": 98.0,
+      "evaluation_success": true,
+      "status": "degraded",
+      "context_compatible": true,
+      "required_failures": [],
+      "source_session_id": "demo-rover-a-session-003",
+      "target_session_id": "demo-rover-b-session-003"
+    }
+  ],
+  "metric_summaries": [
+    {
+      "behavior_id": "navigation.follow_person",
+      "metric_id": "following_distance",
+      "unit": "m",
+      "session_count": 3,
+      "mean_similarity": 0.97,
+      "similarity_std": 0.017321,
+      "confidence_interval_95": {
+        "low": 0.926965,
+        "high": 1.0,
+        "half_width": 0.043035,
+        "critical_value": 4.303
+      }
+    },
+    {
+      "behavior_id": "navigation.follow_person",
+      "metric_id": "stop_delay",
+      "unit": "ms",
+      "session_count": 3,
+      "mean_similarity": 0.96,
+      "similarity_std": 0.02,
+      "confidence_interval_95": {
+        "low": 0.910313,
+        "high": 1.0,
+        "half_width": 0.049687,
+        "critical_value": 4.303
+      }
+    }
+  ],
+  "disclaimer": "Reference fixture for habit-promotion policy examples. Repeated-session continuity is supporting reproducibility evidence, not direct proof of habit formation."
+}
