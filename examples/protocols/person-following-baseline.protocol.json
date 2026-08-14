@@ -1,0 +1,11 @@
+{
+  "protocol_id": "rcl.person_following.baseline",
+  "protocol_version": "0.1",
+  "comparison_fields": [
+    "task_id",
+    "environment_id",
+    "subject_ref",
+    "start_condition_id"
+  ],
+  "description": "Baseline repeated-trial person-following continuity protocol. Robot implementation metadata is recorded but is not part of the strict context key."
+}

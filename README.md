@@ -6,7 +6,7 @@
 
 RCL is an open specification and reference implementation for preserving a robot's **experience, preferences, semantic behavior, and skill history independently from its current hardware body**.
 
-The project now separates four questions:
+The project now separates five questions:
 
 ```text
 What should survive?
@@ -20,6 +20,10 @@ Migration Report + Declared Continuity Score
 Did Robot B hit the declared behavior target?
         ↓
 Observed-vs-declared Evaluation
+        ↓
+Were Robot A and Robot B measured under comparable conditions?
+        ↓
+Experiment Context Gate
         ↓
 Does Robot B behave statistically like Robot A over repeated trials?
         ↓
@@ -58,6 +62,7 @@ The reference implementation can:
 - declare numeric behavior tolerances without duplicating semantic target values;
 - evaluate single target observations against declared tolerances;
 - compare repeated Robot A / Robot B empirical behavior distributions;
+- require declared comparable experiment context before repeated-trial scoring;
 - calculate experimental observed and statistical continuity scores.
 
 Reference declared migration:
@@ -161,7 +166,7 @@ See [`docs/OBSERVED_EVALUATION.md`](docs/OBSERVED_EVALUATION.md).
 
 ## Statistical Continuity Evaluation v0.2
 
-RCL can now compare repeated Robot A and Robot B measurements for the same semantic metric.
+RCL can compare repeated Robot A and Robot B measurements for the same semantic metric.
 
 ```text
 Robot A repeated trials
@@ -194,7 +199,7 @@ tolerance < W1 < z   → linear falloff
 W1 >= z              → similarity 0.0
 ```
 
-This catches cases where averages match but behavior shape differs. For example:
+This catches cases where averages match but behavior shape differs:
 
 ```text
 Robot A: 1.40, 1.40, 1.40, 1.40, 1.40
@@ -206,6 +211,59 @@ mean(A) = mean(B) = 1.40 m
 The means match, but the empirical distributions do not.
 
 See [`docs/STATISTICAL_CONTINUITY.md`](docs/STATISTICAL_CONTINUITY.md).
+
+## Experiment Context / Measurement Protocol v0.1
+
+Repeated-trial scoring is now gated by declared experiment context. A trial capture contains a shared protocol and session-specific context:
+
+```json
+{
+  "experiment": {
+    "protocol": {
+      "protocol_id": "rcl.person_following.baseline",
+      "protocol_version": "0.1",
+      "comparison_fields": [
+        "task_id",
+        "environment_id",
+        "subject_ref",
+        "start_condition_id"
+      ]
+    },
+    "context": {
+      "session_id": "robot-a-session-001",
+      "task_id": "follow-person-straight-5m",
+      "environment_id": "demo-lab-a-layout-01",
+      "subject_ref": "subject-demo-01",
+      "start_condition_id": "stationary-2m-behind-subject",
+      "software_ref": "controller@1.0",
+      "adapter_ref": "adapter@1.0",
+      "sensor_config_ref": "sensor-set@1"
+    }
+  }
+}
+```
+
+Protocol ID/version and protocol-selected context fields must match before Wasserstein scoring. If they do not:
+
+```text
+Context Comparable: NO
+Statistical Continuity Score: N/A
+Status: context_mismatch
+```
+
+No distribution score is calculated. This reduces the risk of interpreting room, subject, task, or starting-condition differences as robot behavior differences.
+
+If `comparison_fields` is omitted, the default strict key is:
+
+```text
+task_id
+environment_id
+start_condition_id
+```
+
+`software_ref`, `adapter_ref`, and `sensor_config_ref` are recorded as informational metadata by default because Robot A and Robot B may legitimately use different implementations.
+
+See [`docs/EXPERIMENT_PROTOCOL.md`](docs/EXPERIMENT_PROTOCOL.md) and [`examples/protocols/person-following-baseline.protocol.json`](examples/protocols/person-following-baseline.protocol.json).
 
 ## ROS 2 reference adapter
 
@@ -261,7 +319,7 @@ RCL intentionally keeps these concepts separate.
 
 **Statistical Continuity Score v0.2** asks:
 
-> Across repeated measurements, how close is Robot B's empirical behavior distribution to Robot A's?
+> Across repeated measurements under declared comparable context, how close is Robot B's empirical behavior distribution to Robot A's?
 
 None of these scores define identity, consciousness, personhood, or emotional authenticity.
 
@@ -273,8 +331,9 @@ None of these scores define identity, consciousness, personhood, or emotional au
 4. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
 5. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
 6. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
-7. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
-8. **Scores do not define identity** — continuity scores only quantify declared or observed behavior preservation.
+7. **Comparable context before statistics** — do not score Robot A vs Robot B distributions when declared test conditions do not match.
+8. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
+9. **Scores do not define identity** — continuity scores only quantify declared or observed behavior preservation.
 
 ## Experimental compatibility levels
 
@@ -282,7 +341,7 @@ None of these scores define identity, consciousness, personhood, or emotional au
 |---|---|
 | **RCL Profile Compatible** | Can read, validate, preserve, and write the portable profile format. |
 | **RCL Migration Compatible** | Can translate semantic behavior, expose degradation, and produce a valid migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, repeated-trial evaluation, and broader conformance. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, context-controlled repeated-trial evaluation, and broader conformance. |
 
 These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
@@ -323,12 +382,14 @@ robot-continuity-layer/
 ├── docs/
 │   ├── CAPABILITY_REGISTRY.md
 │   ├── CONFORMANCE.md
+│   ├── EXPERIMENT_PROTOCOL.md
 │   ├── OBSERVED_EVALUATION.md
 │   ├── STATISTICAL_CONTINUITY.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── examples/
 │   ├── mobile-base/
 │   ├── observations/
+│   ├── protocols/
 │   ├── trials/
 │   └── targets/
 ├── rcl/
@@ -336,6 +397,7 @@ robot-continuity-layer/
 │   ├── capabilities.py
 │   ├── conformance.py
 │   ├── evaluation.py
+│   ├── experiment_context.py
 │   ├── statistical_evaluation.py
 │   ├── migration.py
 │   └── score.py
@@ -345,7 +407,7 @@ robot-continuity-layer/
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, or certified physical safety. It provides explicit experimental measures of portable, declared, and observed robot behavior continuity.
+RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, physical identity of experimental environments, or certified physical safety. It provides explicit experimental measures of portable, declared, and observed robot behavior continuity.
 
 ## License
 

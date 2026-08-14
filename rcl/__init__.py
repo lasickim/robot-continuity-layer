@@ -17,6 +17,11 @@ from .evaluation import (
     evaluate_observed_continuity,
     validate_behavior_evaluation_metadata,
 )
+from .experiment_context import (
+    CONTEXT_VERSION,
+    DEFAULT_COMPARISON_FIELDS,
+    compare_experiment_context,
+)
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
 from .score import calculate_continuity_score
@@ -34,6 +39,8 @@ __all__ = [
     "BehaviorMigrationResult",
     "CapabilityClassification",
     "CapabilityValidationError",
+    "CONTEXT_VERSION",
+    "DEFAULT_COMPARISON_FIELDS",
     "DEFAULT_MIN_TRIALS",
     "EVALUATION_METHOD",
     "EVALUATION_VERSION",
@@ -45,6 +52,7 @@ __all__ = [
     "STATISTICAL_EVALUATION_VERSION",
     "calculate_continuity_score",
     "classify_capability_id",
+    "compare_experiment_context",
     "compare_trial_distributions",
     "evaluate_observed_continuity",
     "get_capability",

@@ -1,15 +1,54 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.3:trial-observations",
-  "title": "RCL Repeated-Trial Observations v0.1",
+  "title": "RCL Repeated-Trial Observations v0.2",
   "type": "object",
   "additionalProperties": false,
-  "required": ["trial_observation_version", "robot_id", "embodiment_id", "captured_at", "behavior_trials"],
+  "required": ["trial_observation_version", "robot_id", "embodiment_id", "captured_at", "experiment", "behavior_trials"],
   "properties": {
-    "trial_observation_version": {"const": "0.1"},
+    "trial_observation_version": {"const": "0.2"},
     "robot_id": {"type": "string", "minLength": 1},
     "embodiment_id": {"type": "string", "minLength": 1},
     "captured_at": {"type": "string", "format": "date-time"},
+    "experiment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["protocol", "context"],
+      "properties": {
+        "protocol": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["protocol_id", "protocol_version"],
+          "properties": {
+            "protocol_id": {"type": "string", "pattern": "^[a-z][a-z0-9_.-]*$"},
+            "protocol_version": {"type": "string", "minLength": 1},
+            "comparison_fields": {
+              "type": "array",
+              "uniqueItems": true,
+              "items": {"type": "string", "enum": ["task_id", "environment_id", "subject_ref", "operator_ref", "start_condition_id"]}
+            },
+            "description": {"type": "string"}
+          }
+        },
+        "context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["session_id"],
+          "properties": {
+            "session_id": {"type": "string", "minLength": 1},
+            "task_id": {"type": "string", "minLength": 1},
+            "environment_id": {"type": "string", "minLength": 1},
+            "subject_ref": {"type": "string", "minLength": 1},
+            "operator_ref": {"type": "string", "minLength": 1},
+            "start_condition_id": {"type": "string", "minLength": 1},
+            "software_ref": {"type": "string", "minLength": 1},
+            "adapter_ref": {"type": "string", "minLength": 1},
+            "sensor_config_ref": {"type": "string", "minLength": 1},
+            "notes": {"type": "string"}
+          }
+        }
+      }
+    },
     "behavior_trials": {
       "type": "array",
       "items": {
