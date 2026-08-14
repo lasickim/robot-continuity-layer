@@ -15,7 +15,8 @@
             "tolerance": 0.1,
             "zero_credit_at": 0.3,
             "weight": 2.0,
-            "required": true
+            "required": true,
+            "min_trials": 5
           },
           {
             "metric_id": "stop_delay",
@@ -25,7 +26,8 @@
             "tolerance": 80,
             "zero_credit_at": 240,
             "weight": 1.0,
-            "required": false
+            "required": false,
+            "min_trials": 5
           }
         ]
       },
