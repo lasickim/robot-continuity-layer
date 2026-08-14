@@ -88,6 +88,11 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] source/provenance digests plus early/late retained exemplars
 - [x] `rcl compact-experience` CLI
 - [x] explicit `destructive=false` compaction boundary; no automatic source deletion
+- [x] action-stratified Experience Summary statistics for action-present/action-absent outcomes
+- [x] summary-aware Intent Discovery from aggregate evidence without pseudo-episode reconstruction
+- [x] shared raw/aggregate discovery scoring and gate logic
+- [x] explicit raw-vs-aggregate Intent Candidate evidence provenance
+- [x] `rcl discover-intent-summary` CLI
 - [x] Explicit Intent Approval / Profile Patch v0.1
 - [x] deterministic candidate-report and source-behavior SHA-256 provenance
 - [x] immutable approved snapshot with `behavior.intent` provenance and `causal_claim=false`
@@ -106,7 +111,7 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [ ] observed intent-success evidence model distinct from motion similarity
 - [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
 - [ ] explicit retention / prune / archive policy after verified compaction
-- [ ] summary-aware Habit / Intent evidence evaluation with raw-vs-aggregate provenance distinction
+- [ ] summary-aware Habit evidence evaluation with raw-vs-aggregate provenance distinction
 
 ### v0.4 semantic rule
 
@@ -120,16 +125,16 @@ HISTORY  → habit / legacy / prior Intent interpretations
 
 A target may change HOW and lose an optional LOOKS expression while still preserving WHY.
 
-Intent Discovery, Approval, and Revision now form an auditable meaning lifecycle:
+Intent Discovery, Approval, and Revision form an auditable meaning lifecycle. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
 
 ```text
 experience
   ↓
-pattern
+optional non-destructive compaction
   ↓
-goal hypothesis
+raw OR aggregate context-action-outcome evidence
   ↓
-context-action-outcome evidence
+shared Intent Discovery scoring
   ↓
 Intent Candidate
   ↓
@@ -167,7 +172,7 @@ non-destructive compaction
   ↓
 long-lived aggregate evidence
   ↓
-Habit / Intent analysis
+summary-aware Intent Discovery / other longitudinal analysis
 ```
 
 ### v0.4 privacy/provenance follow-on
@@ -188,6 +193,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] Robot A live behavior capture
 - [ ] lightweight semantic experience logging on physical Robot A
 - [ ] idle/charging-window compaction on physical hardware
+- [ ] summary-aware Intent Discovery on physical aggregate evidence
 - [ ] `.rcl` export
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
@@ -232,7 +238,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] lightweight long-lived experience storage / compaction profile
 - [ ] explicit approved-mutation / snapshot profile
 - [ ] functional-intent preservation profile
-- [ ] model-independent intent-discovery evidence profile
+- [ ] model-independent raw/aggregate intent-discovery evidence profile
 - [ ] explicit intent-candidate approval profile
 - [ ] auditable Intent revision / prior-interpretation history profile
 - [ ] compatibility/certification profile
@@ -242,4 +248,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, declare an approved/revised Intent to be eternal truth, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation of robot continuity data.
