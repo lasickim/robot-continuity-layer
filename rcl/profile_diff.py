@@ -44,16 +44,21 @@ def _dict_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[st
     for key in sorted(set(before) | set(after)):
         before_present = key in before
         after_present = key in after
-        before_value = before.get(key)
-        after_value = after.get(key)
-        if before_present and after_present and before_value == after_value:
+        if before_present and after_present and before[key] == after[key]:
             continue
+        if not before_present:
+            change_type = "added"
+        elif not after_present:
+            change_type = "removed"
+        else:
+            change_type = "changed"
         changes.append(
-            _change(
-                key,
-                before_value if before_present else None,
-                after_value if after_present else None,
-            )
+            {
+                "field": key,
+                "change_type": change_type,
+                "before": before[key] if before_present else None,
+                "after": after[key] if after_present else None,
+            }
         )
     return changes
 
@@ -93,10 +98,7 @@ def _field_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[s
 
 def _history_events(item: dict[str, Any]) -> dict[str, dict[str, Any]]:
     habit = item.get("habit") or {}
-    return {
-        event["event_id"]: event
-        for event in habit.get("events", [])
-    }
+    return {event["event_id"]: event for event in habit.get("events", [])}
 
 
 def diff_profiles(before: RCLProfile, after: RCLProfile) -> dict[str, Any]:
@@ -141,10 +143,7 @@ def diff_profiles(before: RCLProfile, after: RCLProfile) -> dict[str, Any]:
             )
             continue
 
-        parameter_changes = _dict_changes(
-            before_item.get("parameters", {}),
-            after_item.get("parameters", {}),
-        )
+        parameter_changes = _dict_changes(before_item.get("parameters", {}), after_item.get("parameters", {}))
         field_changes = _field_changes(before_item, after_item)
         before_events = _history_events(before_item)
         after_events = _history_events(after_item)
