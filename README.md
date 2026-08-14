@@ -55,7 +55,8 @@ The reference implementation can:
 - generate a machine-readable migration report;
 - calculate a transparent Behavior Continuity Score;
 - reject overall migration success when a required behavior cannot be safely preserved;
-- translate mobile-base continuity behavior into a ROS 2 execution plan through the experimental `rcl_ros2` integration.
+- translate mobile-base continuity behavior into a ROS 2 execution plan through the experimental `rcl_ros2` integration;
+- run an executable adapter conformance suite with machine-readable results.
 
 Reference migration result:
 
@@ -68,7 +69,7 @@ Migration Success: YES
 
 ## ROS 2 reference adapter
 
-The v0.3-dev branch adds the first middleware integration while keeping ROS-specific details outside the portable profile:
+The v0.3-dev branch includes the first middleware integration while keeping ROS-specific details outside the portable profile:
 
 ```text
 portable .rcl profile
@@ -88,6 +89,43 @@ The ROS runtime dependency is lazy: importing and unit-testing the adapter does 
 
 See [`docs/ROS2_REFERENCE_ADAPTER.md`](docs/ROS2_REFERENCE_ADAPTER.md).
 
+## Adapter conformance
+
+RCL v0.3-dev also includes the first executable compatibility check. A zero-argument Python adapter can run against the published mobile-base fixture with:
+
+```bash
+rcl-conformance test rcl_ros2:ROS2MobileBaseAdapter
+```
+
+Expected reference output:
+
+```text
+RCL Adapter Conformance
+Profile      PASS
+Adapter      PASS
+Migration    PASS
+Safety       PASS
+Reporting    PASS
+
+Result: RCL Migration Compatible (experimental v0.3)
+```
+
+The initial suite ID is:
+
+```text
+rcl.adapter.mobile_base.v0.3
+```
+
+The suite deliberately removes capabilities in negative cases. An adapter that silently reports missing required capabilities as `preserved` fails conformance.
+
+For CI or registry tooling:
+
+```bash
+rcl-conformance test rcl_ros2:ROS2MobileBaseAdapter --json
+```
+
+This is an **experimental protocol conformance result**, not physical robot safety certification or identity proof. See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
+
 ## Core principles
 
 1. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
@@ -105,10 +143,10 @@ RCL is beginning to define interoperability levels:
 | Level | Meaning |
 |---|---|
 | **RCL Profile Compatible** | Can safely read, validate, preserve, and write the portable profile format. |
-| **RCL Migration Compatible** | Can translate semantic behavior to another embodiment and produce an explicit migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, reproducible evaluation, and conformance testing. |
+| **RCL Migration Compatible** | Can translate semantic behavior to another embodiment, expose degradation, and produce an explicit migration report. v0.3 adds the first executable mobile-base suite. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, and reproducible observed-behavior evaluation. |
 
-These are **draft compatibility concepts, not a certification program yet**. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
+These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
 
 ## `.rcl` package format
 
@@ -143,6 +181,7 @@ rcl migrate \
   --output /tmp/migration-report.json
 
 rcl report /tmp/migration-report.json
+rcl-conformance test rcl_ros2:ROS2MobileBaseAdapter
 pytest -q
 ```
 
@@ -189,9 +228,9 @@ Good first contributions include:
 - reviewing the semantic behavior model;
 - proposing additional embodiment capabilities;
 - implementing adapters for real or simulated robots;
+- running the conformance suite against an independently implemented adapter;
 - designing migration evaluation scenarios;
-- finding ambiguous or unsafe parts of the draft specification;
-- helping build the adapter conformance suite.
+- finding ambiguous or unsafe parts of the draft specification.
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`ROADMAP.md`](ROADMAP.md), and the open GitHub issues.
 
@@ -204,11 +243,16 @@ robot-continuity-layer/
 ├── ROADMAP.md
 ├── docs/
 │   ├── COMPATIBILITY.md
+│   ├── CONFORMANCE.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── spec/
+│   └── schemas/
+│       └── conformance-report.schema.json
 ├── examples/
 ├── rcl/
 │   ├── adapter.py
+│   ├── conformance.py
+│   ├── conformance_cli.py
 │   ├── migration.py
 │   ├── profile.py
 │   └── score.py
