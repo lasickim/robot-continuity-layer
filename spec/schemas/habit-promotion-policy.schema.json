@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:habit-promotion-policy",
+  "title": "RCL Habit Promotion Policy v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_version", "policy_id", "transitions"],
+  "properties": {
+    "policy_version": {"const": "0.1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "description": {"type": "string"},
+    "transitions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["configured_to_learning", "learning_to_stable", "stable_to_legacy"],
+      "properties": {
+        "configured_to_learning": {"$ref": "#/$defs/basic_transition"},
+        "learning_to_stable": {"$ref": "#/$defs/evidence_transition"},
+        "stable_to_legacy": {"$ref": "#/$defs/legacy_transition"}
+      }
+    }
+  },
+  "$defs": {
+    "allowed_sources": {
+      "type": "array",
+      "minItems": 1,
+      "uniqueItems": true,
+      "items": {"type": "string", "enum": ["configured", "learned", "imported"]}
+    },
+    "basic_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_sources", "min_observation_days", "min_history_events", "min_confidence"],
+      "properties": {
+        "allowed_sources": {"$ref": "#/$defs/allowed_sources"},
+        "min_observation_days": {"type": "number", "minimum": 0},
+        "min_history_events": {"type": "integer", "minimum": 0},
+        "min_confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["min_scorable_sessions", "require_evaluation_success", "min_mean_score", "max_score_std", "max_score_ci_half_width", "min_behavior_metric_count", "min_metric_mean_similarity", "max_metric_ci_half_width"],
+      "properties": {
+        "min_scorable_sessions": {"type": "integer", "minimum": 1},
+        "require_evaluation_success": {"type": "boolean"},
+        "min_mean_score": {"type": "number", "minimum": 0, "maximum": 100},
+        "max_score_std": {"type": "number", "minimum": 0},
+        "max_score_ci_half_width": {"type": "number", "minimum": 0},
+        "min_behavior_metric_count": {"type": "integer", "minimum": 0},
+        "min_metric_mean_similarity": {"type": "number", "minimum": 0, "maximum": 1},
+        "max_metric_ci_half_width": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "evidence_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_sources", "min_observation_days", "min_history_events", "min_confidence", "evidence"],
+      "properties": {
+        "allowed_sources": {"$ref": "#/$defs/allowed_sources"},
+        "min_observation_days": {"type": "number", "minimum": 0},
+        "min_history_events": {"type": "integer", "minimum": 0},
+        "min_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    },
+    "legacy_transition": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_sources", "min_stable_days", "min_history_events", "min_confidence", "require_user_confirmation", "evidence"],
+      "properties": {
+        "allowed_sources": {"$ref": "#/$defs/allowed_sources"},
+        "min_stable_days": {"type": "number", "minimum": 0},
+        "min_history_events": {"type": "integer", "minimum": 0},
+        "min_confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "require_user_confirmation": {"type": "boolean"},
+        "evidence": {"$ref": "#/$defs/evidence"}
+      }
+    }
+  }
+}
