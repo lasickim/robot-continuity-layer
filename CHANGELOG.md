@@ -2,6 +2,18 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Intent Revision / Correction v0.1 so a previously declared engineering purpose can be explicitly corrected when later evidence supports a better interpretation without erasing the earlier Intent.
+- Added deterministic `preview_intent_revision()` and `apply_intent_revision()` APIs plus `rcl revise-intent preview|apply`.
+- Added machine-readable Intent Revision Candidate, Patch, and Apply Result schemas with runtime/public parity coverage.
+- Added append-only `behavior.intent_history` containing the exact previous Intent snapshot, revision reason, evidence references, candidate digest, approval metadata, and from/to Intent SHA-256 values.
+- Added `source=revised` current-Intent provenance with revision ID, revision-candidate identity/hash, previous-Intent hash, reason/evidence, approval actor/time, and `causal_claim=false`.
+- Added multi-revision digest-chain validation requiring every prior `to_intent_sha256` to match the next `from_intent_sha256` and the final digest to match the current Intent.
+- Added historical Intent snapshot tamper detection, duplicate-revision rejection, chronological revision validation, stale-current-Intent candidate rejection, and semantic no-op revision rejection.
+- Kept first-time Intent Approval separate from Intent Revision: profiles without an existing Intent cannot use revision, while `approve-intent` still refuses to overwrite an existing Intent.
+- Preserved semantic parameters, habit metadata, expression, source/confidence, identity, preferences, skills, and embodiment during revision; only current Intent plus one append-only history entry may change.
+- Extended Profile Diff to expose `intent_history` changes alongside current Intent and provenance changes.
+- Added single-revision, two-successive-revision, digest-chain, history-tamper, chronology, stale-candidate, no-Intent, no-op, and CLI regression tests.
+- Added `docs/INTENT_REVISION.md` and documented the principle that approved Intent is a current engineering interpretation that may be corrected later, not an eternal or causal truth.
 - Added Explicit Intent Approval / Profile Patch v0.1 as the reviewed mutation boundary after Intent Discovery.
 - Added deterministic `preview_intent_approval()` and `apply_intent_approval()` APIs that accept only schema-valid candidates with all evidence gates passing.
 - Added exact candidate-action / target-behavior matching and explicit rejection of existing intent overwrite in v0.1.
