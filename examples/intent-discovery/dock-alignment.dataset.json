@@ -1,0 +1,40 @@
+{
+  "discovery_dataset_version": "0.1",
+  "dataset_id": "demo-dock-alignment-001",
+  "candidate_action_id": "navigation.pre_dock_alignment_pause",
+  "context_match": {
+    "task": "auto_dock"
+  },
+  "outcome": {
+    "outcome_id": "dock_success",
+    "type": "binary",
+    "higher_is_better": true,
+    "minimum_meaningful_effect": 0.25,
+    "unit": "success_rate"
+  },
+  "proposed_intent": {
+    "goal_id": "x.rcl-demo.improve_dock_alignment",
+    "description": "Pause briefly before final docking contact so the target alignment can settle.",
+    "trigger": "activity.before_dock_contact",
+    "success_condition": "state.dock_alignment_acceptable",
+    "failure_action": "retry",
+    "criticality": "preferred",
+    "required_capabilities": [
+      "x.rcl-demo.dock_alignment_observation"
+    ]
+  },
+  "episodes": [
+    {"episode_id":"dock-01","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":true,"parameters":{"pause_ms":300}},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-02","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":true,"parameters":{"pause_ms":320}},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-03","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":true,"parameters":{"pause_ms":290}},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-04","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":true,"parameters":{"pause_ms":310}},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-05","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":true,"parameters":{"pause_ms":305}},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-06","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":true,"parameters":{"pause_ms":315}},"outcomes":{"dock_success":false}},
+    {"episode_id":"dock-07","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":false},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-08","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":false},"outcomes":{"dock_success":false}},
+    {"episode_id":"dock-09","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":false},"outcomes":{"dock_success":false}},
+    {"episode_id":"dock-10","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":false},"outcomes":{"dock_success":true}},
+    {"episode_id":"dock-11","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":false},"outcomes":{"dock_success":false}},
+    {"episode_id":"dock-12","context":{"task":"auto_dock","station":"A"},"action":{"action_id":"navigation.pre_dock_alignment_pause","performed":false},"outcomes":{"dock_success":false}}
+  ]
+}
