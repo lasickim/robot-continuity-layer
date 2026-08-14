@@ -6,11 +6,7 @@
 
 RCL is an open specification and reference implementation for preserving a robot's **experience, preferences, semantic behavior, and skill history independently from its current hardware body**.
 
-The core question is simple:
-
-> When Robot A is replaced by Robot B, what should survive besides files and configuration?
-
-RCL now separates three different questions:
+The project now separates four questions:
 
 ```text
 What should survive?
@@ -21,9 +17,13 @@ Can Robot B represent it?
         ↓
 Migration Report + Declared Continuity Score
         ↓
-Did Robot B actually behave close enough?
+Did Robot B hit the declared behavior target?
         ↓
-Observed Continuity Evaluation
+Observed-vs-declared Evaluation
+        ↓
+Does Robot B behave statistically like Robot A over repeated trials?
+        ↓
+Statistical Continuity Evaluation
 ```
 
 ## Why RCL exists
@@ -56,8 +56,9 @@ The reference implementation can:
 - translate mobile-base continuity behavior into a ROS 2 execution plan through `rcl_ros2`;
 - run an executable adapter conformance suite;
 - declare numeric behavior tolerances without duplicating semantic target values;
-- ingest target-robot numeric observations;
-- calculate an experimental Observed Continuity Score.
+- evaluate single target observations against declared tolerances;
+- compare repeated Robot A / Robot B empirical behavior distributions;
+- calculate experimental observed and statistical continuity scores.
 
 Reference declared migration:
 
@@ -68,27 +69,9 @@ Migration Success: YES
 - navigation.pre_turn_observation: approximated (similarity=0.65)
 ```
 
-Reference observed evaluation:
-
-```text
-Declared target distance : 1.40 m
-Observed Robot B distance: 1.37 m
-Tolerance                : ±0.10 m
-
-Declared stop delay      : 350 ms
-Observed Robot B delay   : 372 ms
-Tolerance                : ±80 ms
-
-Observed Continuity Score: 100.00%
-Evaluation Success       : YES
-Status                   : within_tolerance
-```
-
 ## Capability Registry v0.1
 
-RCL publishes a small formal vocabulary for semantic robot capabilities.
-
-Initial standard IDs:
+Initial standard capability IDs:
 
 ```text
 navigation.planar_velocity
@@ -97,14 +80,14 @@ perception.forward_range
 perception.directional_attention
 ```
 
-Standard-looking names inside an RCL-reserved namespace must exist in the registry:
+Reserved RCL namespaces reject invented standard-looking IDs:
 
 ```text
 perception.person_tracking   VALID
 perception.telepathy         INVALID — reserved but unregistered
 ```
 
-Independent implementations can experiment without waiting for a registry change:
+Independent implementations can experiment with:
 
 ```text
 x.<owner>.<semantic_path>
@@ -116,7 +99,7 @@ Example:
 x.acme.stereo_person_tracking
 ```
 
-Capabilities describe **what an embodiment can semantically provide**, not how it is implemented. ROS topics, vendor SDK calls, motor values, and controller details remain adapter concerns.
+Capabilities describe **what an embodiment can semantically provide**, not how it is implemented.
 
 ```bash
 rcl capabilities list
@@ -126,9 +109,9 @@ rcl capabilities validate x.acme.stereo_person_tracking
 
 See [`docs/CAPABILITY_REGISTRY.md`](docs/CAPABILITY_REGISTRY.md).
 
-## Behavior tolerance and observed evaluation
+## Behavior tolerance metadata
 
-A behavior can optionally declare measurable numeric metrics that reference its existing semantic parameters:
+A behavior can declare measurable numeric metrics that reference its existing semantic parameters:
 
 ```json
 {
@@ -146,26 +129,25 @@ A behavior can optionally declare measurable numeric metrics that reference its 
         "tolerance": 0.10,
         "zero_credit_at": 0.30,
         "weight": 2.0,
-        "required": true
+        "required": true,
+        "min_trials": 5
       }
     ]
   }
 }
 ```
 
-Robot observations are stored separately from the portable profile:
+`min_trials` is used by repeated-trial evaluation and defaults to 5 when omitted.
 
-```json
-{
-  "behavior_id": "navigation.follow_person",
-  "metrics": {
-    "following_distance_m": 1.37,
-    "stop_delay_ms": 372
-  }
-}
+## Observed-vs-declared evaluation v0.1
+
+A single Robot B observation can be evaluated against the declared semantic target.
+
+```bash
+rcl evaluate \
+  examples/mobile-base \
+  examples/observations/demo-rover-b.observations.json
 ```
-
-### Numeric scoring v0.1
 
 For absolute error `e`, tolerance `t`, and zero-credit deviation `z`:
 
@@ -175,28 +157,55 @@ t < e < z   → linear falloff from 1.0 to 0.0
 e >= z      → similarity 0.0
 ```
 
-The final observed score uses both metric weight and the behavior preservation-priority weight.
+See [`docs/OBSERVED_EVALUATION.md`](docs/OBSERVED_EVALUATION.md).
 
-Missing required observations are explicit failures. Missing optional observations remain visible but are excluded from the score denominator.
+## Statistical Continuity Evaluation v0.2
+
+RCL can now compare repeated Robot A and Robot B measurements for the same semantic metric.
+
+```text
+Robot A repeated trials
+        ↓
+empirical distribution
+        ↘
+          exact 1D Wasserstein distance
+        ↗
+empirical distribution
+        ↑
+Robot B repeated trials
+```
 
 Run the bundled example:
 
 ```bash
-rcl evaluate \
+rcl compare-trials \
   examples/mobile-base \
-  examples/observations/demo-rover-b.observations.json
+  examples/trials/demo-rover-a.trials.json \
+  examples/trials/demo-rover-b.trials.json
 ```
 
-JSON mode:
+The report includes sample counts, means, sample standard deviations, Wasserstein-1 distance, and similarity for each metric.
 
-```bash
-rcl evaluate \
-  examples/mobile-base \
-  examples/observations/demo-rover-b.observations.json \
-  --json
+The distribution distance remains in the original metric unit. The same tolerance policy is therefore reused:
+
+```text
+W1 <= tolerance      → similarity 1.0
+tolerance < W1 < z   → linear falloff
+W1 >= z              → similarity 0.0
 ```
 
-See [`docs/OBSERVED_EVALUATION.md`](docs/OBSERVED_EVALUATION.md).
+This catches cases where averages match but behavior shape differs. For example:
+
+```text
+Robot A: 1.40, 1.40, 1.40, 1.40, 1.40
+Robot B: 1.20, 1.20, 1.40, 1.60, 1.60
+
+mean(A) = mean(B) = 1.40 m
+```
+
+The means match, but the empirical distributions do not.
+
+See [`docs/STATISTICAL_CONTINUITY.md`](docs/STATISTICAL_CONTINUITY.md).
 
 ## ROS 2 reference adapter
 
@@ -216,22 +225,17 @@ mobile base
 
 The reference target is a ROS 2 Lyrical mobile base using `geometry_msgs/msg/Twist` for planar velocity. Semantic styles are mapped relative to the **target robot's declared limits**, rather than copying source motor percentages.
 
-The ROS runtime dependency is lazy: importing and unit-testing the adapter does not require ROS 2 to be installed.
-
 See [`docs/ROS2_REFERENCE_ADAPTER.md`](docs/ROS2_REFERENCE_ADAPTER.md).
 
 ## Adapter conformance
-
-A zero-argument Python adapter can run against the published mobile-base fixture:
 
 ```bash
 rcl-conformance test rcl_ros2:ROS2MobileBaseAdapter
 ```
 
-Expected reference output:
+Expected reference result:
 
 ```text
-RCL Adapter Conformance
 Profile      PASS
 Adapter      PASS
 Migration    PASS
@@ -241,29 +245,25 @@ Reporting    PASS
 Result: RCL Migration Compatible (experimental v0.3)
 ```
 
-The initial suite ID is:
+This is experimental protocol conformance, not physical robot safety certification. See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
 
-```text
-rcl.adapter.mobile_base.v0.3
-```
+## Three continuity measures
 
-The suite deliberately removes capabilities in negative cases. An adapter that silently reports missing required capabilities as `preserved` fails conformance.
-
-This is **experimental protocol conformance**, not physical robot safety certification or identity proof. See [`docs/CONFORMANCE.md`](docs/CONFORMANCE.md).
-
-## Declared score vs observed score
-
-RCL intentionally keeps these separate:
+RCL intentionally keeps these concepts separate.
 
 **Declared Behavior Continuity Score** asks:
 
-> Can the target embodiment represent the semantic behavior, and how much degradation did the adapter declare?
+> Can Robot B represent the semantic behavior, and how much degradation did the adapter declare?
 
-**Observed Continuity Score** asks:
+**Observed Continuity Score v0.1** asks:
 
-> Given actual measured Robot B behavior, how close was it to the declared semantic target and tolerance?
+> Did a measured Robot B behavior stay close to the declared target?
 
-The current observed evaluator is **observed-vs-declared**, not yet a full repeated-trial Robot A vs Robot B statistical equivalence test.
+**Statistical Continuity Score v0.2** asks:
+
+> Across repeated measurements, how close is Robot B's empirical behavior distribution to Robot A's?
+
+None of these scores define identity, consciousness, personhood, or emotional authenticity.
 
 ## Core principles
 
@@ -271,10 +271,10 @@ The current observed evaluator is **observed-vs-declared**, not yet a full repea
 2. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
 3. **User-owned and portable** — continuity should export without requiring a vendor cloud.
 4. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-5. **Declared and observed continuity are different** — representability is not proof of real execution fidelity.
-6. **Observable continuity** — migration quality should be measurable and inspectable.
+5. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+6. **Repeated behavior matters** — one correct sample does not prove a stable behavioral pattern.
 7. **Safety outranks continuity** — a legacy behavior never overrides target safety constraints.
-8. **Scores do not define identity** — continuity scores measure declared or observed behavior, not personhood.
+8. **Scores do not define identity** — continuity scores only quantify declared or observed behavior preservation.
 
 ## Experimental compatibility levels
 
@@ -282,25 +282,9 @@ The current observed evaluator is **observed-vs-declared**, not yet a full repea
 |---|---|
 | **RCL Profile Compatible** | Can read, validate, preserve, and write the portable profile format. |
 | **RCL Migration Compatible** | Can translate semantic behavior, expose degradation, and produce a valid migration report. |
-| **RCL Continuity Ready** | Future real-robot level with live capture, restore, repeated-trial observed evaluation, and broader conformance. |
+| **RCL Continuity Ready** | Future real-robot level with live capture, restore, repeated-trial evaluation, and broader conformance. |
 
 These are experimental v0.x compatibility concepts, not a formal certification program. See [`docs/COMPATIBILITY.md`](docs/COMPATIBILITY.md).
-
-## `.rcl` package format
-
-An `.rcl` file is currently a ZIP container:
-
-```text
-robot-a.rcl
-├── manifest.json
-├── identity.json
-├── preferences.json
-├── behavior.json
-├── skills.json
-└── embodiment.json
-```
-
-The manifest contains SHA-256 hashes for every payload file.
 
 ## Quick start
 
@@ -311,80 +295,49 @@ pip install -e ".[dev]"
 
 rcl capabilities list
 rcl validate examples/mobile-base
-rcl pack examples/mobile-base /tmp/robot-a.rcl
-rcl inspect /tmp/robot-a.rcl
 
 rcl migrate \
-  /tmp/robot-a.rcl \
+  examples/mobile-base \
   examples/targets/demo-rover-b.embodiment.json \
   --output /tmp/migration-report.json
-
-rcl report /tmp/migration-report.json
 
 rcl evaluate \
   examples/mobile-base \
   examples/observations/demo-rover-b.observations.json
 
+rcl compare-trials \
+  examples/mobile-base \
+  examples/trials/demo-rover-a.trials.json \
+  examples/trials/demo-rover-b.trials.json
+
 rcl-conformance test rcl_ros2:ROS2MobileBaseAdapter
 pytest -q
 ```
-
-## Who should experiment with RCL?
-
-RCL is currently most useful for:
-
-- robotics developers working with multiple embodiments;
-- ROS 2 and robot middleware developers;
-- research labs studying behavior transfer or lifelong robotics;
-- robot manufacturers and system integrators exploring hardware replacement or fleet migration;
-- developers interested in long-lived personal robots and user-owned robot history.
-
-The project is early enough that **design feedback is as valuable as code**.
-
-## Contributing
-
-Useful contributions include:
-
-- reviewing the semantic behavior model;
-- proposing capability registry additions with concrete interoperability use cases;
-- implementing adapters for real or simulated robots;
-- running the conformance suite against independent adapters;
-- designing observed evaluation metrics and repeatable experiments;
-- contributing Robot A / Robot B observation fixtures;
-- finding ambiguous or unsafe parts of the draft specification.
-
-See [`CONTRIBUTING.md`](CONTRIBUTING.md), [`ROADMAP.md`](ROADMAP.md), and the open GitHub issues.
 
 ## Repository layout
 
 ```text
 robot-continuity-layer/
 ├── README.md
-├── CONTRIBUTING.md
 ├── ROADMAP.md
 ├── docs/
 │   ├── CAPABILITY_REGISTRY.md
-│   ├── COMPATIBILITY.md
 │   ├── CONFORMANCE.md
 │   ├── OBSERVED_EVALUATION.md
+│   ├── STATISTICAL_CONTINUITY.md
 │   └── ROS2_REFERENCE_ADAPTER.md
-├── spec/
-│   ├── capability-registry-v0.1.json
-│   └── schemas/
-│       ├── observations.schema.json
-│       ├── observed-evaluation-report.schema.json
-│       └── ...
 ├── examples/
 │   ├── mobile-base/
 │   ├── observations/
+│   ├── trials/
 │   └── targets/
 ├── rcl/
 │   ├── adapter.py
 │   ├── capabilities.py
 │   ├── conformance.py
 │   ├── evaluation.py
+│   ├── statistical_evaluation.py
 │   ├── migration.py
-│   ├── profile.py
 │   └── score.py
 ├── rcl_ros2/
 └── tests/
@@ -392,7 +345,7 @@ robot-continuity-layer/
 
 ## Important boundary
 
-RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, or certified physical safety. It describes portable robot continuity data and provides explicit experimental measures of declared and observed behavior preservation.
+RCL does **not** claim to measure consciousness, personhood, subjective identity, emotional authenticity, formal statistical equivalence in every behavioral dimension, or certified physical safety. It provides explicit experimental measures of portable, declared, and observed robot behavior continuity.
 
 ## License
 
