@@ -1,0 +1,23 @@
+{
+  "policy_version": "0.1",
+  "policy_id": "rcl.expression.optimization.recommendation.default.v0.1",
+  "require_intent_migration_status": "preserved",
+  "require_observed_intent_status": "pass",
+  "require_strategy_match": true,
+  "safety_block_decision": "retain",
+  "missing_evidence_decision": "inconclusive",
+  "decision_matrix": {
+    "preferred": {
+      "incidental": "review_simplification",
+      "recognized": "review_simplification",
+      "user_valued": "retain",
+      "unspecified": "review_simplification"
+    },
+    "optional": {
+      "incidental": "review_removal",
+      "recognized": "review_simplification",
+      "user_valued": "retain",
+      "unspecified": "review_simplification"
+    }
+  }
+}
