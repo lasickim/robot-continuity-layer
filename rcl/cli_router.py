@@ -7,6 +7,7 @@ from pathlib import Path
 
 from .cli import main as legacy_main
 from .experience import compact_experience
+from .expression_optimization_cli import run as run_expression_optimization
 from .habit_approval import apply_habit_approval, preview_habit_approval
 from .intent_approval_cli import run as run_intent_approval
 from .intent_discovery import (
@@ -232,6 +233,12 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "revise-intent":
         try:
             return run_intent_revision(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "optimize-expression":
+        try:
+            return run_expression_optimization(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
