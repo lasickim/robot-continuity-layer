@@ -8,6 +8,7 @@ from pathlib import Path
 from .cli import main as legacy_main
 from .experience import compact_experience
 from .habit_approval import apply_habit_approval, preview_habit_approval
+from .intent_approval_cli import run as run_intent_approval
 from .intent_discovery import (
     discover_intent_candidate,
     load_default_intent_discovery_policy,
@@ -215,6 +216,12 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "approve-habit":
         try:
             return _run_approval(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "approve-intent":
+        try:
+            return run_intent_approval(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
