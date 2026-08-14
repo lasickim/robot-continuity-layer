@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:intent-revision-result",
+  "title": "RCL Intent Revision Apply Result v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "revision_version",
+    "method",
+    "created_at",
+    "behavior_id",
+    "revision_id",
+    "candidate_id",
+    "candidate_sha256",
+    "patch_sha256",
+    "source_robot_id",
+    "source_profile_id",
+    "output_profile_id",
+    "output_path",
+    "source_unchanged",
+    "output_valid",
+    "diff_summary",
+    "causal_claim",
+    "disclaimer"
+  ],
+  "properties": {
+    "revision_version": {"const": "0.1"},
+    "method": {"const": "rcl.intent.revision.apply.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "revision_id": {"type": "string", "minLength": 1},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "patch_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "source_robot_id": {"type": "string", "minLength": 1},
+    "source_profile_id": {"type": ["string", "null"]},
+    "output_profile_id": {"type": "string", "minLength": 1},
+    "output_path": {"type": "string", "minLength": 1},
+    "source_unchanged": {"const": true},
+    "output_valid": {"const": true},
+    "diff_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added_behaviors", "removed_behaviors", "modified_behaviors"],
+      "properties": {
+        "added_behaviors": {"type": "integer", "minimum": 0},
+        "removed_behaviors": {"type": "integer", "minimum": 0},
+        "modified_behaviors": {"type": "integer", "minimum": 0}
+      }
+    },
+    "causal_claim": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
