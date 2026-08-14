@@ -59,7 +59,7 @@ The package container remains the five-payload `.rcl` format.
 
 ## v0.4 — Behavior Intent / Goal Semantics
 
-Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, discover and explicitly approve reviewable purpose hypotheses, allow those interpretations to be corrected later without erasing history, and keep long-lived experience storage lightweight enough for real robots.
+Primary goal: preserve **why** a behavior exists independently from the source body's physical strategy or recognizable motion, discover and explicitly approve reviewable purpose hypotheses, allow those interpretations to be corrected later without erasing history, measure whether a target actually satisfies the declared purpose, and keep long-lived experience storage lightweight enough for real robots.
 
 - [x] optional `behavior.intent` block
 - [x] portable goal / trigger / success-condition / failure-action model
@@ -104,11 +104,18 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] revised-intent provenance with reason, evidence refs, approval actor/time, and `causal_claim=false`
 - [x] `rcl revise-intent preview|apply` CLI
 - [x] Profile Diff support for current Intent replacement plus Intent-history addition
+- [x] Observed Intent Success v0.1 distinct from motion similarity
+- [x] Intent Observation Input v0.1 with exact behavior/trigger/success-condition matching
+- [x] pass / fail / not_observable / not_triggered intent-result statuses
+- [x] required-intent failed / inconclusive aggregate rules without a universal success-rate threshold
+- [x] target-native strategy audit metadata excluded from pass/fail logic
+- [x] V1 source-style and V2 target-native fixtures satisfying the same declared intents
+- [x] `rcl evaluate-intent` CLI
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
 - [ ] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
-- [ ] observed intent-success evidence model distinct from motion similarity
+- [ ] repeated-trial / repeated-session statistical Intent Success evaluation
 - [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
 - [ ] explicit retention / prune / archive policy after verified compaction
 - [ ] summary-aware Habit evidence evaluation with raw-vs-aggregate provenance distinction
@@ -123,9 +130,9 @@ LOOKS    → expression
 HISTORY  → habit / legacy / prior Intent interpretations
 ```
 
-A target may change HOW and lose an optional LOOKS expression while still preserving WHY.
+A target may change HOW and lose an optional LOOKS expression while still preserving WHY. Observed Intent Success then asks whether the target actually satisfied the declared success condition, independently from source-motion similarity.
 
-Intent Discovery, Approval, and Revision form an auditable meaning lifecycle. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
+Intent Discovery, Approval, Revision, Migration, and Observed Intent Success form an auditable meaning lifecycle. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
 
 ```text
 experience
@@ -154,10 +161,14 @@ explicit Intent Revision
   ↓
 new current Intent + append-only previous Intent history
   ↓
-continuity
+migration to another embodiment
+  ↓
+Observed Intent Success
+  ↓
+separate motion / statistical evaluation
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Neither operation proves causality, and revision never silently erases the previous interpretation.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. None of these operations proves causality or subjective purpose.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -199,6 +210,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] measured before/after following behavior
 - [ ] measured before/after manipulation behavior
 - [ ] measured functional-intent success independently from visible expression similarity
+- [ ] source-style versus target-native strategy Intent Success demo on physical robots
 - [ ] live learned-habit capture and promotion demo
 - [ ] live context-action-outcome capture for an emergent behavior
 - [ ] real Intent Candidate generation from longitudinal robot data
@@ -232,6 +244,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] multi-vendor adapter ecosystem
 - [ ] independent conformance suites for multiple embodiment classes
 - [ ] measured continuity evaluation profile
+- [ ] observed functional-intent success evaluation profile
 - [ ] reproducible statistical evaluation protocol
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
@@ -248,4 +261,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.

@@ -77,6 +77,11 @@ from .intent_revision import (
     apply_intent_revision,
     preview_intent_revision,
 )
+from .intent_success_evaluation import (
+    INTENT_SUCCESS_EVALUATION_METHOD,
+    INTENT_SUCCESS_EVALUATION_VERSION,
+    evaluate_observed_intent_success,
+)
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
 from .profile_diff import (
@@ -134,6 +139,8 @@ __all__ = [
     "INTENT_REVISION_APPLY_METHOD",
     "INTENT_REVISION_PATCH_METHOD",
     "INTENT_REVISION_VERSION",
+    "INTENT_SUCCESS_EVALUATION_METHOD",
+    "INTENT_SUCCESS_EVALUATION_VERSION",
     "INTENT_VOCABULARY_VERSION",
     "IntentMigrationResult",
     "IntentReferenceAdapter",
@@ -161,6 +168,7 @@ __all__ = [
     "discover_intent_candidate_from_summary",
     "evaluate_habit_promotion_candidates",
     "evaluate_observed_continuity",
+    "evaluate_observed_intent_success",
     "evaluate_repeated_sessions",
     "get_capability",
     "get_intent_goal",
