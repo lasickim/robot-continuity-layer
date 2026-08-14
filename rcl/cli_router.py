@@ -6,6 +6,7 @@ import sys
 from pathlib import Path
 
 from .cli import main as legacy_main
+from .experience import compact_experience
 from .habit_approval import apply_habit_approval, preview_habit_approval
 from .intent_discovery import (
     discover_intent_candidate,
@@ -166,6 +167,50 @@ def _run_discovery(argv: list[str]) -> int:
     return 0 if report["status"] == "candidate" else 7
 
 
+def _experience_parser() -> argparse.ArgumentParser:
+    parser = argparse.ArgumentParser(prog="rcl compact-experience")
+    parser.add_argument("source")
+    parser.add_argument("--output")
+    parser.add_argument("--retained-exemplars", type=int, default=4)
+    parser.add_argument("--json", action="store_true")
+    return parser
+
+
+def _run_experience(argv: list[str]) -> int:
+    args = _experience_parser().parse_args(argv)
+    source = _read_json(args.source)
+    summary = compact_experience(source, retained_exemplars=args.retained_exemplars)
+
+    if args.output:
+        print(_write_json(args.output, summary))
+    elif args.json:
+        print(json.dumps(summary, indent=2, ensure_ascii=False))
+    else:
+        print("RCL Experience Compaction")
+        print(f"Store: {summary['source']['store_id']}")
+        print(f"Episodes: {summary['source']['episode_count']}")
+        print(f"Groups: {summary['group_count']}")
+        print("Destructive: NO")
+        for group in summary["groups"]:
+            print(
+                f"- {group['action_id']} context={group['context']} "
+                f"episodes={group['episode_count']} present={group['action_present_count']} "
+                f"absent={group['action_absent_count']}"
+            )
+            for outcome_id, stats in group["outcomes"].items():
+                if stats["type"] == "numeric":
+                    print(
+                        f"    {outcome_id}: numeric n={stats['count']} mean={stats['mean']} "
+                        f"std={stats['sample_std']} range=[{stats['min']}, {stats['max']}]"
+                    )
+                else:
+                    print(
+                        f"    {outcome_id}: binary n={stats['count']} "
+                        f"true_rate={stats['true_rate']}"
+                    )
+    return 0
+
+
 def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "approve-habit":
         try:
@@ -176,6 +221,12 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "discover-intent":
         try:
             return _run_discovery(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "compact-experience":
+        try:
+            return _run_experience(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
