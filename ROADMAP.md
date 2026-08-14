@@ -88,7 +88,10 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] source/provenance digests plus early/late retained exemplars
 - [x] `rcl compact-experience` CLI
 - [x] explicit `destructive=false` compaction boundary; no automatic source deletion
-- [ ] Explicit Intent Approval / Profile Patch that converts an accepted candidate into a new immutable snapshot
+- [x] Explicit Intent Approval / Profile Patch v0.1
+- [x] deterministic candidate-report and source-behavior SHA-256 provenance
+- [x] immutable approved snapshot with `behavior.intent` provenance and `causal_claim=false`
+- [x] `rcl approve-intent preview|apply` CLI
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
@@ -97,6 +100,7 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
 - [ ] explicit retention / prune / archive policy after verified compaction
 - [ ] summary-aware Habit / Intent evidence evaluation with raw-vs-aggregate provenance distinction
+- [ ] intent correction/replacement workflow with preserved provenance
 
 ### v0.4 semantic rule
 
@@ -110,7 +114,7 @@ HISTORY  → habit / legacy
 
 A target may change HOW and lose an optional LOOKS expression while still preserving WHY.
 
-Intent Discovery extends the lifecycle before intent is declared:
+Intent Discovery and Approval now close the lifecycle before intent is declared:
 
 ```text
 experience
@@ -123,14 +127,18 @@ context-action-outcome evidence
   ↓
 Intent Candidate
   ↓
-explicit review / future approval
+explicit review
   ↓
-declared intent
+Intent Approval
+  ↓
+new immutable snapshot
+  ↓
+declared intent + provenance
   ↓
 continuity
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity, not that causality was proven.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -155,7 +163,7 @@ Long-lived intent/history profiles will also need stronger provenance and privac
 - [ ] memory namespaces
 - [ ] encrypted private sections
 - [ ] profile signing
-- [ ] provenance metadata beyond current experience digests
+- [ ] provenance metadata beyond current experience/intent approval digests
 - [ ] selective export
 - [ ] retained-history archival / deletion policy
 
@@ -174,7 +182,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] live learned-habit capture and promotion demo
 - [ ] live context-action-outcome capture for an emergent behavior
 - [ ] real Intent Candidate generation from longitudinal robot data
-- [ ] explicit human review of a discovered intent candidate
+- [ ] explicit human approval of a discovered intent candidate into a real snapshot
 - [ ] multi-session Statistical Continuity Score on physical robots
 - [ ] controlled experiment context capture from real sessions
 - [ ] uncertainty and confidence reporting on real robot data
@@ -218,4 +226,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, and measurable preservation of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, reviewable purpose hypotheses, explicit approved continuity mutations, and measurable preservation of robot continuity data.
