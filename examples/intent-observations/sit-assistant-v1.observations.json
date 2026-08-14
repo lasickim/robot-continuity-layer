@@ -1,0 +1,28 @@
+{
+  "intent_observation_version": "0.1",
+  "robot_id": "RCL-INTENT-DEMO-V1",
+  "embodiment_id": "intent-demo-v1-humanoid",
+  "captured_at": "2026-08-15T01:00:00Z",
+  "intent_observations": [
+    {
+      "observation_id": "v1-sit-001",
+      "behavior_id": "safety.pre_sit_clearance_check",
+      "trigger": "activity.before_sit_down",
+      "trigger_state": "observed",
+      "success_condition": "state.sitting_area_clear",
+      "success_state": "satisfied",
+      "strategy_id": "source.rearward_body_observation",
+      "evidence_refs": ["observation://v1/sit/rearward-check"]
+    },
+    {
+      "observation_id": "v1-handover-001",
+      "behavior_id": "interaction.present_handover",
+      "trigger": "interaction.before_handover_release",
+      "trigger_state": "observed",
+      "success_condition": "state.handover_orientation_acceptable",
+      "success_state": "satisfied",
+      "strategy_id": "source.brief_wrist_roll",
+      "evidence_refs": ["observation://v1/handover/wrist-roll"]
+    }
+  ]
+}
