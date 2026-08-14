@@ -1,0 +1,37 @@
+name: Feature proposal
+description: Propose a new RCL behavior, capability, adapter, or interoperability feature
+title: "[Proposal] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping shape RCL. For semantic additions, describe meaning before hardware implementation.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What continuity or interoperability problem should RCL solve?
+    validations:
+      required: true
+  - type: textarea
+    id: semantic
+    attributes:
+      label: Proposed semantic behavior or interface
+      description: Describe the portable meaning, not just device-specific commands.
+    validations:
+      required: true
+  - type: textarea
+    id: capabilities
+    attributes:
+      label: Required target capabilities
+      description: Which embodiment capabilities are needed to preserve this behavior?
+  - type: textarea
+    id: degradation
+    attributes:
+      label: Safe degradation
+      description: What should happen when exact preservation is impossible?
+  - type: textarea
+    id: evaluation
+    attributes:
+      label: Evaluation
+      description: How could continuity be measured or tested?
