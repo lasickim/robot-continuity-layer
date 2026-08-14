@@ -1,0 +1,8 @@
+{
+  "robot_id": "RCL-INTENT-DEMO-V1",
+  "display_name": "Intent Demo V1",
+  "continuity_generation": 1,
+  "first_activated_at": "2026-01-01T00:00:00Z",
+  "previous_profile_id": null,
+  "notes": "Reference profile demonstrating functional intent versus visible legacy expression."
+}
