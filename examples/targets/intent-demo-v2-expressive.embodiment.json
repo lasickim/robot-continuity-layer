@@ -1,0 +1,43 @@
+{
+  "embodiment_id": "intent-demo-v2-expressive-humanoid",
+  "vendor": "RCL Demo",
+  "model": "Intent V2 Expressive",
+  "class": "humanoid",
+  "capabilities": [
+    "perception.sitting_area_clearance",
+    "perception.directional_attention",
+    "manipulation.handover_orientation"
+  ],
+  "sensors": ["rear_depth_camera"],
+  "limits": {
+    "expression_timing_profiles": {
+      "observation.brief_rearward_check": {
+        "tempo_duration_ms": {
+          "deliberate": 900,
+          "relaxed": 620,
+          "natural": 380,
+          "quick": 260
+        },
+        "dwell_duration_ms": {
+          "none": 0,
+          "brief": 160,
+          "natural": 320,
+          "held": 700
+        },
+        "return_duration_ms": {
+          "deliberate": 850,
+          "relaxed": 580,
+          "natural": 360,
+          "quick": 250
+        },
+        "min_safe_motion_duration_ms": 220,
+        "max_safe_motion_duration_ms": 1200,
+        "max_safe_dwell_duration_ms": 900
+      }
+    }
+  },
+  "adapter": {
+    "adapter_id": "rcl.reference.intent",
+    "adapter_version": "0.4-dev"
+  }
+}
