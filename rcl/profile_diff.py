@@ -75,6 +75,18 @@ def _get_path(item: dict[str, Any], path: str) -> Any:
 def _field_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[str, Any]]:
     fields = (
         "description",
+        "intent.goal_id",
+        "intent.description",
+        "intent.trigger",
+        "intent.success_condition",
+        "intent.failure_action",
+        "intent.criticality",
+        "intent.required_capabilities",
+        "intent.constraints",
+        "expression.expression_id",
+        "expression.description",
+        "expression.preservation_priority",
+        "expression.required_capabilities",
         "preservation.priority",
         "preservation.mode",
         "source",

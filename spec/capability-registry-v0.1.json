@@ -52,6 +52,26 @@
       "non_goals": ["Does not require a humanoid head or movable camera.", "Does not imply human-like gaze or social intent."],
       "introduced_in_rcl": "0.2",
       "replaced_by": null
+    },
+    {
+      "capability_id": "perception.sitting_area_clearance",
+      "namespace": "perception",
+      "status": "experimental",
+      "summary": "Can determine whether an intended sitting or support area is sufficiently clear for a sitting action.",
+      "semantics": "The target can establish whether the region that will receive the robot during a sitting action is free of blocking people or objects with enough confidence for a pre-sit safety decision. The capability is modality-independent and may be implemented with rear cameras, depth sensing, lidar, contact sensing, maps, or sensor fusion.",
+      "non_goals": ["Does not require the robot to rotate its body or head before sitting.", "Does not prescribe a particular sensor direction or sensing modality.", "Does not by itself certify the sitting motion as physically safe."],
+      "introduced_in_rcl": "0.4",
+      "replaced_by": null
+    },
+    {
+      "capability_id": "manipulation.handover_orientation",
+      "namespace": "manipulation",
+      "status": "experimental",
+      "summary": "Can realize an acceptable object or end-effector orientation for a handover.",
+      "semantics": "The target can control or select presentation orientation sufficiently to satisfy a semantic handover-orientation goal. It may use wrist motion, arm posture, grasp selection, regrasping, or another embodiment-specific strategy.",
+      "non_goals": ["Does not prescribe a wrist angle or joint trajectory.", "Does not imply force-controlled release or recipient intent detection."],
+      "introduced_in_rcl": "0.4",
+      "replaced_by": null
     }
   ]
 }

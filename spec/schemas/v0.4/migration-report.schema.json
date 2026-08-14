@@ -9,35 +9,9 @@
     "rcl_version": {"const": "0.2"},
     "report_version": {"const": "0.2"},
     "created_at": {"type": "string", "format": "date-time"},
-    "source": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["robot_id", "profile_id", "embodiment_id"],
-      "properties": {
-        "robot_id": {"type": "string"},
-        "profile_id": {"type": ["string", "null"]},
-        "embodiment_id": {"type": "string"}
-      }
-    },
-    "target": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["embodiment_id", "vendor", "model"],
-      "properties": {
-        "embodiment_id": {"type": "string"},
-        "vendor": {"type": ["string", "null"]},
-        "model": {"type": ["string", "null"]}
-      }
-    },
-    "adapter": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": ["adapter_id", "adapter_version"],
-      "properties": {
-        "adapter_id": {"type": "string"},
-        "adapter_version": {"type": "string"}
-      }
-    },
+    "source": {"type": "object", "additionalProperties": false, "required": ["robot_id", "profile_id", "embodiment_id"], "properties": {"robot_id": {"type": "string"}, "profile_id": {"type": ["string", "null"]}, "embodiment_id": {"type": "string"}}},
+    "target": {"type": "object", "additionalProperties": false, "required": ["embodiment_id", "vendor", "model"], "properties": {"embodiment_id": {"type": "string"}, "vendor": {"type": ["string", "null"]}, "model": {"type": ["string", "null"]}}},
+    "adapter": {"type": "object", "additionalProperties": false, "required": ["adapter_id", "adapter_version"], "properties": {"adapter_id": {"type": "string"}, "adapter_version": {"type": "string"}}},
     "behavior_results": {
       "type": "array",
       "items": {

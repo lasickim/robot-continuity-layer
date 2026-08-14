@@ -1,0 +1,83 @@
+{
+  "behaviors": [
+    {
+      "behavior_id": "safety.pre_sit_clearance_check",
+      "description": "Verify the intended sitting area before committing to the sitting motion.",
+      "parameters": {
+        "verification_pause_ms": 250
+      },
+      "required_capabilities": [],
+      "intent": {
+        "goal_id": "safety.verify_sitting_area_clear",
+        "description": "Do not sit until the intended support area is known to be clear.",
+        "trigger": "activity.before_sit_down",
+        "success_condition": "state.sitting_area_clear",
+        "failure_action": "block",
+        "criticality": "required",
+        "required_capabilities": ["perception.sitting_area_clearance"],
+        "constraints": ["safety.no_unverified_sit"]
+      },
+      "expression": {
+        "expression_id": "observation.brief_rearward_check",
+        "description": "Briefly turn sensing or body orientation rearward before sitting, matching the recognizable V1 behavior.",
+        "preservation_priority": "optional",
+        "required_capabilities": ["perception.directional_attention"]
+      },
+      "preservation": {
+        "priority": "required",
+        "mode": "semantic"
+      },
+      "source": "learned",
+      "confidence": 0.95,
+      "habit": {
+        "lifecycle": "legacy",
+        "first_observed_at": "2026-01-10T00:00:00Z",
+        "stable_since": "2026-02-10T00:00:00Z",
+        "legacy_since": "2026-06-10T00:00:00Z",
+        "events": [
+          {
+            "event_id": "sit-check-001",
+            "observed_at": "2026-01-10T00:00:00Z",
+            "event_type": "observed",
+            "note": "V1 repeatedly looked rearward before sitting because its original sensing layout required the check."
+          },
+          {
+            "event_id": "sit-check-002",
+            "observed_at": "2026-06-10T00:00:00Z",
+            "event_type": "legacy_promoted",
+            "note": "The visible rearward check became a recognizable historical behavior, while the functional goal remained pre-sit clearance verification."
+          }
+        ]
+      }
+    },
+    {
+      "behavior_id": "interaction.present_handover",
+      "description": "Present a held object in a suitable orientation before handover release.",
+      "parameters": {
+        "release_delay_ms": 300
+      },
+      "required_capabilities": [],
+      "intent": {
+        "goal_id": "interaction.optimize_handover_orientation",
+        "description": "Achieve a handover-friendly presentation orientation rather than reproducing a fixed wrist angle.",
+        "trigger": "interaction.before_handover_release",
+        "success_condition": "state.handover_orientation_acceptable",
+        "failure_action": "retry",
+        "criticality": "preferred",
+        "required_capabilities": ["manipulation.handover_orientation"]
+      },
+      "expression": {
+        "expression_id": "handover.brief_wrist_roll",
+        "description": "A brief wrist-roll motion that was recognizable on V1 but is not itself the functional handover goal.",
+        "preservation_priority": "optional",
+        "required_capabilities": ["x.demo.wrist_roll"]
+      },
+      "preservation": {
+        "priority": "preferred",
+        "mode": "semantic"
+      },
+      "source": "learned",
+      "confidence": 0.9
+    }
+  ]
+}

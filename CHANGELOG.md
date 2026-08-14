@@ -1,5 +1,24 @@
 # Changelog
 
+## 0.4.0-dev — 2026-08-14
+
+- Added Behavior Intent / Goal Semantics v0.1 so portable behavior can declare why it exists independently from source-body execution details.
+- Added optional `behavior.intent` metadata for goal ID, trigger, success condition, failure action, criticality, semantic capabilities, and constraints.
+- Added optional `behavior.expression` metadata so recognizable visible motions can be preserved separately from functional purpose.
+- Added Behavior Intent vocabulary v0.1 with `safety.verify_sitting_area_clear` and `interaction.optimize_handover_orientation`.
+- Added the semantic capabilities `perception.sitting_area_clearance` and `manipulation.handover_orientation` to Capability Registry v0.1.
+- Added packaged/public intent vocabulary copies and v0.4 behavior/migration schemas with regression checks that keep published artifacts aligned with runtime artifacts.
+- Added `IntentMigrationResult` and `ExpressionMigrationResult` plus backward-compatible intent/expression hooks on `RCLAdapter`.
+- Added required-intent hard migration gating: a required goal that is unsupported or safety-blocked forces `migration_success=false` without folding intent into the existing numeric Behavior Continuity Score.
+- Kept optional/preferred visible-expression loss separate from functional intent so obsolete source-body motions do not falsely fail migration.
+- Added `IntentReferenceAdapter` demonstrating target-native strategy selection for goal preservation.
+- Added a V1 → V2 pre-sit reference example where V1's rearward-looking motion is not required on V2 because V2 can perform direct rear clearance sensing.
+- Added a handover reference example where the handover-orientation goal survives even when V1's recognizable wrist-roll expression cannot be reproduced.
+- Extended Profile Diff to expose intent and expression changes, including goal, trigger, success condition, failure action, criticality, capabilities, and expression preservation fields.
+- Added validation that unknown standard-looking goal IDs are rejected while `x.<owner>.<semantic_path>` intent extensions remain available for experimentation.
+- Preserved backward compatibility for existing profiles without intent/expression metadata and kept the `.rcl` five-payload package container at its existing format version.
+- Added `docs/BEHAVIOR_INTENT.md` and moved the project package version to `0.4.0.dev0`.
+
 ## 0.3.0-dev — 2026-08-14
 
 - Added the first ROS 2 reference integration as a separate `rcl_ros2` package.

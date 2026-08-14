@@ -1,0 +1,16 @@
+{
+  "embodiment_id": "intent-demo-v2-humanoid",
+  "vendor": "RCL Demo",
+  "model": "Intent V2",
+  "class": "humanoid",
+  "capabilities": [
+    "perception.sitting_area_clearance",
+    "manipulation.handover_orientation"
+  ],
+  "sensors": ["rear_depth_camera"],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.intent",
+    "adapter_version": "0.4-dev"
+  }
+}

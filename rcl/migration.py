@@ -33,19 +33,54 @@ def migrate_profile(
         )
 
     results: list[dict[str, Any]] = []
+    intent_required_failures: list[str] = []
+    has_intent = False
+
     for item in source_behavior["behaviors"]:
-        # Validate the adapter's complete semantic requirement set, including
-        # capabilities the adapter adds beyond those declared in the profile.
+        # Validate every semantic capability set exposed by the adapter/profile.
         validate_capability_set(adapter.required_capabilities(item))
-        results.append(
-            adapter.translate_behavior(
-                item,
-                source_embodiment,
-                target_embodiment,
-            ).to_dict()
+        validate_capability_set(adapter.intent_required_capabilities(item))
+        validate_capability_set(adapter.expression_required_capabilities(item))
+
+        behavior_result = adapter.translate_behavior(
+            item,
+            source_embodiment,
+            target_embodiment,
+        ).to_dict()
+
+        intent_result = adapter.translate_intent(
+            item,
+            source_embodiment,
+            target_embodiment,
         )
+        if intent_result is not None:
+            has_intent = True
+            behavior_result["intent_result"] = intent_result.to_dict()
+            intent = item["intent"]
+            if (
+                intent["criticality"] == "required"
+                and intent_result.status in {"unsupported", "blocked_for_safety"}
+            ):
+                intent_required_failures.append(f"intent:{item['behavior_id']}")
+
+        expression_result = adapter.translate_expression(
+            item,
+            source_embodiment,
+            target_embodiment,
+        )
+        if expression_result is not None:
+            behavior_result["expression_result"] = expression_result.to_dict()
+
+        results.append(behavior_result)
 
     score = calculate_continuity_score(source_behavior["behaviors"], results)
+    if has_intent:
+        score["intent_required_failures"] = sorted(intent_required_failures)
+    if intent_required_failures:
+        score["migration_success"] = False
+        score["required_failures"] = sorted(
+            set(score["required_failures"]) | set(intent_required_failures)
+        )
 
     report = {
         "rcl_version": "0.2",
