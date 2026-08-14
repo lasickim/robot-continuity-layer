@@ -22,6 +22,12 @@ from .experiment_context import (
     DEFAULT_COMPARISON_FIELDS,
     compare_experiment_context,
 )
+from .habit_policy import (
+    HABIT_PROMOTION_METHOD,
+    HABIT_PROMOTION_VERSION,
+    evaluate_habit_promotion_candidates,
+    load_default_habit_promotion_policy,
+)
 from .history import HABIT_LIFECYCLES, validate_behavior_habit_metadata
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, RCL_VERSION
@@ -62,6 +68,8 @@ __all__ = [
     "EVALUATION_METHOD",
     "EVALUATION_VERSION",
     "HABIT_LIFECYCLES",
+    "HABIT_PROMOTION_METHOD",
+    "HABIT_PROMOTION_VERSION",
     "PROFILE_DIFF_METHOD",
     "PROFILE_DIFF_VERSION",
     "RCLAdapter",
@@ -78,10 +86,12 @@ __all__ = [
     "compare_trial_distributions",
     "confidence_interval_95",
     "diff_profiles",
+    "evaluate_habit_promotion_candidates",
     "evaluate_observed_continuity",
     "evaluate_repeated_sessions",
     "get_capability",
     "load_capability_registry",
+    "load_default_habit_promotion_policy",
     "migrate_profile",
     "registered_capabilities",
     "reserved_namespaces",
