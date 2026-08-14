@@ -14,6 +14,7 @@ from .intent_discovery import (
     load_default_intent_discovery_policy,
 )
 from .intent_revision_cli import run as run_intent_revision
+from .intent_summary_discovery_cli import run as run_intent_summary_discovery
 from .profile import RCLProfile, RCLValidationError
 
 
@@ -136,6 +137,7 @@ def _run_discovery(argv: list[str]) -> int:
         print(f"Action: {hypothesis['candidate_action_id']}")
         print(f"Proposed Goal: {intent['goal_id']}")
         print(f"Context: {hypothesis['context_match']}")
+        print("Evidence Basis: RAW")
         print(
             "Samples: "
             f"context={evidence['context_episode_count']} "
@@ -229,6 +231,12 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "revise-intent":
         try:
             return run_intent_revision(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "discover-intent-summary":
+        try:
+            return run_intent_summary_discovery(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2

@@ -27,13 +27,17 @@ def _canonical_json(value: Any) -> str:
     return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
 
 
-def _candidate_id(dataset: dict[str, Any]) -> str:
+def _sha256_json(value: Any) -> str:
+    return hashlib.sha256(_canonical_json(value).encode("utf-8")).hexdigest()
+
+
+def _candidate_id(hypothesis: dict[str, Any]) -> str:
     material = {
-        "dataset_id": dataset["dataset_id"],
-        "candidate_action_id": dataset["candidate_action_id"],
-        "context_match": dataset["context_match"],
-        "outcome_id": dataset["outcome"]["outcome_id"],
-        "goal_id": dataset["proposed_intent"]["goal_id"],
+        "dataset_id": hypothesis["dataset_id"],
+        "candidate_action_id": hypothesis["candidate_action_id"],
+        "context_match": hypothesis["context_match"],
+        "outcome_id": hypothesis["outcome"]["outcome_id"],
+        "goal_id": hypothesis["proposed_intent"]["goal_id"],
     }
     digest = hashlib.sha256(_canonical_json(material).encode("utf-8")).hexdigest()[:16]
     return f"intent-candidate-{digest}"
@@ -85,7 +89,7 @@ def _gate(
     }
 
 
-def _validate_hypothesis(dataset: dict[str, Any]) -> None:
+def _validate_hypothesis(hypothesis: dict[str, Any]) -> None:
     # Reuse the same goal/capability vocabulary checks as a real behavior intent
     # without mutating or constructing an RCL profile.
     synthetic = {
@@ -94,7 +98,7 @@ def _validate_hypothesis(dataset: dict[str, Any]) -> None:
                 "behavior_id": "x.rcl.intent_discovery_candidate",
                 "parameters": {},
                 "preservation": {"priority": "optional", "mode": "semantic"},
-                "intent": dataset["proposed_intent"],
+                "intent": hypothesis["proposed_intent"],
             }
         ]
     }
@@ -134,61 +138,80 @@ def _validate_dataset_cross_fields(dataset: dict[str, Any]) -> None:
     _validate_hypothesis(dataset)
 
 
-def discover_intent_candidate(
-    dataset: dict[str, Any],
-    *,
-    policy: dict[str, Any] | None = None,
-    created_at: str | None = None,
-) -> dict[str, Any]:
-    """Evaluate a generic context-action-outcome intent hypothesis.
+def _validate_summary_cross_fields(summary: dict[str, Any]) -> None:
+    if summary["group_count"] != len(summary["groups"]):
+        raise RCLValidationError("Experience Summary group_count does not match groups length")
 
-    The function measures association only. It does not infer causality, invent a
-    goal, mutate an RCL profile, or approve the proposed intent.
-    """
+    seen_group_ids: set[str] = set()
+    source_count = 0
+    for group in summary["groups"]:
+        group_id = group["group_id"]
+        if group_id in seen_group_ids:
+            raise RCLValidationError(f"Duplicate Experience Summary group_id: {group_id}")
+        seen_group_ids.add(group_id)
 
-    validate_schema(dataset, "intent-discovery-dataset")
-    _validate_dataset_cross_fields(dataset)
+        if group["action_present_count"] + group["action_absent_count"] != group["episode_count"]:
+            raise RCLValidationError(
+                f"{group_id}: action-present/absent counts do not sum to episode_count"
+            )
+        if group["provenance"]["source_episode_count"] != group["episode_count"]:
+            raise RCLValidationError(
+                f"{group_id}: provenance source_episode_count does not match episode_count"
+            )
+        source_count += group["episode_count"]
 
-    effective_policy = policy or load_default_intent_discovery_policy()
-    validate_schema(effective_policy, "intent-discovery-policy")
+        strata = group.get("action_strata")
+        if strata is None:
+            continue
+        for stratum_name, expected_count in (
+            ("present", group["action_present_count"]),
+            ("absent", group["action_absent_count"]),
+        ):
+            stratum = strata[stratum_name]
+            if stratum["episode_count"] != expected_count:
+                raise RCLValidationError(
+                    f"{group_id}: {stratum_name} stratum count does not match group action count"
+                )
+            if expected_count == 0 and stratum["outcomes"]:
+                raise RCLValidationError(
+                    f"{group_id}: zero-count {stratum_name} stratum must not contain outcome statistics"
+                )
+            for outcome_id, stats in stratum["outcomes"].items():
+                if outcome_id not in group["outcome_ids"]:
+                    raise RCLValidationError(
+                        f"{group_id}: stratum outcome {outcome_id!r} is not declared in outcome_ids"
+                    )
+                if stats["count"] != expected_count:
+                    raise RCLValidationError(
+                        f"{group_id}: {stratum_name} outcome {outcome_id!r} count does not match stratum count"
+                    )
 
-    selector = dataset["context_match"]
-    candidate_action_id = dataset["candidate_action_id"]
-    outcome = dataset["outcome"]
-    outcome_id = outcome["outcome_id"]
-    outcome_type = outcome["type"]
-
-    context_episodes = [
-        episode
-        for episode in dataset["episodes"]
-        if _matches_context(episode["context"], selector)
-    ]
-
-    present_values: list[float] = []
-    absent_values: list[float] = []
-    for episode in context_episodes:
-        value = _outcome_value(
-            episode["outcomes"][outcome_id],
-            outcome_type,
-            episode_id=episode["episode_id"],
-            outcome_id=outcome_id,
+    if source_count != summary["source"]["episode_count"]:
+        raise RCLValidationError(
+            "Experience Summary group episode counts do not match source episode_count"
         )
-        if episode["action"]["performed"]:
-            present_values.append(value)
-        else:
-            absent_values.append(value)
 
-    total_episode_count = len(dataset["episodes"])
-    context_episode_count = len(context_episodes)
-    ignored_episode_count = total_episode_count - context_episode_count
-    action_present_count = len(present_values)
-    action_absent_count = len(absent_values)
+
+def _build_report(
+    hypothesis: dict[str, Any],
+    *,
+    total_episode_count: int,
+    context_episode_count: int,
+    ignored_episode_count: int,
+    action_present_count: int,
+    action_absent_count: int,
+    present_mean: float | None,
+    absent_mean: float | None,
+    effective_policy: dict[str, Any],
+    evidence_basis: str,
+    evidence_provenance: dict[str, Any],
+    created_at: str | None,
+) -> dict[str, Any]:
+    outcome = hypothesis["outcome"]
+    outcome_type = outcome["type"]
     action_repeat_rate = (
         action_present_count / context_episode_count if context_episode_count else None
     )
-
-    present_mean = _mean(present_values)
-    absent_mean = _mean(absent_values)
     raw_difference = (
         present_mean - absent_mean
         if present_mean is not None and absent_mean is not None
@@ -274,18 +297,20 @@ def discover_intent_candidate(
         "method": INTENT_DISCOVERY_METHOD,
         "created_at": created_at
         or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "dataset_id": dataset["dataset_id"],
-        "candidate_id": _candidate_id(dataset),
+        "dataset_id": hypothesis["dataset_id"],
+        "candidate_id": _candidate_id(hypothesis),
         "policy": {
             "policy_id": effective_policy["policy_id"],
             "policy_version": effective_policy["policy_version"],
         },
         "hypothesis": {
-            "candidate_action_id": candidate_action_id,
-            "context_match": dataset["context_match"],
-            "outcome": dataset["outcome"],
-            "proposed_intent": dataset["proposed_intent"],
+            "candidate_action_id": hypothesis["candidate_action_id"],
+            "context_match": hypothesis["context_match"],
+            "outcome": hypothesis["outcome"],
+            "proposed_intent": hypothesis["proposed_intent"],
         },
+        "evidence_basis": evidence_basis,
+        "evidence_provenance": evidence_provenance,
         "evidence": {
             "total_episode_count": total_episode_count,
             "context_episode_count": context_episode_count,
@@ -308,9 +333,214 @@ def discover_intent_candidate(
         "causal_claim": False,
         "disclaimer": (
             "Intent Discovery v0.1 reports an association-backed engineering hypothesis only. "
-            "It does not prove that the candidate action caused the observed outcome, does not establish subjective intent, "
+            f"Evidence basis is {evidence_basis}; aggregate evidence is not reconstructed raw observation data. "
+            "The report does not prove that the candidate action caused the observed outcome, does not establish subjective intent, "
             "and does not modify or approve an RCL behavior intent."
         ),
     }
     validate_schema(report, "intent-candidate-report")
     return report
+
+
+def discover_intent_candidate(
+    dataset: dict[str, Any],
+    *,
+    policy: dict[str, Any] | None = None,
+    created_at: str | None = None,
+) -> dict[str, Any]:
+    """Evaluate a generic raw context-action-outcome intent hypothesis.
+
+    The function measures association only. It does not infer causality, invent a
+    goal, mutate an RCL profile, or approve the proposed intent.
+    """
+
+    validate_schema(dataset, "intent-discovery-dataset")
+    _validate_dataset_cross_fields(dataset)
+
+    effective_policy = policy or load_default_intent_discovery_policy()
+    validate_schema(effective_policy, "intent-discovery-policy")
+
+    selector = dataset["context_match"]
+    outcome = dataset["outcome"]
+    outcome_id = outcome["outcome_id"]
+    outcome_type = outcome["type"]
+
+    context_episodes = [
+        episode
+        for episode in dataset["episodes"]
+        if _matches_context(episode["context"], selector)
+    ]
+
+    present_values: list[float] = []
+    absent_values: list[float] = []
+    for episode in context_episodes:
+        value = _outcome_value(
+            episode["outcomes"][outcome_id],
+            outcome_type,
+            episode_id=episode["episode_id"],
+            outcome_id=outcome_id,
+        )
+        if episode["action"]["performed"]:
+            present_values.append(value)
+        else:
+            absent_values.append(value)
+
+    total_episode_count = len(dataset["episodes"])
+    context_episode_count = len(context_episodes)
+    return _build_report(
+        dataset,
+        total_episode_count=total_episode_count,
+        context_episode_count=context_episode_count,
+        ignored_episode_count=total_episode_count - context_episode_count,
+        action_present_count=len(present_values),
+        action_absent_count=len(absent_values),
+        present_mean=_mean(present_values),
+        absent_mean=_mean(absent_values),
+        effective_policy=effective_policy,
+        evidence_basis="raw",
+        evidence_provenance={
+            "basis": "raw",
+            "dataset_digest_sha256": _sha256_json(dataset),
+            "source_episode_count": total_episode_count,
+        },
+        created_at=created_at,
+    )
+
+
+def _stratum_mean(
+    group: dict[str, Any],
+    *,
+    stratum_name: str,
+    outcome_id: str,
+    expected_type: str,
+) -> tuple[int, float | None]:
+    strata = group.get("action_strata")
+    if strata is None:
+        raise RCLValidationError(
+            f"{group['group_id']}: action-stratified outcome statistics are required for summary-aware Intent Discovery"
+        )
+    stratum = strata[stratum_name]
+    count = int(stratum["episode_count"])
+    if count == 0:
+        return 0, None
+    stats = stratum["outcomes"].get(outcome_id)
+    if stats is None:
+        raise RCLValidationError(
+            f"{group['group_id']}: {stratum_name} stratum is missing outcome {outcome_id!r}"
+        )
+    if stats["type"] != expected_type:
+        raise RCLValidationError(
+            f"{group['group_id']}: outcome {outcome_id!r} type {stats['type']!r} does not match hypothesis type {expected_type!r}"
+        )
+    if stats["count"] != count:
+        raise RCLValidationError(
+            f"{group['group_id']}: {stratum_name} outcome count does not match stratum count"
+        )
+    value = stats["mean"] if expected_type == "numeric" else stats["true_rate"]
+    return count, float(value)
+
+
+def discover_intent_candidate_from_summary(
+    summary: dict[str, Any],
+    hypothesis: dict[str, Any],
+    *,
+    policy: dict[str, Any] | None = None,
+    created_at: str | None = None,
+) -> dict[str, Any]:
+    """Evaluate an intent hypothesis from action-stratified aggregate evidence.
+
+    This function never reconstructs pseudo-episodes. It consumes only declared
+    counts and aggregate outcome statistics produced by Experience Compaction.
+    """
+
+    validate_schema(summary, "experience-summary")
+    validate_schema(hypothesis, "intent-summary-hypothesis")
+    _validate_summary_cross_fields(summary)
+    _validate_hypothesis(hypothesis)
+
+    total_episode_count = int(summary["source"]["episode_count"])
+    if total_episode_count < 2:
+        raise RCLValidationError(
+            "Summary-aware Intent Discovery requires at least two source episodes"
+        )
+
+    effective_policy = policy or load_default_intent_discovery_policy()
+    validate_schema(effective_policy, "intent-discovery-policy")
+
+    selector = hypothesis["context_match"]
+    candidate_action_id = hypothesis["candidate_action_id"]
+    outcome_id = hypothesis["outcome"]["outcome_id"]
+    outcome_type = hypothesis["outcome"]["type"]
+
+    matching_groups = [
+        group
+        for group in summary["groups"]
+        if group["action_id"] == candidate_action_id
+        and outcome_id in group["outcome_ids"]
+        and _matches_context(group["context"], selector)
+    ]
+    if not matching_groups:
+        raise RCLValidationError(
+            "Experience Summary contains no groups matching the requested context, action, and outcome"
+        )
+
+    present_count = 0
+    absent_count = 0
+    present_weighted_sum = 0.0
+    absent_weighted_sum = 0.0
+    context_episode_count = 0
+
+    for group in matching_groups:
+        combined_stats = group["outcomes"].get(outcome_id)
+        if combined_stats is None or combined_stats["type"] != outcome_type:
+            actual = None if combined_stats is None else combined_stats["type"]
+            raise RCLValidationError(
+                f"{group['group_id']}: outcome {outcome_id!r} type {actual!r} does not match hypothesis type {outcome_type!r}"
+            )
+
+        group_present_count, group_present_mean = _stratum_mean(
+            group,
+            stratum_name="present",
+            outcome_id=outcome_id,
+            expected_type=outcome_type,
+        )
+        group_absent_count, group_absent_mean = _stratum_mean(
+            group,
+            stratum_name="absent",
+            outcome_id=outcome_id,
+            expected_type=outcome_type,
+        )
+
+        context_episode_count += int(group["episode_count"])
+        present_count += group_present_count
+        absent_count += group_absent_count
+        if group_present_mean is not None:
+            present_weighted_sum += group_present_mean * group_present_count
+        if group_absent_mean is not None:
+            absent_weighted_sum += group_absent_mean * group_absent_count
+
+    present_mean = present_weighted_sum / present_count if present_count else None
+    absent_mean = absent_weighted_sum / absent_count if absent_count else None
+
+    return _build_report(
+        hypothesis,
+        total_episode_count=total_episode_count,
+        context_episode_count=context_episode_count,
+        ignored_episode_count=total_episode_count - context_episode_count,
+        action_present_count=present_count,
+        action_absent_count=absent_count,
+        present_mean=present_mean,
+        absent_mean=absent_mean,
+        effective_policy=effective_policy,
+        evidence_basis="aggregate",
+        evidence_provenance={
+            "basis": "aggregate",
+            "summary_id": summary["summary_id"],
+            "summary_method": summary["method"],
+            "store_id": summary["source"]["store_id"],
+            "source_digest_sha256": summary["source"]["source_digest_sha256"],
+            "source_episode_count": total_episode_count,
+            "group_ids": sorted(group["group_id"] for group in matching_groups),
+        },
+        created_at=created_at,
+    )

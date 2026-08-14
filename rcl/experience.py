@@ -91,6 +91,31 @@ def _binary_summary(values: list[bool]) -> dict[str, Any]:
     }
 
 
+def _summarize_outcomes(
+    episodes: list[dict[str, Any]],
+    outcome_ids: list[str],
+    *,
+    action_id: str,
+) -> dict[str, Any]:
+    if not episodes:
+        return {}
+
+    summaries: dict[str, Any] = {}
+    for outcome_id in outcome_ids:
+        values = [episode["outcomes"][outcome_id] for episode in episodes]
+        types = {_outcome_type(value) for value in values}
+        if len(types) != 1:
+            raise RCLValidationError(
+                f"Experience group {action_id} outcome {outcome_id!r} mixes types: {sorted(types)}"
+            )
+        outcome_type = next(iter(types))
+        if outcome_type == "binary":
+            summaries[outcome_id] = _binary_summary(values)
+        else:
+            summaries[outcome_id] = _numeric_summary([float(value) for value in values])
+    return summaries
+
+
 def _select_exemplars(episodes: list[dict[str, Any]], max_exemplars: int) -> list[str]:
     if max_exemplars <= 0:
         return []
@@ -119,6 +144,9 @@ def compact_experience(
     """Create a deterministic, non-destructive semantic summary of experience episodes.
 
     Grouping is generic: exact semantic context + action ID + outcome-key set.
+    The combined outcome summary is retained for backward compatibility, while
+    action-stratified present/absent summaries preserve the association evidence
+    needed by summary-aware Intent Discovery without reconstructing fake episodes.
     No behavior-specific rules, model training, raw-media ingestion, or source deletion occurs.
     """
 
@@ -143,20 +171,24 @@ def compact_experience(
             key=lambda item: (_parse_datetime(item["observed_at"], label=item["episode_id"]), item["episode_id"]),
         )
         outcome_ids = material["outcome_ids"]
-        outcome_summaries: dict[str, Any] = {}
+        present_episodes = [item for item in episodes if item["action"]["performed"]]
+        absent_episodes = [item for item in episodes if not item["action"]["performed"]]
 
-        for outcome_id in outcome_ids:
-            values = [episode["outcomes"][outcome_id] for episode in episodes]
-            types = {_outcome_type(value) for value in values}
-            if len(types) != 1:
-                raise RCLValidationError(
-                    f"Experience group {material['action_id']} outcome {outcome_id!r} mixes types: {sorted(types)}"
-                )
-            outcome_type = next(iter(types))
-            if outcome_type == "binary":
-                outcome_summaries[outcome_id] = _binary_summary(values)
-            else:
-                outcome_summaries[outcome_id] = _numeric_summary([float(value) for value in values])
+        outcome_summaries = _summarize_outcomes(
+            episodes,
+            outcome_ids,
+            action_id=material["action_id"],
+        )
+        present_summaries = _summarize_outcomes(
+            present_episodes,
+            outcome_ids,
+            action_id=material["action_id"],
+        )
+        absent_summaries = _summarize_outcomes(
+            absent_episodes,
+            outcome_ids,
+            action_id=material["action_id"],
+        )
 
         episode_ids = sorted(item["episode_id"] for item in episodes)
         group_digest = _sha256_text("\n".join(episode_ids))
@@ -170,9 +202,19 @@ def compact_experience(
                 "first_observed_at": ordered[0]["observed_at"],
                 "last_observed_at": ordered[-1]["observed_at"],
                 "episode_count": len(episodes),
-                "action_present_count": sum(1 for item in episodes if item["action"]["performed"]),
-                "action_absent_count": sum(1 for item in episodes if not item["action"]["performed"]),
+                "action_present_count": len(present_episodes),
+                "action_absent_count": len(absent_episodes),
                 "outcomes": outcome_summaries,
+                "action_strata": {
+                    "present": {
+                        "episode_count": len(present_episodes),
+                        "outcomes": present_summaries,
+                    },
+                    "absent": {
+                        "episode_count": len(absent_episodes),
+                        "outcomes": absent_summaries,
+                    },
+                },
                 "provenance": {
                     "source_episode_count": len(episodes),
                     "source_episode_id_digest_sha256": group_digest,
