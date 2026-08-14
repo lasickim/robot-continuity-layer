@@ -2,6 +2,15 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Summary-Aware Intent Discovery v0.1 so long-lived context-action-outcome hypotheses can be evaluated directly from non-destructive Experience Summary aggregate evidence.
+- Extended new Experience Compaction output with action-stratified `present` / `absent` outcome summaries while retaining the existing combined outcome statistics and backward-compatible summary schema validity.
+- Added `discover_intent_candidate_from_summary()` and refactored raw and aggregate Intent Discovery through one shared scoring, gate, confidence, and effect-calculation core.
+- Added explicit `evidence_basis=raw|aggregate` plus machine-readable provenance to every Intent Candidate report; raw reports carry the dataset digest while aggregate reports carry summary/store/source digests and contributing group IDs.
+- Added explicit rejection of legacy summaries without action-stratified outcome statistics rather than reconstructing pseudo-episodes or estimating discarded evidence.
+- Added numeric, binary, higher-is-better, and lower-is-better aggregate discovery with raw-vs-summary equivalence regression coverage.
+- Added `rcl discover-intent-summary SUMMARY HYPOTHESIS` and the Summary-Aware Intent Hypothesis v0.1 schema.
+- Added runtime/public parity coverage for the updated Experience Summary, Intent Candidate Report, and Summary-Aware Intent Hypothesis schemas.
+- Added `docs/SUMMARY_INTENT_DISCOVERY.md` and documented that aggregate evidence is an efficiency/provenance representation, not recovered raw observation data or causal proof.
 - Added Intent Revision / Correction v0.1 so a previously declared engineering purpose can be explicitly corrected when later evidence supports a better interpretation without erasing the earlier Intent.
 - Added deterministic `preview_intent_revision()` and `apply_intent_revision()` APIs plus `rcl revise-intent preview|apply`.
 - Added machine-readable Intent Revision Candidate, Patch, and Apply Result schemas with runtime/public parity coverage.
