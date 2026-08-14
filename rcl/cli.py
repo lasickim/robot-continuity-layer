@@ -16,6 +16,7 @@ from .evaluation import evaluate_observed_continuity
 from .example_adapter import ExampleMobileBaseAdapter
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, validate_schema
+from .session_evaluation import evaluate_repeated_sessions
 from .statistical_evaluation import compare_trial_distributions
 
 
@@ -150,6 +151,99 @@ def _cmd_compare_trials(args: argparse.Namespace) -> int:
     return 0 if report["evaluation_success"] else 5
 
 
+def _manifest_path(base: Path, value: str) -> Path:
+    path = Path(value)
+    return path if path.is_absolute() else base / path
+
+
+def _cmd_compare_sessions(args: argparse.Namespace) -> int:
+    profile = RCLProfile.open(args.source)
+    manifest_path = Path(args.session_manifest)
+    manifest = _read_json(manifest_path)
+    validate_schema(manifest, "session-manifest")
+
+    base = manifest_path.resolve().parent
+    pairs = []
+    for item in manifest["sessions"]:
+        pairs.append(
+            {
+                "session_id": item["session_id"],
+                "source_trials": _read_json(_manifest_path(base, item["source_trials"])),
+                "target_trials": _read_json(_manifest_path(base, item["target_trials"])),
+            }
+        )
+
+    report = evaluate_repeated_sessions(
+        profile,
+        pairs,
+        min_sessions=int(manifest["min_sessions"]),
+    )
+
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(output)
+    elif args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print("Repeated-Session Confidence")
+        print(f"Series Comparable: {'YES' if report['series_comparison']['compatible'] else 'NO'}")
+        print(
+            "Sessions: "
+            f"total={report['total_session_count']} "
+            f"scorable={report['scorable_session_count']} "
+            f"successful={report['successful_session_count']} "
+            f"failed={report['failed_session_count']}"
+        )
+        if report["mean_score"] is None:
+            print("Mean Statistical Continuity Score: N/A")
+        else:
+            print(f"Mean Statistical Continuity Score: {report['mean_score']:.2f}%")
+        if report["score_std"] is None:
+            print("Between-Session Std: N/A")
+        else:
+            print(f"Between-Session Std: {report['score_std']:.2f}")
+        ci = report["confidence_interval_95"]
+        if ci is None:
+            print("95% CI: N/A")
+        else:
+            print(
+                f"95% CI: [{ci['low']:.2f}, {ci['high']:.2f}] "
+                f"(half-width={ci['half_width']:.2f}, t={ci['critical_value']:.3f})"
+            )
+        print(f"Evaluation Success: {'YES' if report['evaluation_success'] else 'NO'}")
+        print(f"Status: {report['status']}")
+        for item in report["session_results"]:
+            score = "N/A" if item["score"] is None else f"{item['score']:.2f}%"
+            print(
+                f"- {item['session_id']}: {item['status']} "
+                f"(score={score}, context={'YES' if item['context_compatible'] else 'NO'})"
+            )
+        if report["series_comparison"]["mismatches"]:
+            for item in report["series_comparison"]["mismatches"]:
+                print(
+                    f"- SERIES MISMATCH {item['session_id']} {item['field']}: "
+                    f"reference={item['reference']!r} observed={item['observed']!r}"
+                )
+        if report["metric_summaries"]:
+            print("Metric uncertainty:")
+            for item in report["metric_summaries"]:
+                metric_ci = item["confidence_interval_95"]
+                ci_text = (
+                    "N/A"
+                    if metric_ci is None
+                    else f"[{metric_ci['low']:.3f}, {metric_ci['high']:.3f}]"
+                )
+                std_text = "N/A" if item["similarity_std"] is None else f"{item['similarity_std']:.3f}"
+                print(
+                    f"- {item['behavior_id']}.{item['metric_id']}: "
+                    f"mean={item['mean_similarity']:.3f} std={std_text} 95%CI={ci_text} "
+                    f"sessions={item['session_count']}"
+                )
+    return 0 if report["evaluation_success"] else 6
+
+
 def _cmd_capabilities_list(args: argparse.Namespace) -> int:
     registry = load_capability_registry()
     capabilities = registered_capabilities()
@@ -206,6 +300,7 @@ def main() -> int:
     p_report = sub.add_parser("report"); p_report.add_argument("path"); p_report.set_defaults(func=_cmd_report)
     p_evaluate = sub.add_parser("evaluate"); p_evaluate.add_argument("source"); p_evaluate.add_argument("observations"); p_evaluate.add_argument("--output"); p_evaluate.add_argument("--json", action="store_true"); p_evaluate.set_defaults(func=_cmd_evaluate)
     p_trials = sub.add_parser("compare-trials"); p_trials.add_argument("source"); p_trials.add_argument("source_trials"); p_trials.add_argument("target_trials"); p_trials.add_argument("--output"); p_trials.add_argument("--json", action="store_true"); p_trials.set_defaults(func=_cmd_compare_trials)
+    p_sessions = sub.add_parser("compare-sessions"); p_sessions.add_argument("source"); p_sessions.add_argument("session_manifest"); p_sessions.add_argument("--output"); p_sessions.add_argument("--json", action="store_true"); p_sessions.set_defaults(func=_cmd_compare_sessions)
     p_capabilities = sub.add_parser("capabilities")
     capability_sub = p_capabilities.add_subparsers(dest="capability_command", required=True)
     p_cap_list = capability_sub.add_parser("list"); p_cap_list.add_argument("--json", action="store_true"); p_cap_list.set_defaults(func=_cmd_capabilities_list)
