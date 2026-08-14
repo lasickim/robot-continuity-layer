@@ -2,6 +2,17 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Intent Discovery / Intent Candidate v0.1 as a model-independent evidence layer for newly learned behavior.
+- Added a generic context-action-outcome dataset format that does not hardcode specific robot behaviors.
+- Added a versioned Intent Discovery Policy v0.1 with explicit context sample, action-present, action-absent, and repetition gates.
+- Added dataset-specific `minimum_meaningful_effect` so numeric domains do not inherit a fake universal effect threshold.
+- Added deterministic `discover_intent_candidate()` support for numeric and binary outcomes, including higher-is-better and lower-is-better semantics.
+- Added machine-readable Intent Candidate reports with explicit gates, evidence summaries, strong/moderate/insufficient evidence labels, and `causal_claim=false`.
+- Added `rcl discover-intent` with candidate / insufficient-evidence / validation exit codes.
+- Added a numeric object-release stability fixture and an unrelated binary auto-docking fixture to demonstrate that discovery is generic rather than behavior-specific.
+- Added published/runtime schema and policy parity checks for Intent Discovery artifacts.
+- Documented that `strong` means strong evidence relative to the declared policy, not a probability that the proposed intent is true.
+- Documented that Intent Discovery never writes `behavior.intent`; explicit Intent Approval remains a separate future step.
 - Added Behavior Intent / Goal Semantics v0.1 so portable behavior can declare why it exists independently from source-body execution details.
 - Added optional `behavior.intent` metadata for goal ID, trigger, success condition, failure action, criticality, semantic capabilities, and constraints.
 - Added optional `behavior.expression` metadata so recognizable visible motions can be preserved separately from functional purpose.
