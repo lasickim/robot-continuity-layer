@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:statistical-continuity-report",
+  "title": "RCL Statistical Continuity Report v0.2",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["evaluation_version", "method", "created_at", "source", "target", "score", "evaluation_success", "status", "required_failures", "metric_results", "disclaimer"],
+  "properties": {
+    "evaluation_version": {"const": "0.2"},
+    "method": {"const": "rcl.observed.empirical_wasserstein.v0.2"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source": {"$ref": "#/$defs/robot_capture"},
+    "target": {"$ref": "#/$defs/robot_capture"},
+    "score": {"type": "number", "minimum": 0, "maximum": 100},
+    "evaluation_success": {"type": "boolean"},
+    "status": {"type": "string", "enum": ["matched", "degraded", "failed"]},
+    "required_failures": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "metric_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["behavior_id", "metric_id", "observable", "unit", "tolerance", "zero_credit_at", "priority", "metric_weight", "effective_weight", "required", "min_trials", "source_count", "target_count", "source_mean", "source_std", "target_mean", "target_std", "wasserstein_distance", "status", "similarity"],
+        "properties": {
+          "behavior_id": {"type": "string", "minLength": 1},
+          "metric_id": {"type": "string", "minLength": 1},
+          "observable": {"type": "string", "minLength": 1},
+          "unit": {"type": "string", "minLength": 1},
+          "tolerance": {"type": "number", "minimum": 0},
+          "zero_credit_at": {"type": "number", "exclusiveMinimum": 0},
+          "priority": {"type": "string", "enum": ["required", "preferred", "optional"]},
+          "metric_weight": {"type": "number", "exclusiveMinimum": 0},
+          "effective_weight": {"type": "number", "exclusiveMinimum": 0},
+          "required": {"type": "boolean"},
+          "min_trials": {"type": "integer", "minimum": 2},
+          "source_count": {"type": "integer", "minimum": 0},
+          "target_count": {"type": "integer", "minimum": 0},
+          "source_mean": {"type": ["number", "null"]},
+          "source_std": {"type": ["number", "null"], "minimum": 0},
+          "target_mean": {"type": ["number", "null"]},
+          "target_std": {"type": ["number", "null"], "minimum": 0},
+          "wasserstein_distance": {"type": ["number", "null"], "minimum": 0},
+          "status": {
+            "type": "string",
+            "enum": [
+              "distribution_within_tolerance",
+              "distribution_partial",
+              "distribution_outside_limit",
+              "missing_both",
+              "missing_source",
+              "missing_target",
+              "insufficient_both",
+              "insufficient_source",
+              "insufficient_target"
+            ]
+          },
+          "similarity": {"type": ["number", "null"], "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "robot_capture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["robot_id", "embodiment_id", "captured_at"],
+      "properties": {
+        "robot_id": {"type": "string", "minLength": 1},
+        "embodiment_id": {"type": "string", "minLength": 1},
+        "captured_at": {"type": "string", "format": "date-time"}
+      }
+    }
+  }
+}

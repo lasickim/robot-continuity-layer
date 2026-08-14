@@ -25,8 +25,14 @@
 - Added a transparent full-credit / linear-falloff / zero-credit numeric scoring rule.
 - Added profile validation for invalid evaluation parameter references and invalid tolerance falloff ranges.
 - Added a Robot B observation example (`1.37 m`, `372 ms`) and observed evaluation documentation.
-- Added tests for within-tolerance, partial-credit, zero-credit, missing-required, missing-optional, and invalid metadata cases.
-- Expanded the public roadmap toward repeated-trial source-vs-target observed evaluation and real-robot validation.
+- Added repeated-trial observation format v0.1 for source and target robots.
+- Added Statistical Continuity Evaluation v0.2 using exact dependency-free one-dimensional empirical Wasserstein-1 distance.
+- Added source/target trial count, mean, sample standard deviation, distribution distance, and per-metric similarity reporting.
+- Added per-metric `min_trials` with a default of 5 and explicit required-metric failure on missing or insufficient trial data.
+- Added `compare_trial_distributions()` and `rcl compare-trials` with text, JSON, and report-file output.
+- Added Robot A / Robot B repeated-trial fixtures and documentation.
+- Added regression coverage proving equal means can still receive degraded continuity when empirical distributions differ.
+- Expanded the roadmap toward repeated-session uncertainty, environmental context, and real-robot validation.
 
 ## 0.2.0-dev — 2026-08-14
 

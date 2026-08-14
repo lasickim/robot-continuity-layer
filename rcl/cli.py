@@ -16,6 +16,7 @@ from .evaluation import evaluate_observed_continuity
 from .example_adapter import ExampleMobileBaseAdapter
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, validate_schema
+from .statistical_evaluation import compare_trial_distributions
 
 
 def _read_json(path: str | Path):
@@ -82,10 +83,7 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
     if args.output:
         output = Path(args.output)
         output.parent.mkdir(parents=True, exist_ok=True)
-        output.write_text(
-            json.dumps(report, indent=2, ensure_ascii=False) + "\n",
-            encoding="utf-8",
-        )
+        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
         print(output)
     elif args.json:
         print(json.dumps(report, indent=2, ensure_ascii=False))
@@ -104,20 +102,40 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
     return 0 if report["evaluation_success"] else 4
 
 
+def _cmd_compare_trials(args: argparse.Namespace) -> int:
+    profile = RCLProfile.open(args.source)
+    source_trials = _read_json(args.source_trials)
+    target_trials = _read_json(args.target_trials)
+    report = compare_trial_distributions(profile, source_trials, target_trials)
+
+    if args.output:
+        output = Path(args.output)
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(json.dumps(report, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+        print(output)
+    elif args.json:
+        print(json.dumps(report, indent=2, ensure_ascii=False))
+    else:
+        print(f"Statistical Continuity Score: {report['score']:.2f}%")
+        print(f"Evaluation Success: {'YES' if report['evaluation_success'] else 'NO'}")
+        print(f"Status: {report['status']}")
+        print(f"Required Failures: {len(report['required_failures'])}")
+        for item in report["metric_results"]:
+            distance = "N/A" if item["wasserstein_distance"] is None else f"{item['wasserstein_distance']:.6g}"
+            similarity = "N/A" if item["similarity"] is None else f"{item['similarity']:.2f}"
+            print(
+                f"- {item['behavior_id']}.{item['metric_id']}: {item['status']} "
+                f"(A n={item['source_count']}, B n={item['target_count']}, "
+                f"W1={distance} {item['unit']}, similarity={similarity})"
+            )
+    return 0 if report["evaluation_success"] else 5
+
+
 def _cmd_capabilities_list(args: argparse.Namespace) -> int:
     registry = load_capability_registry()
     capabilities = registered_capabilities()
     if args.json:
-        print(
-            json.dumps(
-                {
-                    "registry_version": registry["registry_version"],
-                    "capabilities": capabilities,
-                },
-                indent=2,
-                ensure_ascii=False,
-            )
-        )
+        print(json.dumps({"registry_version": registry["registry_version"], "capabilities": capabilities}, indent=2, ensure_ascii=False))
         return 0
 
     print(f"RCL Capability Registry v{registry['registry_version']}")
@@ -152,10 +170,7 @@ def _cmd_capabilities_show(args: argparse.Namespace) -> int:
 
 
 def _cmd_capabilities_validate(args: argparse.Namespace) -> int:
-    result = validate_capability_id(
-        args.capability_id,
-        allow_extensions=not args.standard_only,
-    )
+    result = validate_capability_id(args.capability_id, allow_extensions=not args.standard_only)
     if args.json:
         print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
     else:
@@ -201,6 +216,14 @@ def main() -> int:
     p_evaluate.add_argument("--output")
     p_evaluate.add_argument("--json", action="store_true")
     p_evaluate.set_defaults(func=_cmd_evaluate)
+
+    p_trials = sub.add_parser("compare-trials")
+    p_trials.add_argument("source")
+    p_trials.add_argument("source_trials")
+    p_trials.add_argument("target_trials")
+    p_trials.add_argument("--output")
+    p_trials.add_argument("--json", action="store_true")
+    p_trials.set_defaults(func=_cmd_compare_trials)
 
     p_capabilities = sub.add_parser("capabilities")
     capability_sub = p_capabilities.add_subparsers(dest="capability_command", required=True)

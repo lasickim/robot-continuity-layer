@@ -46,7 +46,8 @@
                     "tolerance": {"type": "number", "minimum": 0},
                     "zero_credit_at": {"type": "number", "exclusiveMinimum": 0},
                     "weight": {"type": "number", "exclusiveMinimum": 0},
-                    "required": {"type": "boolean", "default": true}
+                    "required": {"type": "boolean", "default": true},
+                    "min_trials": {"type": "integer", "minimum": 2, "default": 5}
                   }
                 }
               }
