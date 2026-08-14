@@ -93,6 +93,14 @@ def validate_expression_temporal_style(behavior_id: str, style: dict[str, Any]) 
         seen.add(key)
 
 
+def validate_behavior_expression_timing_metadata(behavior_payload: dict[str, Any]) -> None:
+    for behavior in behavior_payload.get("behaviors", []):
+        expression = behavior.get("expression") or {}
+        style = expression.get("temporal_style")
+        if style is not None:
+            validate_expression_temporal_style(behavior["behavior_id"], style)
+
+
 def _mapped_duration(mapping: Any, key: str, *, label: str, allow_zero: bool = False) -> int:
     if not isinstance(mapping, dict) or key not in mapping:
         raise RCLValidationError(f"{label} does not define {key!r}")
