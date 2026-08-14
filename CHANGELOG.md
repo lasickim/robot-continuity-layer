@@ -8,7 +8,11 @@
 - Added a ROS 2 Lyrical mobile-base target embodiment example.
 - Added unit tests that validate ROS-facing migration behavior without requiring ROS 2 or physical hardware.
 - Added public compatibility levels, contribution guidance, issue templates, and pull request guidance.
-- Expanded the public roadmap toward adapter conformance and real-robot evaluation.
+- Added the first executable adapter conformance suite: `rcl.adapter.mobile_base.v0.3`.
+- Added `rcl-conformance test module.path:AdapterClass` with text and JSON output.
+- Added a machine-readable conformance report schema.
+- Added negative conformance tests that reject adapters which hide missing required capabilities.
+- Expanded the public roadmap toward cross-implementation fixtures and real-robot evaluation.
 
 ## 0.2.0-dev — 2026-08-14
 
