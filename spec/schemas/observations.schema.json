@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3-dev:observations",
+  "title": "RCL Observations v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["observation_version", "robot_id", "embodiment_id", "captured_at", "behavior_observations"],
+  "properties": {
+    "observation_version": {"const": "0.1"},
+    "robot_id": {"type": "string", "minLength": 1},
+    "embodiment_id": {"type": "string", "minLength": 1},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "behavior_observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["behavior_id", "metrics"],
+        "properties": {
+          "behavior_id": {"type": "string", "minLength": 1},
+          "metrics": {"type": "object", "additionalProperties": {"type": "number"}}
+        }
+      }
+    }
+  }
+}
