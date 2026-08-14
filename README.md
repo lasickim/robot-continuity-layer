@@ -51,6 +51,7 @@ The reference implementation can:
 - verify profile integrity with SHA-256 manifests;
 - describe source and target embodiments;
 - perform semantic capability matching;
+- validate capability IDs against Capability Registry v0.1 while allowing isolated `x.<owner>.*` extensions;
 - classify migration results as `preserved`, `approximated`, `unsupported`, or `blocked_for_safety`;
 - generate a machine-readable migration report;
 - calculate a transparent Behavior Continuity Score;
@@ -66,6 +67,51 @@ Migration Success: YES
 - navigation.follow_person: preserved (similarity=1.00)
 - navigation.pre_turn_observation: approximated (similarity=0.65)
 ```
+
+## Capability Registry v0.1
+
+RCL now publishes a small formal vocabulary for semantic robot capabilities.
+
+Initial standard IDs are:
+
+```text
+navigation.planar_velocity
+perception.person_tracking
+perception.forward_range
+perception.directional_attention
+```
+
+Standard-looking names inside an RCL-reserved namespace must exist in the registry. For example:
+
+```text
+perception.person_tracking   VALID
+perception.telepathy         INVALID — reserved but unregistered
+```
+
+Independent implementations can experiment without waiting for a registry change by using the extension namespace:
+
+```text
+x.<owner>.<semantic_path>
+```
+
+Example:
+
+```text
+x.acme.stereo_person_tracking
+```
+
+The capability describes **what an embodiment can semantically provide**, not how it is implemented. ROS topics, vendor SDK calls, motor values, and controller details remain adapter concerns.
+
+CLI:
+
+```bash
+rcl capabilities list
+rcl capabilities show perception.person_tracking
+rcl capabilities validate perception.person_tracking
+rcl capabilities validate x.acme.stereo_person_tracking
+```
+
+See [`docs/CAPABILITY_REGISTRY.md`](docs/CAPABILITY_REGISTRY.md) and the machine-readable [`spec/capability-registry-v0.1.json`](spec/capability-registry-v0.1.json).
 
 ## ROS 2 reference adapter
 
@@ -116,7 +162,7 @@ The initial suite ID is:
 rcl.adapter.mobile_base.v0.3
 ```
 
-The suite deliberately removes capabilities in negative cases. An adapter that silently reports missing required capabilities as `preserved` fails conformance.
+The suite deliberately removes capabilities in negative cases. An adapter that silently reports missing required capabilities as `preserved` fails conformance. The full migration path also rejects unknown capability names inside RCL-reserved namespaces.
 
 For CI or registry tooling:
 
@@ -171,6 +217,7 @@ python -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -e ".[dev]"
 
+rcl capabilities list
 rcl validate examples/mobile-base
 rcl pack examples/mobile-base /tmp/robot-a.rcl
 rcl inspect /tmp/robot-a.rcl
@@ -226,7 +273,8 @@ The project is early enough that **design feedback is as valuable as code**.
 Good first contributions include:
 
 - reviewing the semantic behavior model;
-- proposing additional embodiment capabilities;
+- proposing capability registry additions with concrete interoperability use cases;
+- documenting useful `x.<owner>.*` extension capabilities;
 - implementing adapters for real or simulated robots;
 - running the conformance suite against an independently implemented adapter;
 - designing migration evaluation scenarios;
@@ -242,17 +290,23 @@ robot-continuity-layer/
 ├── CONTRIBUTING.md
 ├── ROADMAP.md
 ├── docs/
+│   ├── CAPABILITY_REGISTRY.md
 │   ├── COMPATIBILITY.md
 │   ├── CONFORMANCE.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── spec/
+│   ├── capability-registry-v0.1.json
 │   └── schemas/
+│       ├── capability-registry.schema.json
 │       └── conformance-report.schema.json
 ├── examples/
 ├── rcl/
 │   ├── adapter.py
+│   ├── capabilities.py
 │   ├── conformance.py
 │   ├── conformance_cli.py
+│   ├── data/
+│   │   └── capability-registry-v0.1.json
 │   ├── migration.py
 │   ├── profile.py
 │   └── score.py

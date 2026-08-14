@@ -5,6 +5,13 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from .capabilities import (
+    CapabilityValidationError,
+    classify_capability_id,
+    load_capability_registry,
+    registered_capabilities,
+    validate_capability_id,
+)
 from .example_adapter import ExampleMobileBaseAdapter
 from .migration import migrate_profile
 from .profile import RCLProfile, RCLValidationError, validate_schema
@@ -66,18 +73,119 @@ def _cmd_report(args: argparse.Namespace) -> int:
     return 0
 
 
+def _cmd_capabilities_list(args: argparse.Namespace) -> int:
+    registry = load_capability_registry()
+    capabilities = registered_capabilities()
+    if args.json:
+        print(
+            json.dumps(
+                {
+                    "registry_version": registry["registry_version"],
+                    "capabilities": capabilities,
+                },
+                indent=2,
+                ensure_ascii=False,
+            )
+        )
+        return 0
+
+    print(f"RCL Capability Registry v{registry['registry_version']}")
+    for item in capabilities:
+        print(f"- {item['capability_id']}: {item['summary']}")
+    return 0
+
+
+def _cmd_capabilities_show(args: argparse.Namespace) -> int:
+    result = classify_capability_id(args.capability_id)
+    if not result.valid:
+        raise CapabilityValidationError(f"{args.capability_id}: {result.message}")
+
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
+        return 0
+
+    if result.kind == "standard" and result.definition is not None:
+        definition = result.definition
+        print(definition["capability_id"])
+        print(f"Status: {definition['status']}")
+        print(f"Namespace: {definition['namespace']}")
+        print(f"Summary: {definition['summary']}")
+        print(f"Semantics: {definition['semantics']}")
+        return 0
+
+    print(result.capability_id)
+    print("Type: extension")
+    print(f"Owner: {result.owner}")
+    print(result.message)
+    return 0
+
+
+def _cmd_capabilities_validate(args: argparse.Namespace) -> int:
+    result = validate_capability_id(
+        args.capability_id,
+        allow_extensions=not args.standard_only,
+    )
+    if args.json:
+        print(json.dumps(result.to_dict(), indent=2, ensure_ascii=False))
+    else:
+        label = "STANDARD" if result.kind == "standard" else "EXTENSION"
+        print(f"VALID {label}: {result.capability_id}")
+        if result.owner:
+            print(f"Owner: {result.owner}")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(prog="rcl")
     sub = parser.add_subparsers(dest="command", required=True)
-    p_validate = sub.add_parser("validate"); p_validate.add_argument("path"); p_validate.set_defaults(func=_cmd_validate)
-    p_inspect = sub.add_parser("inspect"); p_inspect.add_argument("path"); p_inspect.set_defaults(func=_cmd_inspect)
-    p_pack = sub.add_parser("pack"); p_pack.add_argument("source"); p_pack.add_argument("output"); p_pack.add_argument("--profile-id", default="RCL-DEMO-PROFILE-001"); p_pack.set_defaults(func=_cmd_pack)
-    p_migrate = sub.add_parser("migrate"); p_migrate.add_argument("source"); p_migrate.add_argument("target_embodiment"); p_migrate.add_argument("--adapter", default="example-mobile-base"); p_migrate.add_argument("--output"); p_migrate.set_defaults(func=_cmd_migrate)
-    p_report = sub.add_parser("report"); p_report.add_argument("path"); p_report.set_defaults(func=_cmd_report)
+
+    p_validate = sub.add_parser("validate")
+    p_validate.add_argument("path")
+    p_validate.set_defaults(func=_cmd_validate)
+
+    p_inspect = sub.add_parser("inspect")
+    p_inspect.add_argument("path")
+    p_inspect.set_defaults(func=_cmd_inspect)
+
+    p_pack = sub.add_parser("pack")
+    p_pack.add_argument("source")
+    p_pack.add_argument("output")
+    p_pack.add_argument("--profile-id", default="RCL-DEMO-PROFILE-001")
+    p_pack.set_defaults(func=_cmd_pack)
+
+    p_migrate = sub.add_parser("migrate")
+    p_migrate.add_argument("source")
+    p_migrate.add_argument("target_embodiment")
+    p_migrate.add_argument("--adapter", default="example-mobile-base")
+    p_migrate.add_argument("--output")
+    p_migrate.set_defaults(func=_cmd_migrate)
+
+    p_report = sub.add_parser("report")
+    p_report.add_argument("path")
+    p_report.set_defaults(func=_cmd_report)
+
+    p_capabilities = sub.add_parser("capabilities")
+    capability_sub = p_capabilities.add_subparsers(dest="capability_command", required=True)
+
+    p_cap_list = capability_sub.add_parser("list")
+    p_cap_list.add_argument("--json", action="store_true")
+    p_cap_list.set_defaults(func=_cmd_capabilities_list)
+
+    p_cap_show = capability_sub.add_parser("show")
+    p_cap_show.add_argument("capability_id")
+    p_cap_show.add_argument("--json", action="store_true")
+    p_cap_show.set_defaults(func=_cmd_capabilities_show)
+
+    p_cap_validate = capability_sub.add_parser("validate")
+    p_cap_validate.add_argument("capability_id")
+    p_cap_validate.add_argument("--standard-only", action="store_true")
+    p_cap_validate.add_argument("--json", action="store_true")
+    p_cap_validate.set_defaults(func=_cmd_capabilities_validate)
+
     args = parser.parse_args()
     try:
         return args.func(args)
-    except (RCLValidationError, ValueError) as exc:
+    except (CapabilityValidationError, RCLValidationError, ValueError) as exc:
         print(f"ERROR: {exc}")
         return 2
 

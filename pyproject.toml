@@ -22,7 +22,7 @@ packages = ["rcl", "rcl_ros2"]
 include-package-data = true
 
 [tool.setuptools.package-data]
-rcl = ["schemas/*.json"]
+rcl = ["schemas/*.json", "data/*.json"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

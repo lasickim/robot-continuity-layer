@@ -1,0 +1,57 @@
+{
+  "registry_id": "rcl.capability-registry",
+  "registry_version": "0.1",
+  "status": "experimental",
+  "reserved_namespaces": [
+    {"namespace": "navigation", "summary": "Goal, path, and motion-execution capabilities used to move through an environment."},
+    {"namespace": "perception", "summary": "Capabilities that sense, estimate, recognize, or track the robot's environment and relevant entities."},
+    {"namespace": "manipulation", "summary": "Capabilities for physically interacting with objects, tools, loads, and contact forces."},
+    {"namespace": "interaction", "summary": "Capabilities for intentional human-robot or robot-robot communication and interaction."},
+    {"namespace": "mobility", "summary": "Embodiment-level locomotion and posture capabilities distinct from navigation intent."},
+    {"namespace": "safety", "summary": "Capabilities that expose or enforce safety-relevant states, limits, and protective functions."},
+    {"namespace": "system", "summary": "Lifecycle, diagnostics, power, compute, and other robot-system capabilities."}
+  ],
+  "extension_prefix": "x",
+  "capabilities": [
+    {
+      "capability_id": "navigation.planar_velocity",
+      "namespace": "navigation",
+      "status": "experimental",
+      "summary": "Can realize controlled planar translational and yaw velocity for target execution.",
+      "semantics": "The target can accept or produce bounded planar velocity commands sufficient for semantic mobile-base behaviors. The capability is implementation-independent and does not prescribe ROS topics, motor percentages, wheel geometry, or controller APIs.",
+      "non_goals": ["Does not imply global localization.", "Does not imply path planning or obstacle avoidance.", "Does not define a canonical command transport."],
+      "introduced_in_rcl": "0.2",
+      "replaced_by": null
+    },
+    {
+      "capability_id": "perception.person_tracking",
+      "namespace": "perception",
+      "status": "experimental",
+      "summary": "Can maintain a temporally coherent person reference suitable for closed-loop behavior.",
+      "semantics": "The target can observe and maintain the identity or track state of a person over time with enough continuity to support behaviors such as following or approach regulation. A one-frame person detector alone does not necessarily satisfy this capability.",
+      "non_goals": ["Does not require a particular camera, model, biometric identifier, or tracking algorithm.", "Does not imply face recognition or persistent real-world identity resolution."],
+      "introduced_in_rcl": "0.2",
+      "replaced_by": null
+    },
+    {
+      "capability_id": "perception.forward_range",
+      "namespace": "perception",
+      "status": "experimental",
+      "summary": "Can estimate obstacle or free-space range in the robot's forward travel region.",
+      "semantics": "The target can provide range information representative of the forward motion corridor, sufficient for an adapter to reason about conservative preview or approach behavior. The sensing modality is intentionally unspecified.",
+      "non_goals": ["Does not imply full 2D or 3D mapping.", "Does not require lidar, depth cameras, ultrasonic sensors, or any specific sensor type."],
+      "introduced_in_rcl": "0.2",
+      "replaced_by": null
+    },
+    {
+      "capability_id": "perception.directional_attention",
+      "namespace": "perception",
+      "status": "experimental",
+      "summary": "Can intentionally direct or select sensing toward a requested direction before or during behavior execution.",
+      "semantics": "The target can alter the effective sensing direction, field of attention, or observation policy in response to a directional request. This may be implemented by a head, gimbal, sensor selection, crop, policy, or another mechanism; physical head motion is not required.",
+      "non_goals": ["Does not require a humanoid head or movable camera.", "Does not imply human-like gaze or social intent."],
+      "introduced_in_rcl": "0.2",
+      "replaced_by": null
+    }
+  ]
+}

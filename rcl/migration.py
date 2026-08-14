@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from .adapter import RCLAdapter
+from .capabilities import validate_capability_set
 from .profile import RCLProfile, validate_schema
 from .score import calculate_continuity_score
 
@@ -15,21 +16,35 @@ def migrate_profile(
     *,
     created_at: str | None = None,
 ) -> dict[str, Any]:
-    if not adapter.supports(target_embodiment):
-        raise ValueError(
-            f"Adapter {adapter.adapter_id} does not support target embodiment "
-            f"{target_embodiment.get('embodiment_id', '<unknown>')}"
-        )
+    validate_schema(target_embodiment, "embodiment")
 
     source_identity = profile.load("identity.json")
     source_behavior = profile.load("behavior.json")
     source_embodiment = profile.load("embodiment.json")
     manifest = profile.load("manifest.json") if (profile.root / "manifest.json").exists() else None
 
-    results = [
-        adapter.translate_behavior(item, source_embodiment, target_embodiment).to_dict()
-        for item in source_behavior["behaviors"]
-    ]
+    validate_capability_set(source_embodiment.get("capabilities", []))
+    validate_capability_set(target_embodiment.get("capabilities", []))
+
+    if not adapter.supports(target_embodiment):
+        raise ValueError(
+            f"Adapter {adapter.adapter_id} does not support target embodiment "
+            f"{target_embodiment.get('embodiment_id', '<unknown>')}"
+        )
+
+    results: list[dict[str, Any]] = []
+    for item in source_behavior["behaviors"]:
+        # Validate the adapter's complete semantic requirement set, including
+        # capabilities the adapter adds beyond those declared in the profile.
+        validate_capability_set(adapter.required_capabilities(item))
+        results.append(
+            adapter.translate_behavior(
+                item,
+                source_embodiment,
+                target_embodiment,
+            ).to_dict()
+        )
+
     score = calculate_continuity_score(source_behavior["behaviors"], results)
 
     report = {
