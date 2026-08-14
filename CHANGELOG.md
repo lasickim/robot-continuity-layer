@@ -2,6 +2,16 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Explicit Legacy Expression Optimization / Removal Approval v0.1 so familiar expressions are preserved by default and may be simplified or removed only through an explicit reviewed mutation.
+- Added deterministic `preview_expression_optimization()` and `apply_expression_optimization()` APIs plus `rcl optimize-expression preview|apply`.
+- Added Expression Optimization Candidate, Patch, and Apply Result v0.1 schemas with runtime/public parity coverage.
+- Bound every optimization candidate to the exact current-expression canonical SHA-256, with stale-candidate rejection and semantic no-op simplification rejection.
+- Added append-only `behavior.expression_history` preserving the complete previous expression snapshot, approval metadata, reason/evidence, candidate digest, and from/to expression SHA-256 values.
+- Added chronological multi-change expression digest-chain validation and canonical SHA-256 of JSON `null` as the terminal no-active-expression digest after approved removal.
+- Preserved `expression.temporal_style`, non-normative source timing observations, and source hardware-artifact provenance inside historical expression snapshots after simplify/remove.
+- Enforced immutable output snapshots, source five-payload byte immutability, and minimal mutation: only the selected behavior's active `expression` plus exactly one appended `expression_history` entry may change.
+- Extended Profile Diff to expose `expression_history` changes and documented that removal means the expression is no longer active, not that the historical manner is forgotten or replayed.
+- Added `docs/EXPRESSION_OPTIMIZATION.md` and documented the principle “Preserve by default. Optimize only by explicit approval.”
 - Added Expressive Timing / Motion Style v0.1 so recognizable temporal behavior can survive embodiment changes without making source hardware delay normative.
 - Added optional `behavior.expression.temporal_style` with portable `tempo`, `dwell`, `transition`, `timing_policy`, and `legacy_significance` semantics.
 - Added `naturalize` for target-native realization of a familiar gesture and `preserve_style` for explicitly recognized or user-valued temporal mannerisms.

@@ -35,6 +35,18 @@ from .experience import (
     EXPERIENCE_VERSION,
     compact_experience,
 )
+from .expression_history import (
+    NULL_EXPRESSION_SHA256,
+    expression_sha256,
+    validate_behavior_expression_history_metadata,
+)
+from .expression_optimization import (
+    EXPRESSION_OPTIMIZATION_APPLY_METHOD,
+    EXPRESSION_OPTIMIZATION_PATCH_METHOD,
+    EXPRESSION_OPTIMIZATION_VERSION,
+    apply_expression_optimization,
+    preview_expression_optimization,
+)
 from .expression_timing import (
     EXPRESSIVE_TIMING_VERSION,
     realize_temporal_style,
@@ -131,6 +143,9 @@ __all__ = [
     "EXPERIENCE_COMPACTION_METHOD",
     "EXPERIENCE_SUMMARY_VERSION",
     "EXPERIENCE_VERSION",
+    "EXPRESSION_OPTIMIZATION_APPLY_METHOD",
+    "EXPRESSION_OPTIMIZATION_PATCH_METHOD",
+    "EXPRESSION_OPTIMIZATION_VERSION",
     "EXPRESSIVE_TIMING_VERSION",
     "ExpressionMigrationResult",
     "ExpressionTimingMigrationResult",
@@ -153,6 +168,7 @@ __all__ = [
     "INTENT_VOCABULARY_VERSION",
     "IntentMigrationResult",
     "IntentReferenceAdapter",
+    "NULL_EXPRESSION_SHA256",
     "PROFILE_DIFF_METHOD",
     "PROFILE_DIFF_VERSION",
     "RCLAdapter",
@@ -163,6 +179,7 @@ __all__ = [
     "SESSION_EVALUATION_VERSION",
     "STATISTICAL_EVALUATION_METHOD",
     "STATISTICAL_EVALUATION_VERSION",
+    "apply_expression_optimization",
     "apply_habit_approval",
     "apply_intent_approval",
     "apply_intent_revision",
@@ -179,6 +196,7 @@ __all__ = [
     "evaluate_observed_continuity",
     "evaluate_observed_intent_success",
     "evaluate_repeated_sessions",
+    "expression_sha256",
     "get_capability",
     "get_intent_goal",
     "load_capability_registry",
@@ -186,6 +204,7 @@ __all__ = [
     "load_default_intent_discovery_policy",
     "load_intent_vocabulary",
     "migrate_profile",
+    "preview_expression_optimization",
     "preview_habit_approval",
     "preview_intent_approval",
     "preview_intent_revision",
@@ -198,6 +217,7 @@ __all__ = [
     "sample_std",
     "t95_critical",
     "validate_behavior_evaluation_metadata",
+    "validate_behavior_expression_history_metadata",
     "validate_behavior_expression_timing_metadata",
     "validate_behavior_habit_metadata",
     "validate_behavior_intent_metadata",

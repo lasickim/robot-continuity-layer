@@ -1,7 +1,110 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:rcl:schema:v0.4:behavior",
-  "title": "RCL Behavior v0.4-dev with intent, expressive timing, revision, evaluation, and habit metadata",
+  "title": "RCL Behavior v0.4-dev with intent, expression history/timing, revision, evaluation, and habit metadata",
+  "$defs": {
+    "intent": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["goal_id", "trigger", "success_condition", "failure_action", "criticality", "required_capabilities"],
+      "properties": {
+        "goal_id": {"type": "string", "pattern": "^(?:[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+|x\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z][a-z0-9_]*)+)$"},
+        "description": {"type": "string", "minLength": 1},
+        "trigger": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
+        "success_condition": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
+        "failure_action": {"type": "string", "enum": ["block", "retry", "request_help", "abort", "degrade_safely"]},
+        "criticality": {"type": "string", "enum": ["required", "preferred", "advisory"]},
+        "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "constraints": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"}, "uniqueItems": true},
+        "provenance": {
+          "oneOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "candidate_id", "dataset_id", "discovery_method", "policy_id", "policy_version", "candidate_report_sha256", "approved_at", "approved_by", "causal_claim"],
+              "properties": {
+                "source": {"const": "discovered"},
+                "candidate_id": {"type": "string", "minLength": 1},
+                "dataset_id": {"type": "string", "minLength": 1},
+                "discovery_method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
+                "policy_id": {"type": "string", "minLength": 1},
+                "policy_version": {"const": "0.1"},
+                "candidate_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "approved_at": {"type": "string", "format": "date-time"},
+                "approved_by": {"type": ["string", "null"]},
+                "causal_claim": {"const": false}
+              }
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["source", "revision_id", "revision_candidate_id", "revision_candidate_sha256", "previous_intent_sha256", "reason", "evidence_refs", "approved_at", "approved_by", "causal_claim"],
+              "properties": {
+                "source": {"const": "revised"},
+                "revision_id": {"type": "string", "minLength": 1},
+                "revision_candidate_id": {"type": "string", "minLength": 1},
+                "revision_candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "previous_intent_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "reason": {"type": "string", "minLength": 1},
+                "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+                "approved_at": {"type": "string", "format": "date-time"},
+                "approved_by": {"type": ["string", "null"]},
+                "causal_claim": {"const": false}
+              }
+            }
+          ]
+        }
+      }
+    },
+    "temporal_style": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["tempo", "dwell", "transition", "timing_policy", "legacy_significance"],
+      "properties": {
+        "tempo": {"type": "string", "enum": ["deliberate", "relaxed", "natural", "quick"]},
+        "dwell": {"type": "string", "enum": ["none", "brief", "natural", "held"]},
+        "transition": {"type": "string", "enum": ["gentle", "smooth", "direct", "crisp"]},
+        "timing_policy": {"type": "string", "enum": ["naturalize", "preserve_style"]},
+        "legacy_significance": {"type": "string", "enum": ["incidental", "recognized", "user_valued"]},
+        "source_timing_observation": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["motion_duration_ms", "dwell_duration_ms", "return_duration_ms", "normative"],
+          "properties": {
+            "motion_duration_ms": {"type": "number", "exclusiveMinimum": 0},
+            "dwell_duration_ms": {"type": "number", "minimum": 0},
+            "return_duration_ms": {"type": "number", "exclusiveMinimum": 0},
+            "normative": {"const": false}
+          }
+        },
+        "source_artifacts": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["artifact", "effect"],
+            "properties": {
+              "artifact": {"type": "string", "enum": ["actuator_speed_limit", "gearing_limit", "wiring_constraint", "controller_latency", "power_limit", "unknown_hardware_constraint"]},
+              "effect": {"type": "string", "enum": ["slower_than_intended", "delayed_start", "uneven_motion"]}
+            }
+          }
+        }
+      }
+    },
+    "expression": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["expression_id", "preservation_priority", "required_capabilities"],
+      "properties": {
+        "expression_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
+        "description": {"type": "string", "minLength": 1},
+        "preservation_priority": {"type": "string", "enum": ["preferred", "optional"]},
+        "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
+        "temporal_style": {"$ref": "#/$defs/temporal_style"}
+      }
+    }
+  },
   "type": "object",
   "additionalProperties": false,
   "required": ["behaviors"],
@@ -17,59 +120,7 @@
           "description": {"type": "string"},
           "parameters": {"type": "object"},
           "required_capabilities": {"type": "array", "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-          "intent": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["goal_id", "trigger", "success_condition", "failure_action", "criticality", "required_capabilities"],
-            "properties": {
-              "goal_id": {"type": "string", "pattern": "^(?:[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+|x\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?(?:\\.[a-z][a-z0-9_]*)+)$"},
-              "description": {"type": "string", "minLength": 1},
-              "trigger": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
-              "success_condition": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
-              "failure_action": {"type": "string", "enum": ["block", "retry", "request_help", "abort", "degrade_safely"]},
-              "criticality": {"type": "string", "enum": ["required", "preferred", "advisory"]},
-              "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-              "constraints": {"type": "array", "items": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"}, "uniqueItems": true},
-              "provenance": {
-                "oneOf": [
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["source", "candidate_id", "dataset_id", "discovery_method", "policy_id", "policy_version", "candidate_report_sha256", "approved_at", "approved_by", "causal_claim"],
-                    "properties": {
-                      "source": {"const": "discovered"},
-                      "candidate_id": {"type": "string", "minLength": 1},
-                      "dataset_id": {"type": "string", "minLength": 1},
-                      "discovery_method": {"const": "rcl.intent.discovery.context_action_outcome.v0.1"},
-                      "policy_id": {"type": "string", "minLength": 1},
-                      "policy_version": {"const": "0.1"},
-                      "candidate_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-                      "approved_at": {"type": "string", "format": "date-time"},
-                      "approved_by": {"type": ["string", "null"]},
-                      "causal_claim": {"const": false}
-                    }
-                  },
-                  {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["source", "revision_id", "revision_candidate_id", "revision_candidate_sha256", "previous_intent_sha256", "reason", "evidence_refs", "approved_at", "approved_by", "causal_claim"],
-                    "properties": {
-                      "source": {"const": "revised"},
-                      "revision_id": {"type": "string", "minLength": 1},
-                      "revision_candidate_id": {"type": "string", "minLength": 1},
-                      "revision_candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-                      "previous_intent_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-                      "reason": {"type": "string", "minLength": 1},
-                      "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
-                      "approved_at": {"type": "string", "format": "date-time"},
-                      "approved_by": {"type": ["string", "null"]},
-                      "causal_claim": {"const": false}
-                    }
-                  }
-                ]
-              }
-            }
-          },
+          "intent": {"$ref": "#/$defs/intent"},
           "intent_history": {
             "type": "array",
             "items": {
@@ -91,50 +142,25 @@
               }
             }
           },
-          "expression": {
-            "type": "object",
-            "additionalProperties": false,
-            "required": ["expression_id", "preservation_priority", "required_capabilities"],
-            "properties": {
-              "expression_id": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)+$"},
-              "description": {"type": "string", "minLength": 1},
-              "preservation_priority": {"type": "string", "enum": ["preferred", "optional"]},
-              "required_capabilities": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}, "uniqueItems": true},
-              "temporal_style": {
-                "type": "object",
-                "additionalProperties": false,
-                "required": ["tempo", "dwell", "transition", "timing_policy", "legacy_significance"],
-                "properties": {
-                  "tempo": {"type": "string", "enum": ["deliberate", "relaxed", "natural", "quick"]},
-                  "dwell": {"type": "string", "enum": ["none", "brief", "natural", "held"]},
-                  "transition": {"type": "string", "enum": ["gentle", "smooth", "direct", "crisp"]},
-                  "timing_policy": {"type": "string", "enum": ["naturalize", "preserve_style"]},
-                  "legacy_significance": {"type": "string", "enum": ["incidental", "recognized", "user_valued"]},
-                  "source_timing_observation": {
-                    "type": "object",
-                    "additionalProperties": false,
-                    "required": ["motion_duration_ms", "dwell_duration_ms", "return_duration_ms", "normative"],
-                    "properties": {
-                      "motion_duration_ms": {"type": "number", "exclusiveMinimum": 0},
-                      "dwell_duration_ms": {"type": "number", "minimum": 0},
-                      "return_duration_ms": {"type": "number", "exclusiveMinimum": 0},
-                      "normative": {"const": false}
-                    }
-                  },
-                  "source_artifacts": {
-                    "type": "array",
-                    "uniqueItems": true,
-                    "items": {
-                      "type": "object",
-                      "additionalProperties": false,
-                      "required": ["artifact", "effect"],
-                      "properties": {
-                        "artifact": {"type": "string", "enum": ["actuator_speed_limit", "gearing_limit", "wiring_constraint", "controller_latency", "power_limit", "unknown_hardware_constraint"]},
-                        "effect": {"type": "string", "enum": ["slower_than_intended", "delayed_start", "uneven_motion"]}
-                      }
-                    }
-                  }
-                }
+          "expression": {"$ref": "#/$defs/expression"},
+          "expression_history": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["optimization_id", "optimized_at", "optimized_by", "action", "candidate_id", "candidate_sha256", "reason", "evidence_refs", "from_expression_sha256", "to_expression_sha256", "expression_snapshot"],
+              "properties": {
+                "optimization_id": {"type": "string", "minLength": 1},
+                "optimized_at": {"type": "string", "format": "date-time"},
+                "optimized_by": {"type": ["string", "null"]},
+                "action": {"type": "string", "enum": ["simplify", "remove"]},
+                "candidate_id": {"type": "string", "minLength": 1},
+                "candidate_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "reason": {"type": "string", "minLength": 1},
+                "evidence_refs": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+                "from_expression_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "to_expression_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "expression_snapshot": {"$ref": "#/$defs/expression"}
               }
             }
           },
