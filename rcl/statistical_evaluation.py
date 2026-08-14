@@ -5,6 +5,7 @@ from math import sqrt
 from typing import Any, Iterable
 
 from .evaluation import validate_behavior_evaluation_metadata
+from .experiment_context import compare_experiment_context
 from .profile import RCLProfile, RCLValidationError, validate_schema
 from .score import PRIORITY_WEIGHTS
 
@@ -37,13 +38,7 @@ def sample_std(samples: list[float]) -> float:
 
 
 def wasserstein_1d(source_samples: Iterable[float], target_samples: Iterable[float]) -> float:
-    """Return the exact 1D Wasserstein-1 distance between two empirical samples.
-
-    The implementation integrates the absolute difference between the two
-    empirical CDFs. No external numerical dependency is required and unequal
-    sample counts are supported.
-    """
-
+    """Return exact empirical one-dimensional Wasserstein-1 distance."""
     source = sorted(float(value) for value in source_samples)
     target = sorted(float(value) for value in target_samples)
     if not source or not target:
@@ -56,19 +51,15 @@ def wasserstein_1d(source_samples: Iterable[float], target_samples: Iterable[flo
     target_cdf = 0.0
     previous = values[0]
     distance = 0.0
-
     for value in values:
         distance += abs(source_cdf - target_cdf) * (value - previous)
-
         while source_index < len(source) and source[source_index] == value:
             source_index += 1
         while target_index < len(target) and target[target_index] == value:
             target_index += 1
-
         source_cdf = source_index / len(source)
         target_cdf = target_index / len(target)
         previous = value
-
     return distance
 
 
@@ -92,12 +83,18 @@ def _trial_map(payload: dict[str, Any]) -> dict[str, dict[str, list[float]]]:
             raise RCLValidationError(f"Duplicate trial behavior: {behavior_id}")
         metrics: dict[str, list[float]] = {}
         for observable, values in behavior["metrics"].items():
-            metrics[observable] = _as_numeric_samples(
-                values,
-                label=f"{behavior_id}.{observable}",
-            )
+            metrics[observable] = _as_numeric_samples(values, label=f"{behavior_id}.{observable}")
         result[behavior_id] = metrics
     return result
+
+
+def _capture_summary(payload: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "robot_id": payload["robot_id"],
+        "embodiment_id": payload["embodiment_id"],
+        "captured_at": payload["captured_at"],
+        "session_id": payload["experiment"]["context"]["session_id"],
+    }
 
 
 def compare_trial_distributions(
@@ -107,17 +104,38 @@ def compare_trial_distributions(
     *,
     created_at: str | None = None,
 ) -> dict[str, Any]:
-    """Compare repeated source/target observations for declared RCL metrics."""
-
+    """Compare repeated source/target observations under comparable context."""
     validate_schema(source_trials, "trial-observations")
     validate_schema(target_trials, "trial-observations")
 
     behavior_payload = profile.load("behavior.json")
     validate_behavior_evaluation_metadata(behavior_payload)
+    context_comparison = compare_experiment_context(source_trials, target_trials)
+    report_created_at = created_at or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+    if not context_comparison["compatible"]:
+        report = {
+            "evaluation_version": STATISTICAL_EVALUATION_VERSION,
+            "method": STATISTICAL_EVALUATION_METHOD,
+            "created_at": report_created_at,
+            "source": _capture_summary(source_trials),
+            "target": _capture_summary(target_trials),
+            "context_comparison": context_comparison,
+            "score": None,
+            "evaluation_success": False,
+            "status": "context_mismatch",
+            "required_failures": [f"context.{item['field']}" for item in context_comparison["mismatches"]],
+            "metric_results": [],
+            "disclaimer": (
+                "Statistical scoring was blocked because declared experiment contexts were not comparable. "
+                "Context metadata is self-declared and does not prove physical environmental identity."
+            ),
+        }
+        validate_schema(report, "statistical-continuity-report")
+        return report
 
     source_by_behavior = _trial_map(source_trials)
     target_by_behavior = _trial_map(target_trials)
-
     weighted_sum = 0.0
     total_weight = 0.0
     required_failures: list[str] = []
@@ -128,7 +146,6 @@ def compare_trial_distributions(
         evaluation = behavior.get("evaluation")
         if evaluation is None:
             continue
-
         behavior_id = behavior["behavior_id"]
         priority = behavior["preservation"]["priority"]
         priority_weight = float(PRIORITY_WEIGHTS[priority])
@@ -146,83 +163,32 @@ def compare_trial_distributions(
             required = bool(metric.get("required", True))
             min_trials = int(metric.get("min_trials", DEFAULT_MIN_TRIALS))
             if min_trials < 2:
-                raise RCLValidationError(
-                    f"{behavior_id}.{metric_id}: min_trials must be >= 2"
-                )
+                raise RCLValidationError(f"{behavior_id}.{metric_id}: min_trials must be >= 2")
 
             source_samples = source_metrics.get(observable)
             target_samples = target_metrics.get(observable)
-
-            status: str | None = None
+            metric_status: str | None = None
             if source_samples is None and target_samples is None:
-                status = "missing_both"
+                metric_status = "missing_both"
             elif source_samples is None:
-                status = "missing_source"
+                metric_status = "missing_source"
             elif target_samples is None:
-                status = "missing_target"
+                metric_status = "missing_target"
             else:
                 source_short = len(source_samples) < min_trials
                 target_short = len(target_samples) < min_trials
                 if source_short and target_short:
-                    status = "insufficient_both"
+                    metric_status = "insufficient_both"
                 elif source_short:
-                    status = "insufficient_source"
+                    metric_status = "insufficient_source"
                 elif target_short:
-                    status = "insufficient_target"
+                    metric_status = "insufficient_target"
 
-            if status is not None:
+            if metric_status is not None:
                 if required:
                     total_weight += effective_weight
                     required_failures.append(f"{behavior_id}.{metric_id}")
-                metric_results.append(
-                    {
-                        "behavior_id": behavior_id,
-                        "metric_id": metric_id,
-                        "observable": observable,
-                        "unit": metric["unit"],
-                        "tolerance": tolerance,
-                        "zero_credit_at": zero_credit_at,
-                        "priority": priority,
-                        "metric_weight": metric_weight,
-                        "effective_weight": effective_weight,
-                        "required": required,
-                        "min_trials": min_trials,
-                        "source_count": 0 if source_samples is None else len(source_samples),
-                        "target_count": 0 if target_samples is None else len(target_samples),
-                        "source_mean": None,
-                        "source_std": None,
-                        "target_mean": None,
-                        "target_std": None,
-                        "wasserstein_distance": None,
-                        "status": status,
-                        "similarity": 0.0 if required else None,
-                    }
-                )
-                continue
-
-            assert source_samples is not None and target_samples is not None
-            source_mean = sample_mean(source_samples)
-            target_mean = sample_mean(target_samples)
-            source_std = sample_std(source_samples)
-            target_std = sample_std(target_samples)
-            distance = wasserstein_1d(source_samples, target_samples)
-            similarity = _distance_similarity(distance, tolerance, zero_credit_at)
-
-            total_weight += effective_weight
-            weighted_sum += effective_weight * similarity
-
-            if similarity == 1.0:
-                status = "distribution_within_tolerance"
-            elif similarity == 0.0:
-                status = "distribution_outside_limit"
-            else:
-                status = "distribution_partial"
-
-            if required and similarity == 0.0:
-                required_failures.append(f"{behavior_id}.{metric_id}")
-
-            metric_results.append(
-                {
+                metric_results.append({
                     "behavior_id": behavior_id,
                     "metric_id": metric_id,
                     "observable": observable,
@@ -234,17 +200,59 @@ def compare_trial_distributions(
                     "effective_weight": effective_weight,
                     "required": required,
                     "min_trials": min_trials,
-                    "source_count": len(source_samples),
-                    "target_count": len(target_samples),
-                    "source_mean": round(source_mean, 6),
-                    "source_std": round(source_std, 6),
-                    "target_mean": round(target_mean, 6),
-                    "target_std": round(target_std, 6),
-                    "wasserstein_distance": round(distance, 6),
-                    "status": status,
-                    "similarity": round(similarity, 6),
-                }
-            )
+                    "source_count": 0 if source_samples is None else len(source_samples),
+                    "target_count": 0 if target_samples is None else len(target_samples),
+                    "source_mean": None,
+                    "source_std": None,
+                    "target_mean": None,
+                    "target_std": None,
+                    "wasserstein_distance": None,
+                    "status": metric_status,
+                    "similarity": 0.0 if required else None,
+                })
+                continue
+
+            assert source_samples is not None and target_samples is not None
+            source_mean = sample_mean(source_samples)
+            target_mean = sample_mean(target_samples)
+            source_std = sample_std(source_samples)
+            target_std = sample_std(target_samples)
+            distance = wasserstein_1d(source_samples, target_samples)
+            similarity = _distance_similarity(distance, tolerance, zero_credit_at)
+            total_weight += effective_weight
+            weighted_sum += effective_weight * similarity
+
+            if similarity == 1.0:
+                metric_status = "distribution_within_tolerance"
+            elif similarity == 0.0:
+                metric_status = "distribution_outside_limit"
+            else:
+                metric_status = "distribution_partial"
+            if required and similarity == 0.0:
+                required_failures.append(f"{behavior_id}.{metric_id}")
+
+            metric_results.append({
+                "behavior_id": behavior_id,
+                "metric_id": metric_id,
+                "observable": observable,
+                "unit": metric["unit"],
+                "tolerance": tolerance,
+                "zero_credit_at": zero_credit_at,
+                "priority": priority,
+                "metric_weight": metric_weight,
+                "effective_weight": effective_weight,
+                "required": required,
+                "min_trials": min_trials,
+                "source_count": len(source_samples),
+                "target_count": len(target_samples),
+                "source_mean": round(source_mean, 6),
+                "source_std": round(source_std, 6),
+                "target_mean": round(target_mean, 6),
+                "target_std": round(target_std, 6),
+                "wasserstein_distance": round(distance, 6),
+                "status": metric_status,
+                "similarity": round(similarity, 6),
+            })
 
     if declared_metric_count == 0:
         raise RCLValidationError("Profile declares no observed evaluation metrics")
@@ -253,35 +261,21 @@ def compare_trial_distributions(
 
     score = round((weighted_sum / total_weight) * 100.0, 2)
     evaluation_success = len(required_failures) == 0
-    if not evaluation_success:
-        status = "failed"
-    elif score == 100.0:
-        status = "matched"
-    else:
-        status = "degraded"
-
+    status = "failed" if not evaluation_success else ("matched" if score == 100.0 else "degraded")
     report = {
         "evaluation_version": STATISTICAL_EVALUATION_VERSION,
         "method": STATISTICAL_EVALUATION_METHOD,
-        "created_at": created_at
-        or datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-        "source": {
-            "robot_id": source_trials["robot_id"],
-            "embodiment_id": source_trials["embodiment_id"],
-            "captured_at": source_trials["captured_at"],
-        },
-        "target": {
-            "robot_id": target_trials["robot_id"],
-            "embodiment_id": target_trials["embodiment_id"],
-            "captured_at": target_trials["captured_at"],
-        },
+        "created_at": report_created_at,
+        "source": _capture_summary(source_trials),
+        "target": _capture_summary(target_trials),
+        "context_comparison": context_comparison,
         "score": score,
         "evaluation_success": evaluation_success,
         "status": status,
         "required_failures": required_failures,
         "metric_results": metric_results,
         "disclaimer": (
-            "Experimental repeated-trial empirical distribution comparison only; "
+            "Experimental repeated-trial empirical distribution comparison under declared comparable context only; "
             "not a formal hypothesis test, physical safety certification, or identity proof."
         ),
     }
