@@ -44,6 +44,31 @@ def test_intent_reference_profile_and_vocabulary_validate():
     assert get_intent_goal("interaction.optimize_handover_orientation") is not None
 
 
+def test_published_intent_vocabulary_matches_packaged_copy():
+    published = json.loads(
+        (_root() / "spec" / "intent-vocabulary-v0.1.json").read_text(encoding="utf-8")
+    )
+    assert published == load_intent_vocabulary()
+
+
+def test_published_v04_schemas_match_runtime_schemas():
+    root = _root()
+    pairs = [
+        (
+            root / "rcl" / "schemas" / "behavior.schema.json",
+            root / "spec" / "schemas" / "v0.4" / "behavior.schema.json",
+        ),
+        (
+            root / "rcl" / "schemas" / "migration-report.schema.json",
+            root / "spec" / "schemas" / "v0.4" / "migration-report.schema.json",
+        ),
+    ]
+    for runtime_path, published_path in pairs:
+        assert json.loads(runtime_path.read_text(encoding="utf-8")) == json.loads(
+            published_path.read_text(encoding="utf-8")
+        )
+
+
 def test_v2_preserves_goal_while_dropping_obsolete_rearward_expression():
     report = migrate_profile(
         _profile(),
