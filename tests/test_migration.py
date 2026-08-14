@@ -2,6 +2,9 @@ import json
 import shutil
 from pathlib import Path
 
+import pytest
+
+from rcl.capabilities import CapabilityValidationError
 from rcl.example_adapter import ExampleMobileBaseAdapter
 from rcl.migration import migrate_profile
 from rcl.profile import RCLProfile, validate_schema
@@ -55,3 +58,30 @@ def test_required_failure_overrides_score(tmp_path):
     assert report["continuity"]["migration_success"] is False
     assert report["continuity"]["required_failures"] == ["navigation.follow_person"]
     assert report["behavior_results"][0]["status"] == "unsupported"
+
+
+def test_migration_allows_explicit_extension_capability():
+    _, profile, target = _fixtures()
+    target["capabilities"].append("x.acme.experimental_range_fusion")
+
+    report = migrate_profile(
+        profile,
+        target,
+        ExampleMobileBaseAdapter(),
+        created_at="2026-08-14T00:00:00Z",
+    )
+
+    assert report["continuity"]["migration_success"] is True
+
+
+def test_migration_rejects_unknown_reserved_capability():
+    _, profile, target = _fixtures()
+    target["capabilities"].append("perception.telepathy")
+
+    with pytest.raises(CapabilityValidationError, match="reserved namespace"):
+        migrate_profile(
+            profile,
+            target,
+            ExampleMobileBaseAdapter(),
+            created_at="2026-08-14T00:00:00Z",
+        )
