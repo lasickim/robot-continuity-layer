@@ -82,6 +82,15 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] V1 hardware-limited 1400 ms → V2 naturalized 380 ms reference case
 - [x] user-valued deliberate tempo preserved on faster target hardware
 - [x] Profile Diff support for expressive temporal-style changes
+- [x] Explicit Legacy Expression Optimization / Removal Approval v0.1
+- [x] `simplify` / `remove` candidates bound to exact current-expression SHA-256
+- [x] deterministic non-mutating optimization preview plus explicit immutable apply
+- [x] append-only `behavior.expression_history` preserving complete previous expression snapshots
+- [x] multi-change expression SHA-256 chain with canonical JSON-null terminal digest after removal
+- [x] stale-candidate and semantic no-op simplification rejection
+- [x] expressive timing and source hardware-artifact provenance retained after simplification/removal
+- [x] `rcl optimize-expression preview|apply` CLI
+- [x] Profile Diff support for expression-history changes
 - [x] Intent Discovery Dataset v0.1 using generic context-action-outcome episodes
 - [x] Intent Discovery Policy v0.1 with explicit sample/repetition gates
 - [x] Intent Candidate Report v0.1 with `causal_claim=false`
@@ -121,7 +130,6 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] target-native strategy audit metadata excluded from pass/fail logic
 - [x] V1 source-style and V2 target-native fixtures satisfying the same declared intents
 - [x] `rcl evaluate-intent` CLI
-- [ ] explicit legacy-expression optimization/removal approval workflow
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
@@ -139,7 +147,7 @@ WHAT     → semantic behavior + parameters
 HOW      → embodiment adapter / target-native functional strategy
 LOOKS    → expression
 TEMPO    → expressive temporal style
-HISTORY  → habit / legacy / prior Intent interpretations
+HISTORY  → habit / legacy / prior Intent and Expression interpretations
 ```
 
 RCL's default continuity principle is:
@@ -148,13 +156,16 @@ RCL's default continuity principle is:
 Use the new body.
 Preserve the old manner.
 Do not preserve the old limitation by accident.
+Preserve by default; optimize only by explicit approval.
 ```
 
 The target may perform the functional check with a newer system first, then reproduce a familiar legacy gesture separately. If source timing was slow only because of old hardware, the target may naturalize the gesture. If the temporal style itself became recognized or user-valued, it may be explicitly preserved.
 
+A behavior becoming functionally unnecessary is not permission to forget it. Simplifying or removing an active legacy expression is a separate reviewed mutation. The current expression may change, but the exact prior expression remains in append-only `expression_history` with a validated digest chain.
+
 A target may change HOW while preserving WHY, LOOKS, and recognizable TEMPO. If LOOKS cannot be safely reproduced, WHY remains higher priority.
 
-Intent Discovery, Approval, Revision, Migration, and Observed Intent Success form an auditable meaning lifecycle. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
+Intent Discovery, Approval, Revision, Migration, Observed Intent Success, and Expression Optimization form auditable continuity lifecycles. Long-lived raw evidence can be compacted before discovery without pretending aggregate statistics are raw observations:
 
 ```text
 experience
@@ -190,10 +201,16 @@ migration to another embodiment
   ↓
 Observed Intent Success
   ↓
+optional Expression Optimization Candidate
+  ↓
+explicit simplify/remove approval
+  ↓
+new snapshot + append-only previous Expression history
+  ↓
 separate motion / statistical evaluation
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. None of these operations proves causality, consciousness, or subjective purpose.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. Expression Optimization records a reviewed continuity decision without erasing the old manner from history. None of these operations proves causality, consciousness, or subjective purpose.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -238,6 +255,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] source-style versus target-native strategy Intent Success demo on physical robots
 - [ ] physical demo of hardware-limited source timing naturalized on faster target actuators
 - [ ] physical demo of user-valued deliberate timing preserved on faster hardware
+- [ ] physical demo of explicit legacy-expression simplify/remove approval while preserving expression history
 - [ ] live learned-habit capture and promotion demo
 - [ ] live context-action-outcome capture for an emergent behavior
 - [ ] real Intent Candidate generation from longitudinal robot data
@@ -276,6 +294,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
 - [ ] expressive timing / temporal-style portability profile
+- [ ] auditable expression-history / explicit expression-optimization profile
 - [ ] lightweight long-lived experience storage / compaction profile
 - [ ] explicit approved-mutation / snapshot profile
 - [ ] functional-intent preservation profile
@@ -289,4 +308,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, recognizable expression and timing, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, automatically erase a familiar expression merely because it became functionally redundant, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, recognizable expression and timing, reviewable purpose hypotheses, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
