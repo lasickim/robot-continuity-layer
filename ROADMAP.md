@@ -20,17 +20,18 @@ RCL is being developed from a small, testable continuity core toward real multi-
 Primary goal: make RCL testable against external implementations instead of only the bundled reference adapter.
 
 - [x] ROS 2 reference adapter (Lyrical mobile-base semantic bridge, v0.3-dev)
-- [ ] adapter conformance test kit
+- [x] adapter conformance test kit (`rcl.adapter.mobile_base.v0.3`)
+- [x] machine-readable conformance report schema
 - [ ] profile diff command
 - [ ] formal capability vocabulary
 - [ ] behavior tolerance and evaluation metadata
 - [ ] observed-behavior evaluation protocol
-- [ ] migration report compatibility tests
+- [ ] migration report cross-implementation fixtures
 - [ ] extension namespace rules
 
 ### v0.3 success criteria
 
-An independently implemented adapter should be able to consume the same profile, produce a valid migration report, and pass a shared conformance suite.
+An independently implemented adapter should be able to consume the same semantic fixture, produce a valid migration report, expose capability loss honestly, and pass a shared executable conformance suite.
 
 ## v0.4 — private continuity and provenance
 
@@ -70,7 +71,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 - [ ] stable portable core specification
 - [ ] multi-vendor adapter ecosystem
-- [ ] independent conformance suite
+- [ ] independent conformance suites for multiple embodiment classes
 - [ ] compatibility/certification profile
 - [ ] security and privacy profile
 - [ ] stable extension mechanism
