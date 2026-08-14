@@ -14,7 +14,7 @@ dependencies = ["jsonschema>=4.22"]
 dev = ["pytest>=8"]
 
 [project.scripts]
-rcl = "rcl.cli:main"
+rcl = "rcl.cli_router:main"
 rcl-conformance = "rcl.conformance_cli:main"
 
 [tool.setuptools]

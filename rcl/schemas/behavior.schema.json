@@ -72,7 +72,7 @@
                   "properties": {
                     "event_id": {"type": "string", "minLength": 1},
                     "observed_at": {"type": "string", "format": "date-time"},
-                    "event_type": {"type": "string", "enum": ["configured", "observed", "learned_update", "stabilized", "legacy_promoted", "user_confirmed", "note"]},
+                    "event_type": {"type": "string", "enum": ["configured", "observed", "learned_update", "stabilized", "legacy_promoted", "user_confirmed", "promotion_approved", "note"]},
                     "parameter_values": {"type": "object"},
                     "note": {"type": "string"},
                     "evidence_ref": {"type": "string", "minLength": 1}

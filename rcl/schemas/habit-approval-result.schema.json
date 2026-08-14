@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.3:habit-approval-result",
+  "title": "RCL Habit Approval Apply Result v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["approval_version", "method", "created_at", "behavior_id", "from_lifecycle", "to_lifecycle", "patch_sha256", "source_robot_id", "source_profile_id", "output_profile_id", "output_path", "source_unchanged", "output_valid", "diff_summary", "disclaimer"],
+  "properties": {
+    "approval_version": {"const": "0.1"},
+    "method": {"const": "rcl.habit.approval.apply.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "from_lifecycle": {"type": "string", "enum": ["configured", "learning", "stable"]},
+    "to_lifecycle": {"type": "string", "enum": ["learning", "stable", "legacy"]},
+    "patch_sha256": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "source_robot_id": {"type": "string", "minLength": 1},
+    "source_profile_id": {"type": ["string", "null"]},
+    "output_profile_id": {"type": "string", "minLength": 1},
+    "output_path": {"type": "string", "minLength": 1},
+    "source_unchanged": {"const": true},
+    "output_valid": {"const": true},
+    "diff_summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["added_behaviors", "removed_behaviors", "modified_behaviors"],
+      "properties": {
+        "added_behaviors": {"const": 0},
+        "removed_behaviors": {"const": 0},
+        "modified_behaviors": {"const": 1}
+      }
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}

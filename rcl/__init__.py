@@ -22,6 +22,13 @@ from .experiment_context import (
     DEFAULT_COMPARISON_FIELDS,
     compare_experiment_context,
 )
+from .habit_approval import (
+    HABIT_APPROVAL_APPLY_METHOD,
+    HABIT_APPROVAL_PATCH_METHOD,
+    HABIT_APPROVAL_VERSION,
+    apply_habit_approval,
+    preview_habit_approval,
+)
 from .habit_policy import (
     HABIT_PROMOTION_METHOD,
     HABIT_PROMOTION_VERSION,
@@ -67,6 +74,9 @@ __all__ = [
     "DEFAULT_MIN_TRIALS",
     "EVALUATION_METHOD",
     "EVALUATION_VERSION",
+    "HABIT_APPROVAL_APPLY_METHOD",
+    "HABIT_APPROVAL_PATCH_METHOD",
+    "HABIT_APPROVAL_VERSION",
     "HABIT_LIFECYCLES",
     "HABIT_PROMOTION_METHOD",
     "HABIT_PROMOTION_VERSION",
@@ -80,6 +90,7 @@ __all__ = [
     "SESSION_EVALUATION_VERSION",
     "STATISTICAL_EVALUATION_METHOD",
     "STATISTICAL_EVALUATION_VERSION",
+    "apply_habit_approval",
     "calculate_continuity_score",
     "classify_capability_id",
     "compare_experiment_context",
@@ -93,6 +104,7 @@ __all__ = [
     "load_capability_registry",
     "load_default_habit_promotion_policy",
     "migrate_profile",
+    "preview_habit_approval",
     "registered_capabilities",
     "reserved_namespaces",
     "run_adapter_conformance",
