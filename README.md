@@ -23,7 +23,11 @@ What purpose might explain it?
         ↓
 Intent Discovery / Intent Candidate
         ↓
-What purpose is actually declared for continuity?
+Was the proposed purpose explicitly accepted?
+        ↓
+Intent Approval + new immutable snapshot
+        ↓
+What purpose is now declared for continuity?
         ↓
 Behavior Intent / Goal Semantics
         ↓
@@ -86,6 +90,8 @@ The reference implementation can:
 - allow an obsolete optional expression to disappear while the functional goal remains preserved;
 - evaluate a proposed intent hypothesis from generic context-action-outcome episodes without hardcoding a specific behavior;
 - generate an **Intent Candidate** or `insufficient_evidence` result without mutating a profile;
+- explicitly approve an eligible Intent Candidate only into a new immutable snapshot;
+- preserve discovered-intent provenance, candidate/report hashes, approval actor/time, and `causal_claim=false` with the declared intent;
 - support numeric/binary and higher-is-better/lower-is-better discovery outcomes;
 - record lightweight semantic Experience Episodes without embedding raw media;
 - compact long-lived experience into deterministic numeric/binary summaries during idle or charging windows;
@@ -283,9 +289,74 @@ Every report explicitly contains:
 
 because association between an action and a better outcome does not prove that the action caused the outcome or that the proposed semantic purpose is correct.
 
-Intent Discovery never writes `behavior.intent` and never approves a candidate. An explicit Intent Approval step remains a future v0.4 task.
+Intent Discovery never writes `behavior.intent` and never approves a candidate. **Explicit Intent Approval** is the separate mutation boundary described below.
 
 See [`docs/INTENT_DISCOVERY.md`](docs/INTENT_DISCOVERY.md).
+
+## Explicit Intent Approval / Profile Patch v0.1
+
+An Intent Candidate is still only a review hypothesis. `approve-intent` is the explicit operation that accepts an eligible candidate into continuity data.
+
+```text
+Intent Candidate
+  ↓
+preview
+  ↓
+explicit approval
+  ↓
+new immutable snapshot
+  ↓
+Declared Intent + provenance
+```
+
+Preview without modifying the profile:
+
+```bash
+rcl approve-intent preview \
+  examples/intent-approval/object-release-before \
+  candidate-report.json \
+  interaction.post_release_hold \
+  --approved-at 2026-08-14T09:00:00Z
+```
+
+Apply into a new snapshot:
+
+```bash
+rcl approve-intent apply \
+  examples/intent-approval/object-release-before \
+  candidate-report.json \
+  interaction.post_release_hold \
+  /tmp/object-release-approved \
+  --approved-at 2026-08-14T09:00:00Z \
+  --approved-by local-user
+```
+
+v0.1 requires a schema-valid candidate, every evidence gate to pass, `candidate_action_id` to exactly match the target `behavior_id`, and the target behavior to have no existing intent. Existing intent replacement is deliberately rejected rather than silently overwriting continuity data.
+
+The approved intent carries auditable provenance:
+
+```json
+{
+  "provenance": {
+    "source": "discovered",
+    "candidate_id": "intent-candidate-...",
+    "dataset_id": "demo-object-release-stability-001",
+    "discovery_method": "rcl.intent.discovery.context_action_outcome.v0.1",
+    "policy_id": "rcl.intent.discovery.default.v0.1",
+    "policy_version": "0.1",
+    "candidate_report_sha256": "...",
+    "approved_at": "2026-08-14T09:00:00Z",
+    "approved_by": "local-user",
+    "causal_claim": false
+  }
+}
+```
+
+The source profile is never overwritten. Apply changes only `behavior.intent`, regenerates the manifest, validates the new snapshot, verifies source payload hashes are unchanged, and rejects semantic parameter or non-intent behavior changes.
+
+Approval means the reviewed engineering hypothesis was selected for continuity. It does **not** turn observational association into causal proof.
+
+See [`docs/INTENT_APPROVAL.md`](docs/INTENT_APPROVAL.md).
 
 ## Lightweight Experience Store + Compaction v0.1
 
@@ -385,7 +456,7 @@ rcl diff \
   examples/history/mobile-base-after
 ```
 
-Profile Diff reports behavior, parameter, preservation, history, **intent**, and **expression** changes. It is an audit tool, not a Continuity Score.
+Profile Diff reports behavior, parameter, preservation, history, **intent**, **intent provenance**, and **expression** changes. It is an audit tool, not a Continuity Score.
 
 ## Habit Promotion Policy v0.1
 
@@ -546,6 +617,8 @@ RCL intentionally keeps these concepts separate.
 
 **Intent Discovery** asks whether observed context-action-outcome association is strong enough to review a proposed goal hypothesis. It does not assert causality or mutate the profile.
 
+**Explicit Intent Approval** is the reviewed mutation that converts an eligible Intent Candidate into declared continuity data in a new snapshot. It is not causal proof.
+
 **Behavior Intent** asks whether the target can preserve the declared purpose, trigger, and success condition.
 
 **Expression** asks whether a recognizable source-body motion can also be retained.
@@ -566,21 +639,22 @@ None of these constructs define consciousness, personhood, subjective identity, 
 
 1. **Preserve why before copying how** — portable goal semantics outrank source-body implementation details.
 2. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
-3. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
-4. **Compaction is not deletion** — a v0.1 experience summary never authorizes pruning source evidence.
-5. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
-6. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
-7. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
-8. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
-9. **User-owned and portable** — continuity should export without requiring a vendor cloud.
-10. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-11. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
-12. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
-13. **Approval is explicit and immutable-by-default** — lifecycle mutation creates a new validated snapshot.
-14. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
-15. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-16. **Safety outranks continuity** — a legacy expression never overrides target safety constraints.
-17. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
+3. **Intent approval is explicit** — discovery may recommend a goal, but only an explicit approval operation may add it to continuity data, and approval does not imply causal proof.
+4. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
+5. **Compaction is not deletion** — a v0.1 experience summary never authorizes pruning source evidence.
+6. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
+7. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
+8. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
+9. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
+10. **User-owned and portable** — continuity should export without requiring a vendor cloud.
+11. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
+12. **History is descriptive, not executable** — historical events explain evolution but never silently mutate current behavior.
+13. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
+14. **Approval is explicit and immutable-by-default** — reviewed continuity mutations create new validated snapshots rather than overwriting the source.
+15. **Declared and measured continuity are different** — representability is not proof of execution fidelity.
+16. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+17. **Safety outranks continuity** — a legacy expression or approved intent never overrides target safety constraints.
+18. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
 
 ## Quick start
 
@@ -597,7 +671,14 @@ rcl compact-experience \
   --output /tmp/experience-summary.json
 
 rcl discover-intent \
-  examples/intent-discovery/object-release-stability.dataset.json
+  examples/intent-discovery/object-release-stability.dataset.json \
+  --output /tmp/intent-candidate.json
+
+rcl approve-intent preview \
+  examples/intent-approval/object-release-before \
+  /tmp/intent-candidate.json \
+  interaction.post_release_hold \
+  --approved-at 2026-08-14T09:00:00Z
 
 rcl diff \
   examples/history/mobile-base-before \
@@ -645,6 +726,7 @@ robot-continuity-layer/
 ├── docs/
 │   ├── BEHAVIOR_INTENT.md
 │   ├── EXPERIENCE_STORE.md
+│   ├── INTENT_APPROVAL.md
 │   ├── INTENT_DISCOVERY.md
 │   ├── CAPABILITY_REGISTRY.md
 │   ├── CONFORMANCE.md
@@ -659,6 +741,7 @@ robot-continuity-layer/
 ├── examples/
 │   ├── experience/
 │   ├── intent/
+│   ├── intent-approval/
 │   ├── intent-discovery/
 │   ├── history/
 │   ├── mobile-base/
@@ -671,6 +754,8 @@ robot-continuity-layer/
 ├── rcl/
 │   ├── experience.py
 │   ├── intent.py
+│   ├── intent_approval.py
+│   ├── intent_approval_cli.py
 │   ├── intent_discovery.py
 │   ├── intent_reference_adapter.py
 │   ├── habit_approval.py
@@ -687,7 +772,7 @@ robot-continuity-layer/
 
 RCL does **not** claim to measure consciousness, personhood, subjective motivation, free will, emotional authenticity, causal truth from observational association, universal statistical equivalence, universal habit thresholds, or certified physical safety.
 
-Behavior Intent represents declared engineering goal semantics. Intent Discovery produces an association-backed engineering hypothesis for review. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal in a human subjective sense.
+Behavior Intent represents declared engineering goal semantics. Intent Discovery produces an association-backed engineering hypothesis for review. Explicit Intent Approval records a reviewed selection into a new snapshot without turning association into causal proof. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal in a human subjective sense.
 
 ## License
 
