@@ -2,6 +2,15 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Observed Intent Success v0.1 to evaluate whether a robot actually satisfies a declared `behavior.intent.success_condition` independently from source-motion similarity or visible expression.
+- Added deterministic `evaluate_observed_intent_success()` with per-intent `pass`, `fail`, `not_observable`, and `not_triggered` results.
+- Added required-intent aggregate rules: required failure makes the report `failed`, while missing/unobservable/untriggered required evidence makes it `inconclusive`; preferred/advisory failures remain explicit but nonblocking.
+- Added Intent Observation Input v0.1 and Observed Intent Success Report v0.1 schemas with runtime/public parity coverage.
+- Added exact behavior ID, trigger ID, and success-condition ID matching plus duplicate-observation and invalid trigger/success-state rejection.
+- Added target-native `strategy_id` as audit metadata that is deliberately excluded from Intent Success pass/fail logic.
+- Added V1 source-style and V2 target-native fixtures that use different execution strategies yet both satisfy the same declared pre-sit and handover goals.
+- Added `rcl evaluate-intent PROFILE OBSERVATIONS` with text, JSON, output-file, passed/inconclusive/failed exit-code coverage.
+- Added `docs/OBSERVED_INTENT_SUCCESS.md` and documented that purpose achievement, motion similarity, causal truth, subjective motivation, and physical safety certification are separate concepts.
 - Added Summary-Aware Intent Discovery v0.1 so long-lived context-action-outcome hypotheses can be evaluated directly from non-destructive Experience Summary aggregate evidence.
 - Extended new Experience Compaction output with action-stratified `present` / `absent` outcome summaries while retaining the existing combined outcome statistics and backward-compatible summary schema validity.
 - Added `discover_intent_candidate_from_summary()` and refactored raw and aggregate Intent Discovery through one shared scoring, gate, confidence, and effect-calculation core.
