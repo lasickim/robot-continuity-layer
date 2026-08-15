@@ -1,0 +1,10 @@
+{
+  "policy_id": "rcl.experience.retention.conservative",
+  "policy_version": "0.1",
+  "min_active_retention_days": 30,
+  "protect_retained_exemplars": true,
+  "protect_external_evidence_refs": true,
+  "min_group_episode_count_for_prune": 8,
+  "max_prune_fraction_per_group": 0.5,
+  "require_archive_record_for_prune": true
+}
