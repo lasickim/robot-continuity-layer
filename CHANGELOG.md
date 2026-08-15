@@ -2,6 +2,16 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+- Added Alternative Capability Sets / Goal Satisfaction Paths v0.1 so one declared Intent can be represented by multiple valid semantic capability combinations across different robot embodiments.
+- Added optional named `intent.capability_paths` with clause-level `all_of`, `any_of`, and `one_of` semantics; clauses inside one path combine as AND while complete paths are alternatives (OR).
+- Kept legacy `intent.required_capabilities` backward-compatible by normalizing it to one implicit `legacy.required_capabilities` `all_of` path; v0.1 requires exactly one of the legacy or new representations.
+- Defined `one_of` as selecting one valid available capability for a clause, not Boolean XOR over the target's entire capability inventory, so targets are not penalized for exposing several alternatives.
+- Added deterministic `validate_intent_capability_paths()`, `evaluate_intent_capability_paths()`, and `select_satisfied_capability_path()` APIs with matched, missing, selected, and satisfied diagnostics per clause and per path.
+- Added adapter-level `preferred_intent_capability_paths()` so target embodiments may prefer a valid route without establishing a universal camera/lidar/contact/network technology ranking.
+- Extended `IntentMigrationResult` and migration-report schemas with `selected_capability_path_id` and complete `capability_path_results`; required Intent failure now occurs only when no declared path can satisfy the goal (or a higher-priority safety rule blocks it).
+- Added backward-compatible `IntentMigrationResult` backfill for existing adapters that still emit flat `required_capabilities`, plus Profile Diff visibility for `intent.capability_paths`.
+- Added `CapabilityPathReferenceAdapter`, direct/rear-attention/external-state reference targets, runtime/public schema parity coverage, and migration tests proving the same pre-sit WHY can be preserved through different capability paths.
+- Added `docs/CAPABILITY_PATHS.md` and documented the principle “Preserve the goal, not one body's capability recipe”; capability-path satisfiability remains representability evidence and does not replace Observed Intent Success.
 - Added Expression Optimization Recommendation Policy v0.1 as a deterministic non-mutating review layer between target functional evidence and explicit expression optimization approval.
 - Added `evaluate_expression_optimization_recommendations()` and a published default policy with `review_removal`, `review_simplification`, `retain`, and `inconclusive` decisions.
 - Added exact profile/target/behavior/goal/trigger/success-condition consistency checks across migration and Observed Intent Success evidence.
