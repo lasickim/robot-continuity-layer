@@ -1,0 +1,32 @@
+{
+  "goal_proposal_version": "0.1",
+  "proposal_id": "goal-proposal-bf96945d41eeeb38",
+  "created_at": "2026-08-15T14:47:00Z",
+  "proposer": {
+    "actor": "rcl-demo",
+    "organization": "RCL demo community"
+  },
+  "proposed_goal": {
+    "goal_id": "interaction.camera_check_recipient",
+    "summary": "Use a camera to check the intended recipient before completing a transfer.",
+    "semantics": "Move the camera and servo toward the recipient and verify a camera-derived ready state before completing the transfer.",
+    "triggers": [
+      "interaction.before_transfer_commit"
+    ],
+    "success_conditions": [
+      "state.camera_recipient_ready"
+    ],
+    "allowed_failure_actions": [
+      "retry",
+      "request_help",
+      "abort"
+    ]
+  },
+  "source_extension_goal_ids": [
+    "x.acme.camera_check_recipient"
+  ],
+  "portability_rationale": "The proposer believes the behavior is broadly useful, but the submitted wording still captures implementation details.",
+  "evidence_refs": [
+    "proposal://demo/camera-recipient"
+  ]
+}
