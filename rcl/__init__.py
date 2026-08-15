@@ -16,6 +16,16 @@ from .capabilities import (
     validate_capability_id,
     validate_capability_set,
 )
+from .capability_path_reference_adapter import CapabilityPathReferenceAdapter
+from .capability_paths import (
+    CAPABILITY_PATHS_VERSION,
+    LEGACY_CAPABILITY_PATH_ID,
+    declared_intent_capabilities,
+    evaluate_intent_capability_paths,
+    normalized_intent_capability_paths,
+    select_satisfied_capability_path,
+    validate_intent_capability_paths,
+)
 from .conformance import run_adapter_conformance
 from .evaluation import (
     EVALUATION_METHOD,
@@ -136,7 +146,9 @@ from .statistical_evaluation import (
 
 __all__ = [
     "BehaviorMigrationResult",
+    "CAPABILITY_PATHS_VERSION",
     "CapabilityClassification",
+    "CapabilityPathReferenceAdapter",
     "CapabilityValidationError",
     "CONFIDENCE_LEVEL",
     "CONTEXT_VERSION",
@@ -176,6 +188,7 @@ __all__ = [
     "INTENT_VOCABULARY_VERSION",
     "IntentMigrationResult",
     "IntentReferenceAdapter",
+    "LEGACY_CAPABILITY_PATH_ID",
     "NULL_EXPRESSION_SHA256",
     "PROFILE_DIFF_METHOD",
     "PROFILE_DIFF_VERSION",
@@ -197,11 +210,13 @@ __all__ = [
     "compare_experiment_context",
     "compare_trial_distributions",
     "confidence_interval_95",
+    "declared_intent_capabilities",
     "diff_profiles",
     "discover_intent_candidate",
     "discover_intent_candidate_from_summary",
     "evaluate_expression_optimization_recommendations",
     "evaluate_habit_promotion_candidates",
+    "evaluate_intent_capability_paths",
     "evaluate_observed_continuity",
     "evaluate_observed_intent_success",
     "evaluate_repeated_sessions",
@@ -214,6 +229,7 @@ __all__ = [
     "load_default_intent_discovery_policy",
     "load_intent_vocabulary",
     "migrate_profile",
+    "normalized_intent_capability_paths",
     "preview_expression_optimization",
     "preview_habit_approval",
     "preview_intent_approval",
@@ -225,6 +241,7 @@ __all__ = [
     "run_adapter_conformance",
     "sample_mean",
     "sample_std",
+    "select_satisfied_capability_path",
     "t95_critical",
     "validate_behavior_evaluation_metadata",
     "validate_behavior_expression_history_metadata",
@@ -234,5 +251,6 @@ __all__ = [
     "validate_capability_id",
     "validate_capability_set",
     "validate_expression_temporal_style",
+    "validate_intent_capability_paths",
     "wasserstein_1d",
 ]
