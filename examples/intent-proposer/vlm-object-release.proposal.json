@@ -1,0 +1,39 @@
+{
+  "intent_hypothesis_proposal_version": "0.1",
+  "method": "rcl.intent.hypothesis_proposer.v0.1",
+  "proposal_id": "intent-proposal-c8212f1c1f20792c",
+  "created_at": "2026-08-16T01:20:00+09:00",
+  "status": "proposed",
+  "non_mutating": true,
+  "approved": false,
+  "candidate_action_id": "interaction.post_release_hold",
+  "context_match": {"task": "object_release"},
+  "outcome": {
+    "outcome_id": "object_stability_score",
+    "type": "numeric",
+    "higher_is_better": true,
+    "minimum_meaningful_effect": 0.15,
+    "unit": "ratio"
+  },
+  "proposed_intent": {
+    "goal_id": "x.rcl-demo.stabilize_released_object",
+    "description": "Keep support briefly after release so the object reaches a stable state before withdrawal.",
+    "trigger": "activity.after_object_release",
+    "success_condition": "state.released_object_stable",
+    "failure_action": "retry",
+    "criticality": "preferred",
+    "required_capabilities": ["x.rcl-demo.object_stability_observation"]
+  },
+  "rationale_summary": "Repeated post-release support appears associated with a more stable released object.",
+  "evidence_refs": ["experience://object-release-series"],
+  "self_confidence": 0.88,
+  "self_confidence_semantics": "proposer_self_reported_non_normative",
+  "proposer": {
+    "kind": "vlm",
+    "proposer_id": "demo.vlm-proposer",
+    "provider": "example-provider",
+    "model": "example-vision-language-model",
+    "tool": "intent_hypothesis_adapter",
+    "version": "1"
+  }
+}
