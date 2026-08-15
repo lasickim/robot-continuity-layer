@@ -1,0 +1,98 @@
+{
+  "intent_observation_series_version": "0.1",
+  "series_id": "sit-assistant-v1-repeated",
+  "robot_id": "RCL-INTENT-DEMO-V1",
+  "embodiment_id": "intent-demo-v1-humanoid",
+  "sessions": [
+    {
+      "session_id": "v1-session-01",
+      "started_at": "2026-08-15T01:00:00Z",
+      "trials": [
+        {
+          "trial_id": "v1-s01-t01",
+          "captured_at": "2026-08-15T01:00:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s01-t01-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s01/t01/sit"]},
+            {"observation_id": "v1-s01-t01-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s01/t01/handover"]}
+          ]
+        },
+        {
+          "trial_id": "v1-s01-t02",
+          "captured_at": "2026-08-15T01:01:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s01-t02-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s01/t02/sit"]},
+            {"observation_id": "v1-s01-t02-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s01/t02/handover"]}
+          ]
+        },
+        {
+          "trial_id": "v1-s01-t03",
+          "captured_at": "2026-08-15T01:02:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s01-t03-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s01/t03/sit"]},
+            {"observation_id": "v1-s01-t03-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s01/t03/handover"]}
+          ]
+        }
+      ]
+    },
+    {
+      "session_id": "v1-session-02",
+      "started_at": "2026-08-16T01:00:00Z",
+      "trials": [
+        {
+          "trial_id": "v1-s02-t01",
+          "captured_at": "2026-08-16T01:00:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s02-t01-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s02/t01/sit"]},
+            {"observation_id": "v1-s02-t01-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s02/t01/handover"]}
+          ]
+        },
+        {
+          "trial_id": "v1-s02-t02",
+          "captured_at": "2026-08-16T01:01:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s02-t02-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s02/t02/sit"]},
+            {"observation_id": "v1-s02-t02-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s02/t02/handover"]}
+          ]
+        },
+        {
+          "trial_id": "v1-s02-t03",
+          "captured_at": "2026-08-16T01:02:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s02-t03-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s02/t03/sit"]},
+            {"observation_id": "v1-s02-t03-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s02/t03/handover"]}
+          ]
+        }
+      ]
+    },
+    {
+      "session_id": "v1-session-03",
+      "started_at": "2026-08-17T01:00:00Z",
+      "trials": [
+        {
+          "trial_id": "v1-s03-t01",
+          "captured_at": "2026-08-17T01:00:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s03-t01-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s03/t01/sit"]},
+            {"observation_id": "v1-s03-t01-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s03/t01/handover"]}
+          ]
+        },
+        {
+          "trial_id": "v1-s03-t02",
+          "captured_at": "2026-08-17T01:01:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s03-t02-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s03/t02/sit"]},
+            {"observation_id": "v1-s03-t02-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s03/t02/handover"]}
+          ]
+        },
+        {
+          "trial_id": "v1-s03-t03",
+          "captured_at": "2026-08-17T01:02:10Z",
+          "intent_observations": [
+            {"observation_id": "v1-s03-t03-sit", "behavior_id": "safety.pre_sit_clearance_check", "trigger": "activity.before_sit_down", "trigger_state": "observed", "success_condition": "state.sitting_area_clear", "success_state": "satisfied", "strategy_id": "source.rearward_body_observation", "evidence_refs": ["observation://v1/s03/t03/sit"]},
+            {"observation_id": "v1-s03-t03-handover", "behavior_id": "interaction.present_handover", "trigger": "interaction.before_handover_release", "trigger_state": "observed", "success_condition": "state.handover_orientation_acceptable", "success_state": "satisfied", "strategy_id": "source.brief_wrist_roll", "evidence_refs": ["observation://v1/s03/t03/handover"]}
+          ]
+        }
+      ]
+    }
+  ]
+}
