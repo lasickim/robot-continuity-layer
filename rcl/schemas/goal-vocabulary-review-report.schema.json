@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:goal-vocabulary-review-report",
+  "title": "RCL Goal Vocabulary Review Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "goal_governance_review_version",
+    "method",
+    "created_at",
+    "proposal_id",
+    "proposal_sha256",
+    "proposed_goal_id",
+    "vocabulary",
+    "status",
+    "eligible_for_approval",
+    "recommended_decision",
+    "blockers",
+    "advisories",
+    "checks",
+    "overlap_candidates",
+    "specificity_hits",
+    "vocabulary_mutated",
+    "disclaimer"
+  ],
+  "properties": {
+    "goal_governance_review_version": {"const": "0.1"},
+    "method": {"const": "rcl.intent.goal_vocabulary_review.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "proposal_id": {"type": "string", "pattern": "^goal-proposal-[0-9a-f]{16}$"},
+    "proposal_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "proposed_goal_id": {"type": "string", "minLength": 3},
+    "vocabulary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["vocabulary_id", "vocabulary_version", "vocabulary_sha256"],
+      "properties": {
+        "vocabulary_id": {"const": "rcl.behavior-intent"},
+        "vocabulary_version": {"const": "0.1"},
+        "vocabulary_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": ["ready_for_review", "needs_revision", "blocked"]
+    },
+    "eligible_for_approval": {"type": "boolean"},
+    "recommended_decision": {
+      "type": "string",
+      "enum": ["approved", "needs_revision"]
+    },
+    "blockers": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "advisories": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["check_id", "passed", "severity", "summary", "details"],
+        "properties": {
+          "check_id": {"type": "string", "minLength": 1},
+          "passed": {"type": "boolean"},
+          "severity": {"type": "string", "enum": ["blocker", "advisory", "info"]},
+          "summary": {"type": "string", "minLength": 1},
+          "details": {"type": "object"}
+        }
+      }
+    },
+    "overlap_candidates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["goal_id", "token_overlap"],
+        "properties": {
+          "goal_id": {"type": "string", "minLength": 1},
+          "token_overlap": {"type": "number", "minimum": 0, "maximum": 1}
+        }
+      }
+    },
+    "specificity_hits": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["field", "term"],
+        "properties": {
+          "field": {"type": "string", "minLength": 1},
+          "term": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "vocabulary_mutated": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
