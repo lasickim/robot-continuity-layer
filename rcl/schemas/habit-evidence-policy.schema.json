@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:habit-evidence-policy",
+  "title": "RCL Habit Evidence Policy v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["policy_version", "policy_id", "description", "min_episode_count", "min_action_present_count", "min_repeat_rate", "min_observation_span_days", "min_matched_group_count"],
+  "properties": {
+    "policy_version": {"const": "0.1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "min_episode_count": {"type": "integer", "minimum": 1},
+    "min_action_present_count": {"type": "integer", "minimum": 1},
+    "min_repeat_rate": {"type": "number", "minimum": 0, "maximum": 1},
+    "min_observation_span_days": {"type": "number", "minimum": 0},
+    "min_matched_group_count": {"type": "integer", "minimum": 1}
+  }
+}
