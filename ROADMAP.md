@@ -149,8 +149,14 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] target-native strategy audit metadata excluded from pass/fail logic
 - [x] V1 source-style and V2 target-native fixtures satisfying the same declared intents
 - [x] `rcl evaluate-intent` CLI
+- [x] Intent-aware Adapter Conformance v0.1
+- [x] separate `rcl.adapter.intent.v0.4` suite and `RCL Intent Migration Compatible` experimental label
+- [x] independent core path evaluation versus adapter-selected-path claims
+- [x] direct-path and alternate-path preservation checks without flattening path OR semantics
+- [x] false selected-path, no-path false-preservation, and expression-as-Intent substitution detection
+- [x] required-Intent migration-failure and legacy flat-capability compatibility checks
+- [x] `rcl-conformance intent` CLI plus dedicated runtime/public conformance-report schema
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
-- [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
 - [x] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
 - [ ] repeated-trial / repeated-session statistical Intent Success evaluation
@@ -183,6 +189,8 @@ Preserve the goal, not one body's capability recipe.
 The target may perform the functional check with a newer system first, then reproduce a familiar legacy gesture separately. If source timing was slow only because of old hardware, the target may naturalize the gesture. If the temporal style itself became recognized or user-valued, it may be explicitly preserved.
 
 A declared Intent may expose several semantic capability paths. Clauses inside one path are combined, while complete paths are alternatives. A target adapter may select any satisfied path and must report which path and target-native strategy it chose. RCL does not treat a source body's original sensor/capability combination as the only correct route to the same WHY.
+
+Intent-aware Conformance independently recomputes those path options and compares them with an adapter's claims. An adapter may choose a different HOW, but it must report the WHY and the selected satisfaction path honestly.
 
 A behavior becoming functionally unnecessary is not permission to forget it. RCL may recommend reviewing optimization from compatible migration + Observed Intent Success evidence, but recommendations are non-mutating and keep `redundancy_proven=false`. A target that cannot reproduce an expression retains that expression in continuity data rather than treating embodiment limitation as permission to erase it.
 
