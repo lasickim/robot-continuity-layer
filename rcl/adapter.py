@@ -81,6 +81,35 @@ class IntentMigrationResult:
 
     def __post_init__(self) -> None:
         _validate_status(self.status)
+        if not self.capability_path_results and self.required_capabilities:
+            required = sorted(set(self.required_capabilities))
+            missing = sorted(set(self.missing_capabilities))
+            matched = sorted(set(required) - set(missing))
+            capability_satisfied = not missing
+            selected = required if capability_satisfied else []
+            result = {
+                "path_id": LEGACY_CAPABILITY_PATH_ID,
+                "satisfied": capability_satisfied,
+                "selected_capabilities": selected,
+                "clauses": [
+                    {
+                        "clause": "all_of",
+                        "options": required,
+                        "matched": matched,
+                        "missing": missing,
+                        "selected": selected,
+                        "satisfied": capability_satisfied,
+                    }
+                ],
+                "reason": (
+                    "all_capability_clauses_satisfied"
+                    if capability_satisfied
+                    else "one_or_more_capability_clauses_unsatisfied"
+                ),
+            }
+            object.__setattr__(self, "capability_path_results", (result,))
+            if self.selected_capability_path_id is None and capability_satisfied:
+                object.__setattr__(self, "selected_capability_path_id", LEGACY_CAPABILITY_PATH_ID)
 
     def to_dict(self) -> dict[str, Any]:
         return {
