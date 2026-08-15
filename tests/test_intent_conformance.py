@@ -103,7 +103,10 @@ def test_intent_conformance_catches_false_selected_path():
     assert report["passed"] is False
     failed = {item["check_id"] for item in report["checks"] if not item["passed"]}
     assert "direct.selected_path_truthful" in failed
-    assert "direct.path_diagnostics_complete" in failed
+    assert "migration_report.selected_path" in failed
+    # The adapter may still preserve complete path diagnostics while lying only
+    # about which path it selected. Conformance separates those failure modes.
+    assert "direct.path_diagnostics_complete" not in failed
 
 
 def test_intent_conformance_catches_expression_substitution():
