@@ -1,0 +1,32 @@
+{
+  "goal_proposal_version": "0.1",
+  "proposal_id": "goal-proposal-226b5f9d657c6e86",
+  "created_at": "2026-08-15T14:45:00Z",
+  "proposer": {
+    "actor": "rcl-demo",
+    "organization": "RCL demo community"
+  },
+  "proposed_goal": {
+    "goal_id": "interaction.verify_recipient_ready",
+    "summary": "Verify that the intended recipient is ready before completing a transfer.",
+    "semantics": "Establish sufficient semantic evidence that the intended recipient can accept the item before the transfer is completed, without prescribing a particular sensing or motion strategy.",
+    "triggers": [
+      "interaction.before_transfer_commit"
+    ],
+    "success_conditions": [
+      "state.recipient_ready"
+    ],
+    "allowed_failure_actions": [
+      "retry",
+      "request_help",
+      "abort"
+    ]
+  },
+  "source_extension_goal_ids": [
+    "x.acme.verify_recipient_ready"
+  ],
+  "portability_rationale": "The purpose can be satisfied by different embodiments and sensing strategies without requiring one source body's implementation.",
+  "evidence_refs": [
+    "proposal://demo/recipient-ready"
+  ]
+}

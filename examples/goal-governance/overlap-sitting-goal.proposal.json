@@ -1,0 +1,33 @@
+{
+  "goal_proposal_version": "0.1",
+  "proposal_id": "goal-proposal-e258cd1fbeeb0be8",
+  "created_at": "2026-08-15T14:48:00Z",
+  "proposer": {
+    "actor": "rcl-demo",
+    "organization": "RCL demo community"
+  },
+  "proposed_goal": {
+    "goal_id": "safety.confirm_sitting_region_clear",
+    "summary": "Verify that the intended sitting area is clear before a sitting motion proceeds.",
+    "semantics": "Establish sufficient evidence that the intended sitting area is free of a blocking person or object before sitting proceeds, without prescribing the target embodiment strategy.",
+    "triggers": [
+      "activity.before_sit_down"
+    ],
+    "success_conditions": [
+      "state.sitting_area_clear"
+    ],
+    "allowed_failure_actions": [
+      "block",
+      "retry",
+      "request_help",
+      "abort"
+    ]
+  },
+  "source_extension_goal_ids": [
+    "x.acme.confirm_sitting_region_clear"
+  ],
+  "portability_rationale": "The goal is described semantically and can be implemented through different embodiments, but it may duplicate an existing shared purpose.",
+  "evidence_refs": [
+    "proposal://demo/sitting-overlap"
+  ]
+}
