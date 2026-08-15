@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:goal-vocabulary-proposal",
+  "title": "RCL Goal Vocabulary Proposal v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "goal_proposal_version",
+    "proposal_id",
+    "created_at",
+    "proposer",
+    "proposed_goal",
+    "source_extension_goal_ids",
+    "portability_rationale",
+    "evidence_refs"
+  ],
+  "properties": {
+    "goal_proposal_version": {"const": "0.1"},
+    "proposal_id": {"type": "string", "pattern": "^goal-proposal-[0-9a-f]{16}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "proposer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["actor"],
+      "properties": {
+        "actor": {"type": "string", "minLength": 1},
+        "organization": {"type": "string", "minLength": 1}
+      }
+    },
+    "proposed_goal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "goal_id",
+        "summary",
+        "semantics",
+        "triggers",
+        "success_conditions",
+        "allowed_failure_actions"
+      ],
+      "properties": {
+        "goal_id": {"type": "string", "minLength": 3},
+        "summary": {"type": "string", "minLength": 12},
+        "semantics": {"type": "string", "minLength": 24},
+        "triggers": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 3}
+        },
+        "success_conditions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 3}
+        },
+        "allowed_failure_actions": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "enum": ["block", "retry", "request_help", "abort", "degrade_safely"]
+          }
+        }
+      }
+    },
+    "source_extension_goal_ids": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "pattern": "^x\\.[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$"
+      }
+    },
+    "portability_rationale": {"type": "string", "minLength": 24},
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
