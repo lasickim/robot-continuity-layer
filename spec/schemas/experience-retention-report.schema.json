@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:experience-retention-report",
+  "title": "RCL Experience Retention Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "retention_version",
+    "method",
+    "created_at",
+    "as_of",
+    "policy",
+    "source",
+    "summary",
+    "archive_records",
+    "counts",
+    "decisions",
+    "non_mutating",
+    "prune_executed",
+    "archive_executed_by_rcl",
+    "disclaimer"
+  ],
+  "properties": {
+    "retention_version": {"const": "0.1"},
+    "method": {"const": "rcl.experience.retention.evaluate.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "as_of": {"type": "string", "format": "date-time"},
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"const": "0.1"}
+      }
+    },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["store_id", "episode_count", "source_digest_sha256"],
+      "properties": {
+        "store_id": {"type": "string", "minLength": 1},
+        "episode_count": {"type": "integer", "minimum": 1},
+        "source_digest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary_id", "summary_sha256", "binding_verified"],
+      "properties": {
+        "summary_id": {"type": "string", "minLength": 1},
+        "summary_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "binding_verified": {"const": true}
+      }
+    },
+    "archive_records": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["archive_id", "archive_record_sha256", "episode_count", "location_ref"],
+        "properties": {
+          "archive_id": {"type": "string", "pattern": "^experience-archive-[0-9a-f]{16}$"},
+          "archive_record_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "episode_count": {"type": "integer", "minimum": 1},
+          "location_ref": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["total", "retain", "archive_candidate", "prune_candidate"],
+      "properties": {
+        "total": {"type": "integer", "minimum": 1},
+        "retain": {"type": "integer", "minimum": 0},
+        "archive_candidate": {"type": "integer", "minimum": 0},
+        "prune_candidate": {"type": "integer", "minimum": 0}
+      }
+    },
+    "decisions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "episode_id",
+          "group_id",
+          "observed_at",
+          "age_days",
+          "group_episode_count",
+          "group_prune_candidate_limit",
+          "archived",
+          "archive_record_ids",
+          "protected",
+          "decision",
+          "reasons"
+        ],
+        "properties": {
+          "episode_id": {"type": "string", "minLength": 1},
+          "group_id": {"type": "string", "minLength": 1},
+          "observed_at": {"type": "string", "format": "date-time"},
+          "age_days": {"type": "integer", "minimum": 0},
+          "group_episode_count": {"type": "integer", "minimum": 1},
+          "group_prune_candidate_limit": {"type": "integer", "minimum": 0},
+          "archived": {"type": "boolean"},
+          "archive_record_ids": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^experience-archive-[0-9a-f]{16}$"}
+          },
+          "protected": {"type": "boolean"},
+          "decision": {"type": "string", "enum": ["retain", "archive_candidate", "prune_candidate"]},
+          "reasons": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "enum": [
+                "within_active_retention_window",
+                "retained_summary_exemplar",
+                "external_evidence_reference",
+                "sparse_semantic_group",
+                "prune_fraction_guard",
+                "archive_record_required",
+                "archive_record_present",
+                "eligible_under_policy"
+              ]
+            }
+          }
+        }
+      }
+    },
+    "non_mutating": {"const": true},
+    "prune_executed": {"const": false},
+    "archive_executed_by_rcl": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
