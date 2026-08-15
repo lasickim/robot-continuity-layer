@@ -47,13 +47,13 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "evaluate-habit-evidence":
         try:
             return run_habit_evidence(sys.argv[2:])
-        except (RCLValidationError, ValueError, OSError, json.JSONDecodeError) as exc:
+        except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
     if len(sys.argv) >= 2 and sys.argv[1] == "evaluate-habit-evidence-summary":
         try:
             return run_habit_evidence_summary(sys.argv[2:])
-        except (RCLValidationError, ValueError, OSError, json.JSONDecodeError) as exc:
+        except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
     return existing_main()
