@@ -1,0 +1,16 @@
+{
+  "embodiment_id": "capability-path-direct-v2",
+  "vendor": "RCL Demo",
+  "model": "Direct Clearance V2",
+  "class": "other",
+  "capabilities": [
+    "perception.sitting_area_clearance",
+    "manipulation.handover_orientation"
+  ],
+  "sensors": [],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.capability_paths",
+    "adapter_version": "0.4-dev"
+  }
+}

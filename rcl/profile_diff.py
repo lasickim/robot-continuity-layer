@@ -82,6 +82,7 @@ def _field_changes(before: dict[str, Any], after: dict[str, Any]) -> list[dict[s
         "intent.failure_action",
         "intent.criticality",
         "intent.required_capabilities",
+        "intent.capability_paths",
         "intent.constraints",
         "intent.provenance",
         "intent_history",

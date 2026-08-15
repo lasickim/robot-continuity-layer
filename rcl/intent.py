@@ -9,6 +9,7 @@ from importlib.resources import files
 from typing import Any
 
 from .capabilities import validate_capability_set
+from .capability_paths import validate_intent_capability_paths
 from .profile import RCLValidationError, validate_schema
 
 
@@ -101,7 +102,7 @@ def _validate_goal_reference(goal_id: str) -> dict[str, Any] | None:
 def _validate_intent(behavior_id: str, intent: dict[str, Any]) -> None:
     goal_id = intent["goal_id"]
     definition = _validate_goal_reference(goal_id)
-    validate_capability_set(intent["required_capabilities"])
+    validate_intent_capability_paths(intent)
 
     if definition is not None:
         if intent["trigger"] not in definition["triggers"]:

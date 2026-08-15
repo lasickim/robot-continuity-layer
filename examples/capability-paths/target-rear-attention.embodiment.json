@@ -1,0 +1,17 @@
+{
+  "embodiment_id": "capability-path-rear-v2",
+  "vendor": "RCL Demo",
+  "model": "Rear Attention V2",
+  "class": "other",
+  "capabilities": [
+    "perception.directional_attention",
+    "x.demo.rear_clearance_classifier",
+    "manipulation.handover_orientation"
+  ],
+  "sensors": [],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.capability_paths",
+    "adapter_version": "0.4-dev"
+  }
+}

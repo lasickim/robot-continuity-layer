@@ -1,0 +1,16 @@
+{
+  "embodiment_id": "capability-path-external-v2",
+  "vendor": "RCL Demo",
+  "model": "External Seat State V2",
+  "class": "other",
+  "capabilities": [
+    "x.demo.external_seat_clearance",
+    "manipulation.handover_orientation"
+  ],
+  "sensors": [],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.capability_paths",
+    "adapter_version": "0.4-dev"
+  }
+}
