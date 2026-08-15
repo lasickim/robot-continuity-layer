@@ -64,6 +64,15 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] optional `behavior.intent` block
 - [x] portable goal / trigger / success-condition / failure-action model
 - [x] required / preferred / advisory intent criticality
+- [x] Alternative Capability Sets / Goal Satisfaction Paths v0.1
+- [x] legacy `required_capabilities` compatibility as implicit `legacy.required_capabilities` all-of path
+- [x] named `capability_paths` with path-level OR and clause-level AND semantics
+- [x] `all_of / any_of / one_of` capability clauses
+- [x] deterministic `one_of` capability selection without XOR-over-availability behavior
+- [x] adapter-specific capability-path preference without a universal technology ranking
+- [x] migration reporting for `selected_capability_path_id` plus per-path matched/missing diagnostics
+- [x] required Intent hard failure only when no declared capability path is satisfied
+- [x] Profile Diff visibility for `intent.capability_paths`
 - [x] Behavior Intent vocabulary v0.1
 - [x] standard goals for pre-sit clearance and handover orientation
 - [x] semantic capabilities `perception.sitting_area_clearance` and `manipulation.handover_orientation`
@@ -143,7 +152,7 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
 - [ ] intent-aware conformance checks for independently implemented adapters
 - [ ] goal vocabulary proposal / review workflow
-- [ ] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
+- [x] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
 - [ ] repeated-trial / repeated-session statistical Intent Success evaluation
 - [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
 - [ ] explicit retention / prune / archive policy after verified compaction
@@ -168,9 +177,12 @@ Preserve the old manner.
 Do not preserve the old limitation by accident.
 Preserve by default; optimize only by explicit approval.
 Recommend automatically; change only by explicit approval.
+Preserve the goal, not one body's capability recipe.
 ```
 
 The target may perform the functional check with a newer system first, then reproduce a familiar legacy gesture separately. If source timing was slow only because of old hardware, the target may naturalize the gesture. If the temporal style itself became recognized or user-valued, it may be explicitly preserved.
+
+A declared Intent may expose several semantic capability paths. Clauses inside one path are combined, while complete paths are alternatives. A target adapter may select any satisfied path and must report which path and target-native strategy it chose. RCL does not treat a source body's original sensor/capability combination as the only correct route to the same WHY.
 
 A behavior becoming functionally unnecessary is not permission to forget it. RCL may recommend reviewing optimization from compatible migration + Observed Intent Success evidence, but recommendations are non-mutating and keep `redundancy_proven=false`. A target that cannot reproduce an expression retains that expression in continuity data rather than treating embodiment limitation as permission to erase it.
 
@@ -208,6 +220,7 @@ explicit Intent Revision
 new current Intent + append-only previous Intent history
   ↓
 migration to another embodiment
+  ├─ select one satisfied semantic capability path
   ├─ target-native functional strategy
   ├─ legacy expression where safe/representable
   └─ target-native expressive timing realization
@@ -227,7 +240,7 @@ new snapshot + append-only previous Expression history
 separate motion / statistical evaluation
 ```
 
-An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. Expression Recommendation creates a review suggestion without proving causal redundancy or user preference. Expression Optimization records a reviewed continuity decision without erasing the old manner from history. None of these operations proves causality, consciousness, or subjective purpose.
+An Intent Candidate is an association-backed engineering hypothesis, not causal proof or subjective motivation. Approval means the hypothesis was explicitly selected for continuity. Revision means later evidence led to an explicitly accepted better engineering interpretation. Capability Path satisfaction means the target can represent one declared semantic route to a goal; it does not prove observed success or make that route universally superior. Observed Intent Success means the declared engineering success condition was observed during a controlled execution. Expressive Timing preserves temporal character without making source hardware delay canonical. Expression Recommendation creates a review suggestion without proving causal redundancy or user preference. Expression Optimization records a reviewed continuity decision without erasing the old manner from history. None of these operations proves causality, consciousness, or subjective purpose.
 
 Long-lived experience handling is deliberately split by compute timescale:
 
@@ -268,6 +281,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] Robot B restore
 - [ ] measured before/after following behavior
 - [ ] measured before/after manipulation behavior
+- [ ] physical demo where different target bodies satisfy one Intent through different capability paths
 - [ ] measured functional-intent success independently from visible expression similarity
 - [ ] source-style versus target-native strategy Intent Success demo on physical robots
 - [ ] physical demo of hardware-limited source timing naturalized on faster target actuators
@@ -312,6 +326,7 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] reproducible statistical evaluation protocol
 - [ ] longitudinal uncertainty profile
 - [ ] behavior-history portability profile
+- [ ] alternative Intent capability-path / satisfaction-route profile
 - [ ] expressive timing / temporal-style portability profile
 - [ ] auditable expression-recommendation / review policy profile
 - [ ] auditable expression-history / explicit expression-optimization profile
@@ -328,4 +343,4 @@ Primary goal: replace configuration-only similarity with measured physical behav
 
 ## Non-goals
 
-RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, prove an expression causally redundant merely because target-native Intent Success passed, treat target inability as permission to forget a legacy expression, automatically erase a familiar expression merely because it became functionally redundant, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, recognizable expression and timing, reviewable purpose/optimization recommendations, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
+RCL does not attempt to standardize every robot command, replace ROS 2 or other robot middleware, define consciousness/personhood/subjective motivation, infer causality from association alone, archive unlimited raw media, claim aggregate evidence can recover discarded raw observations, declare an approved/revised Intent to be eternal truth, equate Intent Success with source-motion similarity, copy source hardware defects as normative behavior, canonize one source body's sensor/capability recipe as the only valid route to a goal, prove an expression causally redundant merely because target-native Intent Success passed, treat target inability as permission to forget a legacy expression, automatically erase a familiar expression merely because it became functionally redundant, define one universal natural motion speed, or force physically different embodiments to behave identically. Its scope is the portable representation, translation, lightweight experience evidence, history, declared purpose, alternative semantic satisfaction paths, recognizable expression and timing, reviewable purpose/optimization recommendations, explicit approved continuity mutations, auditable corrections, and measurable preservation and observed satisfaction of robot continuity data.
