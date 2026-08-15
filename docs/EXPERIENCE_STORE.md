@@ -95,6 +95,19 @@ A single semantic group may contain multiple outcomes, including both numeric an
 
 Mixed types for the **same outcome ID inside one semantic group** are rejected explicitly.
 
+## Action-stratified evidence
+
+Compaction also records outcome summaries separately for:
+
+```text
+action present
+action absent
+```
+
+This allows summary-aware Intent Discovery and context diagnostics to compare association evidence without reconstructing pseudo-episodes.
+
+Aggregate evidence remains aggregate evidence; RCL does not pretend a compacted statistic is a recovered raw observation.
+
 ## Provenance
 
 Every summary contains:
@@ -108,9 +121,9 @@ The default exemplar selection retains both early and late observations so a com
 
 This provenance does not make an aggregate equivalent to raw evidence. It makes the relationship auditable.
 
-## Non-destructive v0.1 boundary
+## Non-destructive compaction boundary
 
-Compaction never deletes episodes.
+Compaction itself never deletes episodes.
 
 Every summary contains:
 
@@ -122,7 +135,55 @@ Every summary contains:
 
 The input object is also checked for accidental mutation by the reference implementation.
 
-Retention, prune, delete, or archival actions are deliberately deferred to a separate explicit future policy. Creating a summary is not consent to delete source evidence.
+The rule remains:
+
+> **Creating a summary is not consent to delete source evidence.**
+
+## Retention / Archive / Prune lifecycle
+
+RCL v0.4 now has a separate explicit lifecycle policy after compaction.
+
+```text
+raw source
+   ↓
+compaction
+   ↓
+summary
+   ↓
+verify summary against exact current source
+   ↓
+retention policy
+   ↓
+retain | archive_candidate | prune_candidate
+```
+
+This lifecycle remains non-destructive.
+
+`prune_candidate` means only that a later explicit prune workflow may consider the episode. It does not remove an episode from the active store.
+
+The conservative default protects:
+
+- recent raw episodes;
+- retained summary exemplars;
+- episodes carrying external `evidence_refs`;
+- sparse semantic groups;
+- a deterministic per-group remainder through a maximum prune-candidate fraction.
+
+Before an episode becomes a prune candidate under the default policy, a deployment-asserted Archive Record must cover the exact source-store digest and episode ID.
+
+See [`EXPERIENCE_RETENTION.md`](EXPERIENCE_RETENTION.md).
+
+## Archive Record boundary
+
+An Archive Record says that the deployment asserts an external copy exists at a `location_ref`.
+
+It does **not** say that RCL itself performed the copy or inspected the remote bytes.
+
+```text
+archive_executed_by_rcl = false
+```
+
+This distinction keeps RCL vendor-neutral: the external archive could be a database, object store, NAS, tape system, or another deployment-specific mechanism.
 
 ## Compute model
 
@@ -146,13 +207,13 @@ RCL itself does not require continual neural-network weight updates. A robot may
 
 ## CLI
 
+Compact experience:
+
 ```bash
 rcl compact-experience \
   examples/experience/mixed-robot-life.episodes.json \
   --output /tmp/experience-summary.json
 ```
-
-Human-readable output is the default. Use `--json` for a machine-readable report on stdout.
 
 The number of retained exemplar IDs can be changed without deleting source data:
 
@@ -160,6 +221,26 @@ The number of retained exemplar IDs can be changed without deleting source data:
 rcl compact-experience episodes.json \
   --retained-exemplars 8 \
   --output summary.json
+```
+
+Review lifecycle after compaction:
+
+```bash
+rcl evaluate-experience-retention \
+  episodes.json \
+  summary.json \
+  --as-of 2026-04-01T12:00:00Z
+```
+
+Record a deployment-asserted external archive after the deployment has performed that storage operation:
+
+```bash
+rcl record-experience-archive episodes.json \
+  --episode-id release-001 \
+  --location-ref archive://cold-store/release-001 \
+  --archived-at 2026-04-01T11:00:00Z \
+  --archived-by operator@example.org \
+  --output archive-record.json
 ```
 
 ## Relationship to Intent Discovery
@@ -171,24 +252,28 @@ neutral experience records
         ↓
 compaction / indexing
         ↓
-a learning system or human proposes a hypothesis
+human / rule / LLM / VLM proposes a WHY hypothesis
         ↓
-Intent Discovery evaluates evidence
+Intent Discovery evaluates raw or aggregate evidence
         ↓
-Intent Candidate
+Context Diagnostics
+        ↓
+Intent Candidate review / explicit approval
 ```
 
-Intent Discovery v0.1 currently consumes episode datasets rather than compacted summaries directly. A future version may add summary-aware evidence evaluation, but it must preserve provenance and explicitly distinguish aggregate evidence from raw episode evidence.
+Summary-aware evaluation consumes declared aggregate counts/statistics directly and never reconstructs fake episodes.
 
 ## Scope boundary
 
-Experience Compaction is not:
+Experience Store + Compaction + Retention is not:
 
 - model training;
 - causal inference;
 - automatic habit promotion;
 - automatic intent approval;
 - a raw-media archive;
-- automatic retention/deletion policy.
+- automatic deletion;
+- remote storage execution;
+- legal/compliance retention policy.
 
-It is a lightweight continuity-data storage and evidence-summary layer.
+It is a lightweight continuity-data storage, evidence-summary, and explicit lifecycle-review layer.
