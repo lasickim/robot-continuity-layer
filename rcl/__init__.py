@@ -130,6 +130,14 @@ from .profile_diff import (
     PROFILE_DIFF_VERSION,
     diff_profiles,
 )
+from .repeated_intent_success import (
+    DEFAULT_MIN_OBSERVABLE_TRIALS,
+    DEFAULT_MIN_SESSIONS as DEFAULT_MIN_INTENT_SESSIONS,
+    REPEATED_INTENT_SUCCESS_METHOD,
+    REPEATED_INTENT_SUCCESS_VERSION,
+    evaluate_repeated_intent_success,
+    wilson_interval_95,
+)
 from .score import calculate_continuity_score
 from .session_evaluation import (
     CONFIDENCE_LEVEL,
@@ -159,6 +167,8 @@ __all__ = [
     "CONFIDENCE_LEVEL",
     "CONTEXT_VERSION",
     "DEFAULT_COMPARISON_FIELDS",
+    "DEFAULT_MIN_INTENT_SESSIONS",
+    "DEFAULT_MIN_OBSERVABLE_TRIALS",
     "DEFAULT_MIN_SESSIONS",
     "DEFAULT_MIN_TRIALS",
     "DEFAULT_RETAINED_EXEMPLARS",
@@ -201,6 +211,8 @@ __all__ = [
     "NULL_EXPRESSION_SHA256",
     "PROFILE_DIFF_METHOD",
     "PROFILE_DIFF_VERSION",
+    "REPEATED_INTENT_SUCCESS_METHOD",
+    "REPEATED_INTENT_SUCCESS_VERSION",
     "RCLAdapter",
     "RCLProfile",
     "RCLValidationError",
@@ -228,6 +240,7 @@ __all__ = [
     "evaluate_intent_capability_paths",
     "evaluate_observed_continuity",
     "evaluate_observed_intent_success",
+    "evaluate_repeated_intent_success",
     "evaluate_repeated_sessions",
     "expression_sha256",
     "get_capability",
@@ -263,4 +276,5 @@ __all__ = [
     "validate_expression_temporal_style",
     "validate_intent_capability_paths",
     "wasserstein_1d",
+    "wilson_interval_95",
 ]

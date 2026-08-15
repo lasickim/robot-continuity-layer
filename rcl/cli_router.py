@@ -19,6 +19,7 @@ from .intent_revision_cli import run as run_intent_revision
 from .intent_success_cli import run as run_intent_success
 from .intent_summary_discovery_cli import run as run_intent_summary_discovery
 from .profile import RCLProfile, RCLValidationError
+from .repeated_intent_success_cli import run as run_repeated_intent_success
 
 
 def _read_json(path: str | Path):
@@ -246,6 +247,12 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "optimize-expression":
         try:
             return run_expression_optimization(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "evaluate-intent-series":
+        try:
+            return run_repeated_intent_success(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2
