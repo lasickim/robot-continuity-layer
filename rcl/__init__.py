@@ -97,6 +97,12 @@ from .intent_approval import (
     apply_intent_approval,
     preview_intent_approval,
 )
+from .intent_conformance import (
+    INTENT_CONFORMANCE_COMPATIBILITY_LEVEL,
+    INTENT_CONFORMANCE_SUITE_ID,
+    INTENT_CONFORMANCE_SUITE_VERSION,
+    run_intent_adapter_conformance,
+)
 from .intent_discovery import (
     INTENT_DISCOVERY_METHOD,
     INTENT_DISCOVERY_VERSION,
@@ -178,6 +184,9 @@ __all__ = [
     "INTENT_APPROVAL_APPLY_METHOD",
     "INTENT_APPROVAL_PATCH_METHOD",
     "INTENT_APPROVAL_VERSION",
+    "INTENT_CONFORMANCE_COMPATIBILITY_LEVEL",
+    "INTENT_CONFORMANCE_SUITE_ID",
+    "INTENT_CONFORMANCE_SUITE_VERSION",
     "INTENT_DISCOVERY_METHOD",
     "INTENT_DISCOVERY_VERSION",
     "INTENT_REVISION_APPLY_METHOD",
@@ -239,6 +248,7 @@ __all__ = [
     "registered_intent_goals",
     "reserved_namespaces",
     "run_adapter_conformance",
+    "run_intent_adapter_conformance",
     "sample_mean",
     "sample_std",
     "select_satisfied_capability_path",
