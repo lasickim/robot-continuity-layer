@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:goal-vocabulary-decision-record",
+  "title": "RCL Goal Vocabulary Decision Record v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "goal_governance_decision_version",
+    "method",
+    "decision_id",
+    "proposal_id",
+    "proposal_sha256",
+    "review_report_sha256",
+    "review_status",
+    "decision",
+    "reviewed_at",
+    "reviewed_by",
+    "reason",
+    "vocabulary_mutated",
+    "next_action",
+    "disclaimer"
+  ],
+  "properties": {
+    "goal_governance_decision_version": {"const": "0.1"},
+    "method": {"const": "rcl.intent.goal_vocabulary_decision.v0.1"},
+    "decision_id": {"type": "string", "pattern": "^goal-decision-[0-9a-f]{16}$"},
+    "proposal_id": {"type": "string", "pattern": "^goal-proposal-[0-9a-f]{16}$"},
+    "proposal_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "review_report_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "review_status": {
+      "type": "string",
+      "enum": ["ready_for_review", "needs_revision", "blocked"]
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["approved", "rejected", "needs_revision"]
+    },
+    "reviewed_at": {"type": "string", "format": "date-time"},
+    "reviewed_by": {"type": "string", "minLength": 1},
+    "reason": {"type": "string", "minLength": 1},
+    "vocabulary_mutated": {"const": false},
+    "next_action": {
+      "type": "string",
+      "enum": [
+        "submit_explicit_vocabulary_change",
+        "archive_rejected_proposal",
+        "revise_and_resubmit_proposal"
+      ]
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
