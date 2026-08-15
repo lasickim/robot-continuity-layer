@@ -4,6 +4,13 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import Any
 
+from .capability_paths import (
+    LEGACY_CAPABILITY_PATH_ID,
+    declared_intent_capabilities,
+    evaluate_intent_capability_paths,
+    select_satisfied_capability_path,
+)
+
 
 MIGRATION_STATUSES = (
     "preserved",
@@ -69,6 +76,8 @@ class IntentMigrationResult:
     target_strategy: str | None = None
     required_capabilities: tuple[str, ...] = ()
     missing_capabilities: tuple[str, ...] = ()
+    selected_capability_path_id: str | None = None
+    capability_path_results: tuple[dict[str, Any], ...] = ()
 
     def __post_init__(self) -> None:
         _validate_status(self.status)
@@ -81,6 +90,8 @@ class IntentMigrationResult:
             "target_strategy": self.target_strategy,
             "required_capabilities": list(self.required_capabilities),
             "missing_capabilities": list(self.missing_capabilities),
+            "selected_capability_path_id": self.selected_capability_path_id,
+            "capability_path_results": [dict(item) for item in self.capability_path_results],
         }
 
 
@@ -136,9 +147,8 @@ class RCLAdapter(ABC):
     """Translate semantic RCL behavior into a target embodiment representation.
 
     Adapters generate migration plans; they do not directly command hardware.
-    v0.4 adds optional intent, visible-expression, and expressive-timing
-    translation alongside the existing behavior translation. Existing adapters
-    remain valid because the new facet methods provide conservative defaults.
+    v0.4 adds optional intent, visible-expression, expressive-timing, and
+    alternative capability-path translation alongside behavior translation.
     """
 
     adapter_id: str
@@ -153,8 +163,18 @@ class RCLAdapter(ABC):
         return set(declared)
 
     def intent_required_capabilities(self, behavior: dict[str, Any]) -> set[str]:
-        intent = behavior.get("intent") or {}
-        return set(intent.get("required_capabilities", []))
+        """Return the capability universe referenced by the Intent.
+
+        For legacy flat requirements this is the historical all-required set.
+        For alternative paths this is the union used for vocabulary validation;
+        callers must use capability-path evaluation rather than treating the
+        union as one all-required requirement.
+        """
+
+        intent = behavior.get("intent")
+        if intent is None:
+            return set()
+        return declared_intent_capabilities(intent)
 
     def expression_required_capabilities(self, behavior: dict[str, Any]) -> set[str]:
         expression = behavior.get("expression") or {}
@@ -169,6 +189,16 @@ class RCLAdapter(ABC):
         available = set(target_embodiment.get("capabilities", []))
         return required & available, required - available
 
+    def preferred_intent_capability_paths(
+        self,
+        behavior: dict[str, Any],
+        source_embodiment: dict[str, Any],
+        target_embodiment: dict[str, Any],
+    ) -> tuple[str, ...]:
+        """Optional embodiment-specific path preference without global ranking semantics."""
+
+        return ()
+
     def translate_intent(
         self,
         behavior: dict[str, Any],
@@ -179,22 +209,43 @@ class RCLAdapter(ABC):
         if intent is None:
             return None
 
-        required = self.intent_required_capabilities(behavior)
         available = set(target_embodiment.get("capabilities", []))
-        missing = required - available
-        if missing:
+        path_results = evaluate_intent_capability_paths(intent, available)
+        selected = select_satisfied_capability_path(
+            intent,
+            available,
+            preferred_path_ids=list(
+                self.preferred_intent_capability_paths(
+                    behavior,
+                    source_embodiment,
+                    target_embodiment,
+                )
+            ),
+        )
+        if selected is None:
+            declared = declared_intent_capabilities(intent)
+            legacy_missing: tuple[str, ...] = ()
+            if len(path_results) == 1 and path_results[0]["path_id"] == LEGACY_CAPABILITY_PATH_ID:
+                clause = path_results[0]["clauses"][0]
+                legacy_missing = tuple(clause["missing"])
             return IntentMigrationResult(
                 goal_id=intent["goal_id"],
                 status="unsupported",
-                reason="Target lacks capabilities required to satisfy the declared intent.",
-                required_capabilities=tuple(sorted(required)),
-                missing_capabilities=tuple(sorted(missing)),
+                reason="Target satisfies none of the declared semantic capability paths for this intent.",
+                required_capabilities=tuple(sorted(declared)),
+                missing_capabilities=legacy_missing,
+                selected_capability_path_id=None,
+                capability_path_results=tuple(path_results),
             )
+
         return IntentMigrationResult(
             goal_id=intent["goal_id"],
             status="preserved",
-            reason="Target exposes the semantic capabilities required by the declared intent.",
-            required_capabilities=tuple(sorted(required)),
+            reason="Target satisfies a declared semantic capability path for this intent.",
+            required_capabilities=tuple(selected["selected_capabilities"]),
+            missing_capabilities=(),
+            selected_capability_path_id=selected["path_id"],
+            capability_path_results=tuple(path_results),
         )
 
     def translate_expression(
