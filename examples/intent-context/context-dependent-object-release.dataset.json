@@ -1,0 +1,40 @@
+{
+  "discovery_dataset_version": "0.1",
+  "dataset_id": "demo-context-dependent-object-release-001",
+  "candidate_action_id": "interaction.post_release_hold",
+  "context_match": {"task": "object_release"},
+  "outcome": {
+    "outcome_id": "object_stability_score",
+    "type": "numeric",
+    "higher_is_better": true,
+    "minimum_meaningful_effect": 0.15,
+    "unit": "ratio"
+  },
+  "proposed_intent": {
+    "goal_id": "x.rcl-demo.stabilize_released_object",
+    "description": "Briefly support a released object so it can settle before withdrawal.",
+    "trigger": "activity.after_object_release",
+    "success_condition": "state.released_object_stable",
+    "failure_action": "retry",
+    "criticality": "preferred",
+    "required_capabilities": ["x.rcl-demo.object_stability_observation"]
+  },
+  "episodes": [
+    {"episode_id":"dep-table-p1","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.96}},
+    {"episode_id":"dep-table-p2","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.94}},
+    {"episode_id":"dep-table-p3","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.95}},
+    {"episode_id":"dep-table-p4","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.97}},
+    {"episode_id":"dep-table-a1","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.60}},
+    {"episode_id":"dep-table-a2","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.62}},
+    {"episode_id":"dep-table-a3","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.59}},
+    {"episode_id":"dep-table-a4","context":{"task":"object_release","surface":"table"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.61}},
+    {"episode_id":"dep-tray-p1","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.63}},
+    {"episode_id":"dep-tray-p2","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.61}},
+    {"episode_id":"dep-tray-p3","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.62}},
+    {"episode_id":"dep-tray-p4","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":true},"outcomes":{"object_stability_score":0.64}},
+    {"episode_id":"dep-tray-a1","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.60}},
+    {"episode_id":"dep-tray-a2","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.61}},
+    {"episode_id":"dep-tray-a3","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.59}},
+    {"episode_id":"dep-tray-a4","context":{"task":"object_release","surface":"tray"},"action":{"action_id":"interaction.post_release_hold","performed":false},"outcomes":{"object_stability_score":0.60}}
+  ]
+}

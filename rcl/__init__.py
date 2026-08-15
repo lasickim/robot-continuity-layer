@@ -103,6 +103,12 @@ from .intent_conformance import (
     INTENT_CONFORMANCE_SUITE_VERSION,
     run_intent_adapter_conformance,
 )
+from .intent_context_report import (
+    INTENT_CONTEXT_REPORT_METHOD,
+    INTENT_CONTEXT_REPORT_VERSION,
+    diagnose_intent_context,
+    diagnose_intent_context_from_summary,
+)
 from .intent_discovery import (
     INTENT_DISCOVERY_METHOD,
     INTENT_DISCOVERY_VERSION,
@@ -197,6 +203,8 @@ __all__ = [
     "INTENT_CONFORMANCE_COMPATIBILITY_LEVEL",
     "INTENT_CONFORMANCE_SUITE_ID",
     "INTENT_CONFORMANCE_SUITE_VERSION",
+    "INTENT_CONTEXT_REPORT_METHOD",
+    "INTENT_CONTEXT_REPORT_VERSION",
     "INTENT_DISCOVERY_METHOD",
     "INTENT_DISCOVERY_VERSION",
     "INTENT_REVISION_APPLY_METHOD",
@@ -232,6 +240,8 @@ __all__ = [
     "compare_trial_distributions",
     "confidence_interval_95",
     "declared_intent_capabilities",
+    "diagnose_intent_context",
+    "diagnose_intent_context_from_summary",
     "diff_profiles",
     "discover_intent_candidate",
     "discover_intent_candidate_from_summary",

@@ -11,6 +11,7 @@ from .expression_optimization_cli import run as run_expression_optimization
 from .expression_recommendation_cli import run as run_expression_recommendation
 from .habit_approval import apply_habit_approval, preview_habit_approval
 from .intent_approval_cli import run as run_intent_approval
+from .intent_context_cli import run_raw as run_intent_context, run_summary as run_intent_context_summary
 from .intent_discovery import (
     discover_intent_candidate,
     load_default_intent_discovery_policy,
@@ -259,6 +260,18 @@ def main() -> int:
     if len(sys.argv) >= 2 and sys.argv[1] == "evaluate-intent":
         try:
             return run_intent_success(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "diagnose-intent-context-summary":
+        try:
+            return run_intent_context_summary(sys.argv[2:])
+        except (RCLValidationError, ValueError, OSError) as exc:
+            print(f"ERROR: {exc}")
+            return 2
+    if len(sys.argv) >= 2 and sys.argv[1] == "diagnose-intent-context":
+        try:
+            return run_intent_context(sys.argv[2:])
         except (RCLValidationError, ValueError, OSError) as exc:
             print(f"ERROR: {exc}")
             return 2

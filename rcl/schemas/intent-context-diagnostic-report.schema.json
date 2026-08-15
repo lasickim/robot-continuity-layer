@@ -1,0 +1,166 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:intent-context-diagnostic-report",
+  "title": "RCL Intent Context Diagnostic Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "context_diagnostic_version",
+    "method",
+    "created_at",
+    "dataset_id",
+    "candidate_id",
+    "candidate_status",
+    "candidate_confidence",
+    "hypothesis",
+    "evidence_basis",
+    "evidence_provenance",
+    "diagnostics",
+    "causal_claim",
+    "disclaimer"
+  ],
+  "properties": {
+    "context_diagnostic_version": {"const": "0.1"},
+    "method": {"const": "rcl.intent.context_diagnostics.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "dataset_id": {"type": "string", "minLength": 1},
+    "candidate_id": {"type": "string", "minLength": 1},
+    "candidate_status": {"type": "string", "enum": ["candidate", "insufficient_evidence"]},
+    "candidate_confidence": {"type": "string", "enum": ["strong", "moderate", "insufficient"]},
+    "hypothesis": {"type": "object"},
+    "evidence_basis": {"type": "string", "enum": ["raw", "aggregate"]},
+    "evidence_provenance": {"type": "object"},
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "diagnostics_version",
+        "evidence_basis",
+        "status",
+        "review_required",
+        "evaluated_fields",
+        "thresholds",
+        "fields",
+        "warnings",
+        "causal_claim"
+      ],
+      "properties": {
+        "diagnostics_version": {"const": "0.1"},
+        "evidence_basis": {"type": "string", "enum": ["raw", "aggregate"]},
+        "status": {
+          "type": "string",
+          "enum": [
+            "no_material_context_signal",
+            "context_dependency_signal",
+            "insufficient_context_coverage",
+            "no_residual_context_fields"
+          ]
+        },
+        "review_required": {"type": "boolean"},
+        "evaluated_fields": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "thresholds": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "min_stratum_action_present",
+            "min_stratum_action_absent",
+            "action_repeat_rate_spread",
+            "minimum_meaningful_effect"
+          ],
+          "properties": {
+            "min_stratum_action_present": {"type": "integer", "minimum": 1},
+            "min_stratum_action_absent": {"type": "integer", "minimum": 1},
+            "action_repeat_rate_spread": {"type": "number", "minimum": 0, "maximum": 1},
+            "minimum_meaningful_effect": {"type": "number", "exclusiveMinimum": 0}
+          }
+        },
+        "fields": {
+          "type": "array",
+          "items": {"$ref": "#/$defs/fieldDiagnostic"}
+        },
+        "warnings": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "causal_claim": {"const": false}
+      }
+    },
+    "causal_claim": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  },
+  "$defs": {
+    "fieldDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "field",
+        "status",
+        "value_count",
+        "supported_value_count",
+        "action_repeat_rate_spread",
+        "action_prevalence_signal",
+        "beneficial_effect_spread",
+        "effect_heterogeneity_signal",
+        "reasons",
+        "strata"
+      ],
+      "properties": {
+        "field": {"type": "string", "minLength": 1},
+        "status": {
+          "type": "string",
+          "enum": ["no_material_context_signal", "context_dependency_signal", "insufficient_context_coverage"]
+        },
+        "value_count": {"type": "integer", "minimum": 2},
+        "supported_value_count": {"type": "integer", "minimum": 0},
+        "action_repeat_rate_spread": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "action_prevalence_signal": {"type": "boolean"},
+        "beneficial_effect_spread": {"type": ["number", "null"], "minimum": 0},
+        "effect_heterogeneity_signal": {"type": "boolean"},
+        "reasons": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1}
+        },
+        "strata": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/stratumDiagnostic"}
+        }
+      }
+    },
+    "stratumDiagnostic": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "value",
+        "episode_count",
+        "action_present_count",
+        "action_absent_count",
+        "action_repeat_rate",
+        "action_present_mean",
+        "action_absent_mean",
+        "beneficial_effect",
+        "effect_direction",
+        "effect_estimable"
+      ],
+      "properties": {
+        "value": {"type": ["string", "number", "boolean", "null"]},
+        "episode_count": {"type": "integer", "minimum": 1},
+        "action_present_count": {"type": "integer", "minimum": 0},
+        "action_absent_count": {"type": "integer", "minimum": 0},
+        "action_repeat_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "action_present_mean": {"type": ["number", "null"]},
+        "action_absent_mean": {"type": ["number", "null"]},
+        "beneficial_effect": {"type": ["number", "null"]},
+        "effect_direction": {"type": "string", "enum": ["beneficial", "neutral_or_harmful", "not_estimable"]},
+        "effect_estimable": {"type": "boolean"}
+      }
+    }
+  }
+}
