@@ -38,16 +38,6 @@
           }
         }
       ]
-    },
-    "counts": {
-      "type": "object",
-      "properties": {
-        "pass_count": {"type": "integer", "minimum": 0},
-        "fail_count": {"type": "integer", "minimum": 0},
-        "not_observable_count": {"type": "integer", "minimum": 0},
-        "not_triggered_count": {"type": "integer", "minimum": 0},
-        "missing_observation_count": {"type": "integer", "minimum": 0}
-      }
     }
   },
   "type": "object",
