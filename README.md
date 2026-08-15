@@ -49,6 +49,10 @@ Was that promotion explicitly approved?
         ↓
 Habit Approval + new immutable snapshot
         ↓
+Can different bodies satisfy the same goal through different capability routes?
+        ↓
+Alternative Capability Paths / Goal Satisfaction Routes
+        ↓
 Can Robot B represent the behavior and its required goals?
         ↓
 Migration + Declared Continuity
@@ -100,7 +104,9 @@ TEMPO    -> expressive temporal style
 HISTORY  -> habit / legacy / prior intent and expression interpretations
 ```
 
-Four continuity principles follow from that separation:
+A declared WHY may also expose several **semantic capability paths**. Those paths describe alternative ways a body can be capable of satisfying the same goal; the adapter still owns the concrete target-native HOW.
+
+Five continuity principles follow from that separation:
 
 > **Use the new body. Preserve the old manner.**
 >
@@ -109,8 +115,12 @@ Four continuity principles follow from that separation:
 > **Preserve by default. Optimize only by explicit approval.**
 >
 > **Recommend automatically. Change only by explicit approval.**
+>
+> **Preserve the goal, not one body's capability recipe.**
 
 A V2 robot should use better sensors, motors, controllers, and wiring for the actual function. A familiar V1 gesture may still remain as a legacy expression. If V1 was slow only because of a motor or wiring limitation, V2 does not have to copy that delay. If the slow tempo itself became a recognized or user-valued mannerism, that temporal character can be preserved explicitly.
+
+Likewise, the source robot's original capability combination is not automatically the canonical route to a goal. A target may satisfy the same WHY through a different declared semantic capability path and report the selected path and strategy explicitly.
 
 A behavior becoming functionally unnecessary is **not** the same as permission to forget it. RCL may recommend reviewing an expression when target-native functional evidence supports that review, but recommendation remains non-mutating and never proves causal redundancy. Simplifying or removing a familiar expression is a separate reviewed continuity mutation; the current expression may change, but its complete previous snapshot remains in append-only history.
 
@@ -120,10 +130,14 @@ The reference implementation can:
 
 - validate and package portable `.rcl` profiles with SHA-256 integrity manifests;
 - describe source and target embodiments through a shared capability vocabulary;
+- preserve legacy flat Intent `required_capabilities` as one implicit all-required capability path;
+- declare named alternative Intent `capability_paths` with `all_of`, `any_of`, and selected-`one_of` semantics;
+- evaluate every capability path with matched / missing / selected diagnostics and let an adapter select an embodiment-appropriate satisfied path;
+- report the selected Intent capability path separately from the target-native execution strategy;
 - migrate semantic behavior and report preserved / approximated / unsupported / safety-blocked results;
 - calculate a declared Behavior Continuity Score;
 - preserve and migrate **Behavior Intent / Goal Semantics** separately from visible expression;
-- hard-fail migration when a `required` intent cannot be satisfied;
+- hard-fail migration when a `required` intent cannot be satisfied by any declared path;
 - preserve a familiar visible expression separately while allowing the target to use a newer functional strategy;
 - describe portable expressive tempo / dwell / transition without embedding raw motor trajectories;
 - naturalize source timing that came from actuator, gearing, wiring, controller, or power limitations;
@@ -160,7 +174,7 @@ The reference implementation can:
 - require comparable experiment context before statistical scoring;
 - aggregate comparable sessions with Student-t uncertainty reporting;
 - record optional behavior habit/history metadata without changing the five-payload `.rcl` layout;
-- compare two profile snapshots with deterministic semantic diffing;
+- compare two profile snapshots with deterministic semantic diffing, including Intent capability-path changes;
 - generate non-mutating habit lifecycle promotion candidates from explicit versioned evidence gates;
 - preview explicit lifecycle approval as a deterministic patch;
 - apply an approved lifecycle transition only into a new validated snapshot while keeping semantic behavior parameters unchanged.
@@ -269,6 +283,103 @@ Reference fixture:
 examples/intent/sit-assistant-v1
 examples/targets/intent-demo-v2.embodiment.json
 rcl.intent_reference_adapter.IntentReferenceAdapter
+```
+
+## Alternative Capability Sets / Goal Satisfaction Paths v0.1
+
+A single WHY may have several valid semantic capability routes. RCL therefore supports `intent.capability_paths` as an alternative to the legacy flat `required_capabilities` list.
+
+```json
+{
+  "goal_id": "safety.verify_sitting_area_clear",
+  "trigger": "activity.before_sit_down",
+  "success_condition": "state.sitting_area_clear",
+  "failure_action": "block",
+  "criticality": "required",
+  "capability_paths": [
+    {
+      "path_id": "direct_clearance",
+      "all_of": [
+        "perception.sitting_area_clearance"
+      ]
+    },
+    {
+      "path_id": "rear_attention_classifier",
+      "all_of": [
+        "perception.directional_attention"
+      ],
+      "any_of": [
+        "x.demo.rear_clearance_classifier",
+        "x.demo.rear_occupancy_estimator"
+      ]
+    },
+    {
+      "path_id": "external_seat_state",
+      "one_of": [
+        "x.demo.external_seat_clearance",
+        "x.demo.networked_seat_clearance"
+      ]
+    }
+  ]
+}
+```
+
+Semantics are intentionally small and declarative:
+
+```text
+inside one path:
+all_of AND any_of AND one_of clauses
+
+across paths:
+Path A OR Path B OR Path C
+```
+
+`one_of` means **select one valid capability for this path**. It is not Boolean XOR over what the robot physically possesses. A target does not fail merely because it happens to expose several listed alternatives.
+
+Existing profiles remain valid. RCL normalizes legacy:
+
+```text
+required_capabilities
+```
+
+into:
+
+```text
+legacy.required_capabilities / all_of
+```
+
+New Intent metadata uses either `required_capabilities` **or** `capability_paths`, never both at once.
+
+Adapters may express an embodiment-specific path preference, but RCL does not declare one sensing technology universally superior. The selected path and all per-path diagnostics are written into the Intent migration result:
+
+```text
+selected_capability_path_id
+capability_path_results[]
+target_strategy
+```
+
+For example, three targets can preserve the same pre-sit clearance WHY through:
+
+```text
+direct_clearance
+rear_attention_classifier
+external_seat_state
+```
+
+while using different target-native strategies.
+
+Capability-path satisfaction means the target can **represent** one declared route to the goal. It does not prove that the goal was actually achieved in a physical execution; that remains the job of Observed Intent Success.
+
+See [`docs/CAPABILITY_PATHS.md`](docs/CAPABILITY_PATHS.md).
+
+Reference examples:
+
+```text
+examples/capability-paths/pre-sit-intent.json
+examples/capability-paths/target-direct.embodiment.json
+examples/capability-paths/target-rear-attention.embodiment.json
+examples/capability-paths/target-external.embodiment.json
+rcl.capability_path_reference_adapter.CapabilityPathReferenceAdapter
 ```
 
 ## Expressive Timing / Motion Style v0.1
@@ -760,7 +871,7 @@ rcl diff \
   examples/history/mobile-base-after
 ```
 
-Profile Diff reports behavior, parameter, preservation, history, **intent**, **intent provenance**, **intent revision history**, **expression**, **expression history**, and **expressive temporal-style** changes. It is an audit tool, not a Continuity Score.
+Profile Diff reports behavior, parameter, preservation, history, **intent**, **Intent capability paths**, **intent provenance**, **intent revision history**, **expression**, **expression history**, and **expressive temporal-style** changes. It is an audit tool, not a Continuity Score.
 
 ## Habit Promotion Policy v0.1
 
@@ -955,6 +1066,8 @@ RCL intentionally keeps these concepts separate.
 
 **Behavior Intent** asks whether the target can represent the declared purpose, trigger, and success condition.
 
+**Alternative Capability Paths** ask which declared semantic capability combination can represent that Intent on the current embodiment. Path satisfiability is not observed goal success and does not rank one technology universally above another.
+
 **Expression** asks whether a recognizable source-body gesture can also be retained independently from its functional necessity.
 
 **Expressive Timing** asks what recognizable temporal character that expression should retain, while distinguishing target-native timing from historical hardware delay.
@@ -980,32 +1093,34 @@ None of these constructs define consciousness, personhood, subjective identity, 
 ## Core principles
 
 1. **Preserve why before copying how** — portable goal semantics outrank source-body implementation details.
-2. **Use the new body; preserve the old manner** — improved target capabilities should perform the function, while familiar expressions may remain where safe and representable.
-3. **Preserve the gesture, not the limitation** — source actuator, wiring, gearing, power, or controller delay is not automatically a target timing requirement.
-4. **Preserve by default; optimize only by explicit approval** — functional redundancy does not authorize silent simplification or removal of familiar expression.
-5. **Recommend automatically; change only by explicit approval** — machine-readable evidence may trigger a review recommendation, but advisory output never mutates continuity data.
-6. **Target inability is not permission to forget** — an embodiment that cannot reproduce an expression does not authorize erasing it from portable continuity.
-7. **Removal is not forgetting** — an approved removal clears the active expression while retaining its complete historical snapshot and digest-chain provenance.
-8. **Purpose success is not motion similarity** — a target may use a different strategy and still satisfy the same declared success condition.
-9. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
-10. **Intent approval is explicit** — discovery may recommend a goal, but only an explicit approval operation may add it to continuity data.
-11. **Corrections preserve history** — later evidence may revise a declared purpose, but previous Intent snapshots are retained rather than silently erased.
-12. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
-13. **Compaction is not deletion** — an experience summary never authorizes pruning source evidence.
-14. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
-15. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
-16. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
-17. **Timing observations are descriptive by default** — measured source milliseconds are history, not portable commands; intentionally preserved tempo must be represented semantically.
-18. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
-19. **User-owned and portable** — continuity should export without requiring a vendor cloud.
-20. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
-21. **History is descriptive, not executable** — historical events, historical Intent snapshots, and historical Expression snapshots explain evolution but never silently override current behavior or replay removed gestures.
-22. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
-23. **Approval is explicit and immutable-by-default** — reviewed continuity mutations create new validated snapshots rather than overwriting the source.
-24. **Declared, observed, and functional success are different** — representability, motion fidelity, and goal achievement are separate evaluation questions.
-25. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
-26. **Safety outranks continuity** — a legacy expression, temporal style, recommendation, approved intent, revised intent, expression-optimization result, or observed-success result never overrides target safety constraints.
-27. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
+2. **Preserve the goal, not one body's capability recipe** — a target may satisfy the same WHY through another declared semantic capability path; one source sensor/capability combination is not the universal answer.
+3. **Use the new body; preserve the old manner** — improved target capabilities should perform the function, while familiar expressions may remain where safe and representable.
+4. **Preserve the gesture, not the limitation** — source actuator, wiring, gearing, power, or controller delay is not automatically a target timing requirement.
+5. **Preserve by default; optimize only by explicit approval** — functional redundancy does not authorize silent simplification or removal of familiar expression.
+6. **Recommend automatically; change only by explicit approval** — machine-readable evidence may trigger a review recommendation, but advisory output never mutates continuity data.
+7. **Target inability is not permission to forget** — an embodiment that cannot reproduce an expression does not authorize erasing it from portable continuity.
+8. **Removal is not forgetting** — an approved removal clears the active expression while retaining its complete historical snapshot and digest-chain provenance.
+9. **Purpose success is not motion similarity** — a target may use a different strategy and still satisfy the same declared success condition.
+10. **Capability satisfaction is not observed success** — selecting a valid capability path establishes representability, while physical goal achievement remains a separate observation question.
+11. **Evidence before assertion** — a discovered intent is a review hypothesis until explicitly accepted; association is not causal proof.
+12. **Intent approval is explicit** — discovery may recommend a goal, but only an explicit approval operation may add it to continuity data.
+13. **Corrections preserve history** — later evidence may revise a declared purpose, but previous Intent snapshots are retained rather than silently erased.
+14. **Log light, analyze later** — normal robot operation should record compact semantic events; longitudinal aggregation can run during idle or charging windows.
+15. **Compaction is not deletion** — an experience summary never authorizes pruning source evidence.
+16. **Semantic before kinematic** — preserve observable intent and style, not canonical raw motor values.
+17. **Body-independent where possible** — hardware execution belongs in embodiment adapters.
+18. **Expression is not purpose** — a recognizable motion may be preserved separately, but it never substitutes for a required functional goal.
+19. **Timing observations are descriptive by default** — measured source milliseconds are history, not portable commands; intentionally preserved tempo must be represented semantically.
+20. **Model-independent core** — LLM/VLM/foundation-model proposers may suggest hypotheses, but the RCL evidence format and evaluator do not depend on one AI model.
+21. **User-owned and portable** — continuity should export without requiring a vendor cloud.
+22. **Graceful degradation** — unsupported behavior must be reported, never silently called preserved.
+23. **History is descriptive, not executable** — historical events, historical Intent snapshots, and historical Expression snapshots explain evolution but never silently override current behavior or replay removed gestures.
+24. **Promotion is advisory, not mutating** — evidence can create a review candidate but cannot silently change lifecycle state.
+25. **Approval is explicit and immutable-by-default** — reviewed continuity mutations create new validated snapshots rather than overwriting the source.
+26. **Declared, observed, and functional success are different** — representability, motion fidelity, and goal achievement are separate evaluation questions.
+27. **Comparable context before statistics** — do not score distributions under mismatched declared conditions.
+28. **Safety outranks continuity** — a capability path, legacy expression, temporal style, recommendation, approved intent, revised intent, expression-optimization result, or observed-success result never overrides target safety constraints.
+29. **Scores do not define identity** — continuity measures quantify declared or observed behavior preservation only.
 
 ## Quick start
 
@@ -1084,6 +1199,7 @@ robot-continuity-layer/
 ├── ROADMAP.md
 ├── docs/
 │   ├── BEHAVIOR_INTENT.md
+│   ├── CAPABILITY_PATHS.md
 │   ├── EXPERIENCE_STORE.md
 │   ├── EXPRESSIVE_TIMING.md
 │   ├── EXPRESSION_OPTIMIZATION.md
@@ -1104,6 +1220,7 @@ robot-continuity-layer/
 │   ├── STATISTICAL_CONTINUITY.md
 │   └── ROS2_REFERENCE_ADAPTER.md
 ├── examples/
+│   ├── capability-paths/
 │   ├── experience/
 │   ├── expression-timing/
 │   ├── intent/
@@ -1119,6 +1236,8 @@ robot-continuity-layer/
 │   ├── trials/
 │   └── targets/
 ├── rcl/
+│   ├── capability_path_reference_adapter.py
+│   ├── capability_paths.py
 │   ├── experience.py
 │   ├── expression_history.py
 │   ├── expression_optimization.py
@@ -1149,7 +1268,7 @@ robot-continuity-layer/
 
 RCL does **not** claim to measure consciousness, personhood, subjective motivation, free will, emotional authenticity, causal truth from observational association, universal statistical equivalence, universal habit thresholds, one universal natural movement speed, or certified physical safety.
 
-Behavior Intent represents declared engineering goal semantics. Expression and Expressive Timing can preserve recognizable manner without turning source hardware defects into target requirements. Historical timing observations are descriptive and must remain non-normative. Expression Optimization Recommendation combines compatible functional evidence into a versioned review recommendation while remaining `non_mutating=true` and `redundancy_proven=false`; it does not infer user dislike, treat target incompatibility as permission to forget, prove causal redundancy, or authorize a mutation. Explicit Expression Optimization records a reviewed simplify/remove decision into a new snapshot while preserving the previous expression in append-only history; it does not automatically decide that a gesture is obsolete, prove removal safe, or erase the historical manner. Intent Discovery produces an association-backed engineering hypothesis for review. Summary-Aware Intent Discovery evaluates compatible aggregate evidence without pretending it is raw observation. Explicit Intent Approval records a reviewed selection. Intent Revision records a reviewed correction while preserving the earlier interpretation. Observed Intent Success records whether a declared success condition was observed, independently from physical strategy, but it is not safety certification or proof of subjective purpose. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal or gesture in a human subjective sense.
+Behavior Intent represents declared engineering goal semantics. Alternative Capability Paths represent several semantic routes by which a target may be capable of satisfying that goal; selecting a path is representability evidence, not proof of physical success or a claim that one technology is universally best. Expression and Expressive Timing can preserve recognizable manner without turning source hardware defects into target requirements. Historical timing observations are descriptive and must remain non-normative. Expression Optimization Recommendation combines compatible functional evidence into a versioned review recommendation while remaining `non_mutating=true` and `redundancy_proven=false`; it does not infer user dislike, treat target incompatibility as permission to forget, prove causal redundancy, or authorize a mutation. Explicit Expression Optimization records a reviewed simplify/remove decision into a new snapshot while preserving the previous expression in append-only history; it does not automatically decide that a gesture is obsolete, prove removal safe, or erase the historical manner. Intent Discovery produces an association-backed engineering hypothesis for review. Summary-Aware Intent Discovery evaluates compatible aggregate evidence without pretending it is raw observation. Explicit Intent Approval records a reviewed selection. Intent Revision records a reviewed correction while preserving the earlier interpretation. Observed Intent Success records whether a declared success condition was observed, independently from physical strategy, but it is not safety certification or proof of subjective purpose. Experience Compaction summarizes neutral evidence without retraining models or authorizing deletion. None of these means the robot experiences or understands a goal or gesture in a human subjective sense.
 
 ## License
 
