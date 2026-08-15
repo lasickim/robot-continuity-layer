@@ -1,0 +1,10 @@
+{
+  "policy_version": "0.1",
+  "policy_id": "rcl.habit.evidence.default.v0.1",
+  "description": "Conservative reference thresholds for deciding whether repeated semantic behavior evidence is substantial enough to support Habit review. This policy does not promote lifecycle state.",
+  "min_episode_count": 8,
+  "min_action_present_count": 5,
+  "min_repeat_rate": 0.6,
+  "min_observation_span_days": 14,
+  "min_matched_group_count": 1
+}

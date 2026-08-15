@@ -171,6 +171,36 @@ A blocked result exposes every failed gate rather than returning only a boolean.
     BLOCK score_ci_half_width: actual=None required={'maximum': 5.0}
 ```
 
+## Optional Summary-aware formation evidence
+
+Habit Promotion remains backward compatible: existing callers do not need a Habit Evidence Report.
+
+Deployments that want an additional formation-evidence gate can use:
+
+```python
+from rcl.habit_evidence_promotion import (
+    evaluate_habit_promotion_with_formation_evidence,
+)
+```
+
+The supplied report may be based on raw Experience episodes or a compacted Experience Summary.
+
+```text
+RAW Habit Evidence
+or
+AGGREGATE Habit Evidence
+        ↓
+formation evidence gate
+        ↓
+existing Habit Promotion gates remain
+```
+
+A `sufficient` report lets the existing candidate decision stand. An `insufficient` report blocks that review candidate.
+
+This integration never turns aggregate group counts into synthetic `habit.events`. Profile history remains the declared history; Summary-aware Habit Evidence is additional supporting evidence with explicit provenance.
+
+See `docs/HABIT_EVIDENCE.md` for the RAW / AGGREGATE distinction and reference thresholds.
+
 ## Non-mutating contract
 
 Calling the policy evaluator must not change:

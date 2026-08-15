@@ -1,0 +1,16 @@
+{
+  "experience_version": "0.1",
+  "store_id": "habit-follow-person-demo",
+  "episodes": [
+    {"episode_id":"follow-001","observed_at":"2026-01-01T09:00:00Z","context":{"task":"person_following","zone":"home"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-002","observed_at":"2026-01-04T09:00:00Z","context":{"task":"person_following","zone":"home"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-003","observed_at":"2026-01-07T09:00:00Z","context":{"task":"person_following","zone":"home"},"action":{"action_id":"navigation.follow_person","performed":false},"outcomes":{"distance_ok":false}},
+    {"episode_id":"follow-004","observed_at":"2026-01-10T09:00:00Z","context":{"task":"person_following","zone":"home"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-005","observed_at":"2026-01-13T09:00:00Z","context":{"task":"person_following","zone":"home"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-006","observed_at":"2026-01-16T09:00:00Z","context":{"task":"person_following","zone":"hallway"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-007","observed_at":"2026-01-19T09:00:00Z","context":{"task":"person_following","zone":"hallway"},"action":{"action_id":"navigation.follow_person","performed":false},"outcomes":{"distance_ok":false}},
+    {"episode_id":"follow-008","observed_at":"2026-01-22T09:00:00Z","context":{"task":"person_following","zone":"hallway"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-009","observed_at":"2026-01-26T09:00:00Z","context":{"task":"person_following","zone":"hallway"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}},
+    {"episode_id":"follow-010","observed_at":"2026-01-31T09:00:00Z","context":{"task":"person_following","zone":"hallway"},"action":{"action_id":"navigation.follow_person","performed":true},"outcomes":{"distance_ok":true}}
+  ]
+}

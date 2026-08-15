@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:habit-evidence-report",
+  "title": "RCL Habit Evidence Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["habit_evidence_version", "method", "created_at", "behavior_id", "action_id", "context_match", "evidence_basis", "source_verification", "source", "metrics", "groups", "gates", "status", "supports_habit_review", "pseudo_episodes_created", "non_mutating", "formation_claim", "disclaimer"],
+  "properties": {
+    "habit_evidence_version": {"const": "0.1"},
+    "method": {"const": "rcl.habit.evidence.repeated_semantic_action.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "action_id": {"type": "string", "minLength": 1},
+    "context_match": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}},
+    "evidence_basis": {"type": "string", "enum": ["raw", "aggregate"]},
+    "source_verification": {"type": "string", "enum": ["direct_source", "raw_verified", "summary_declared"]},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["store_id", "source_digest_sha256", "summary_id", "summary_sha256", "matched_episode_id_digest_sha256"],
+      "properties": {
+        "store_id": {"type": "string", "minLength": 1},
+        "source_digest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "summary_id": {"type": ["string", "null"]},
+        "summary_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+        "matched_episode_id_digest_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "metrics": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matched_group_count", "episode_count", "action_present_count", "action_absent_count", "repeat_rate", "first_observed_at", "last_observed_at", "observation_span_days"],
+      "properties": {
+        "matched_group_count": {"type": "integer", "minimum": 0},
+        "episode_count": {"type": "integer", "minimum": 0},
+        "action_present_count": {"type": "integer", "minimum": 0},
+        "action_absent_count": {"type": "integer", "minimum": 0},
+        "repeat_rate": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+        "first_observed_at": {"type": ["string", "null"], "format": "date-time"},
+        "last_observed_at": {"type": ["string", "null"], "format": "date-time"},
+        "observation_span_days": {"type": ["number", "null"], "minimum": 0}
+      }
+    },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["group_id", "context", "outcome_ids", "episode_count", "action_present_count", "action_absent_count", "repeat_rate", "first_observed_at", "last_observed_at", "source_episode_id_digest_sha256"],
+        "properties": {
+          "group_id": {"type": "string", "minLength": 1},
+          "context": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}},
+          "outcome_ids": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+          "episode_count": {"type": "integer", "minimum": 1},
+          "action_present_count": {"type": "integer", "minimum": 0},
+          "action_absent_count": {"type": "integer", "minimum": 0},
+          "repeat_rate": {"type": "number", "minimum": 0, "maximum": 1},
+          "first_observed_at": {"type": "string", "format": "date-time"},
+          "last_observed_at": {"type": "string", "format": "date-time"},
+          "source_episode_id_digest_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+        }
+      }
+    },
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gate", "passed", "actual", "required", "reason"],
+        "properties": {
+          "gate": {"type": "string", "minLength": 1},
+          "passed": {"type": "boolean"},
+          "actual": {},
+          "required": {},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "status": {"type": "string", "enum": ["sufficient", "insufficient"]},
+    "supports_habit_review": {"type": "boolean"},
+    "pseudo_episodes_created": {"const": false},
+    "non_mutating": {"const": true},
+    "formation_claim": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
