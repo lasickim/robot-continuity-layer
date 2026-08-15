@@ -33,10 +33,13 @@ def _hypothesis(dataset):
 
 
 def _summary(dataset):
+    episodes = copy.deepcopy(dataset["episodes"])
+    for index, episode in enumerate(episodes, start=1):
+        episode["observed_at"] = f"2026-08-15T11:{index:02d}:00Z"
     store = {
         "experience_version": "0.1",
         "store_id": f"store-{dataset['dataset_id']}",
-        "episodes": copy.deepcopy(dataset["episodes"]),
+        "episodes": episodes,
     }
     return compact_experience(store)
 
@@ -103,18 +106,30 @@ def test_existing_single_surface_fixture_reports_no_residual_context_fields():
     assert diagnostic["review_required"] is False
 
 
-def test_insufficient_context_coverage_is_explicit():
+def test_insufficient_context_coverage_is_explicit_without_false_imbalance_signal():
     dataset = _load(STABLE)
-    # Keep enough pooled evidence, but make the tray stratum lack an absent comparison group.
-    for episode in dataset["episodes"]:
-        if episode["context"]["surface"] == "tray" and not episode["action"]["performed"]:
-            episode["context"]["surface"] = "shelf"
+    tray_present = [
+        episode for episode in dataset["episodes"]
+        if episode["context"]["surface"] == "tray" and episode["action"]["performed"]
+    ]
+    tray_absent = [
+        episode for episode in dataset["episodes"]
+        if episode["context"]["surface"] == "tray" and not episode["action"]["performed"]
+    ]
+    for index, (present, absent) in enumerate(zip(tray_present, tray_absent), start=1):
+        value = f"tray-{index}"
+        present["context"]["surface"] = value
+        absent["context"]["surface"] = value
+
     report = diagnose_intent_context(dataset, created_at="2026-08-15T11:00:00Z")
 
     diagnostic = report["diagnostics"]
     assert diagnostic["status"] == "insufficient_context_coverage"
     assert diagnostic["review_required"] is True
-    assert any(value.endswith(":insufficient_context_coverage") for value in diagnostic["warnings"])
+    field = diagnostic["fields"][0]
+    assert field["action_prevalence_signal"] is False
+    assert field["supported_value_count"] == 1
+    assert "surface:insufficient_context_coverage" in diagnostic["warnings"]
 
 
 def test_raw_and_aggregate_context_diagnostics_match_for_equivalent_evidence():
