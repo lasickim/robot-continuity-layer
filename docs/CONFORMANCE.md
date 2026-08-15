@@ -50,7 +50,7 @@ Migration    PASS
 Safety       PASS
 Reporting    PASS
 
-Result: RCL Migration Compatible (experimental v0.3)
+Result: RCL Migration Compatible (experimental suite 0.3)
 ```
 
 ## Reference fixture
@@ -85,32 +85,73 @@ Include the suite ID when publishing results:
 rcl.adapter.mobile_base.v0.3
 ```
 
+## Intent-aware v0.4 suite
+
+RCL v0.4 also provides a separate opt-in suite for adapters that claim to preserve **Behavior Intent / Goal Semantics** and alternative capability paths.
+
+```bash
+rcl-conformance intent rcl:CapabilityPathReferenceAdapter
+```
+
+This suite checks that an adapter:
+
+- keeps alternative capability paths as alternatives instead of flattening them into one all-required set;
+- reports a selected path that the target actually satisfies;
+- preserves the same declared goal through a different valid target path;
+- fails honestly when no functional path is satisfied;
+- does not use a reproducible legacy expression as a substitute for functional Intent satisfaction;
+- exposes complete path diagnostics in migration reports;
+- preserves legacy flat `required_capabilities` compatibility.
+
+A passing implementation receives the experimental label:
+
+```text
+RCL Intent Migration Compatible
+```
+
+Suite ID:
+
+```text
+rcl.adapter.intent.v0.4
+```
+
+See [`INTENT_CONFORMANCE.md`](INTENT_CONFORMANCE.md) for the full contract.
+
+The existing v0.3 mobile-base suite remains unchanged. An adapter may be tested against either or both suites depending on the interoperability claim it makes.
+
 ## What a pass does not mean
 
-This is **not**:
+These suites are **not**:
 
 - physical robot safety certification;
 - functional-safety certification;
 - proof that two robots move identically;
 - verification of real sensor accuracy;
 - verification of hardware reliability;
+- proof that a declared Intent was actually achieved in the physical world;
 - proof of consciousness, personhood, or subjective identity continuity.
 
-Real-world behavior measurement belongs to a future `RCL Continuity Ready` conformance level.
+Observed goal achievement remains a separate `Observed Intent Success` question. Real-world behavior measurement remains a separate physical/evaluation layer.
 
-## Conformance report
+## Conformance reports
 
-The JSON output validates against:
+The v0.3 JSON output validates against:
 
 ```text
 spec/schemas/conformance-report.schema.json
 ```
 
-The report contains adapter identity, suite identity, group results, individual checks, and the experimental compatibility result. This makes it suitable for future adapter registries or CI badges without turning a self-declared label into a certification claim.
+The Intent-aware v0.4 JSON output validates against:
+
+```text
+spec/schemas/intent-conformance-report.schema.json
+```
+
+Reports contain adapter identity, suite identity, group results, individual checks, and the experimental compatibility result. This makes them suitable for future adapter registries or CI badges without turning a self-declared label into a physical certification claim.
 
 ## Future suites
 
-The v0.3 mobile-base suite is only the first profile. Future work can add independent fixture suites for:
+The current suites cover mobile-base migration and Intent/capability-path report honesty. Future work can add independent fixture suites for:
 
 - manipulators;
 - mobile manipulators;
