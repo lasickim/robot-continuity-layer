@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:hil-runtime-attestation",
+  "title": "RCL HIL Runtime Attestation v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "hil_attestation_version",
+    "captured_at",
+    "attestation_trust",
+    "environment",
+    "component_id",
+    "runtime",
+    "real_components",
+    "simulated_components",
+    "evidence_refs"
+  ],
+  "properties": {
+    "hil_attestation_version": {"const": "0.1"},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "attestation_trust": {"const": "self_declared"},
+    "environment": {"type": "string", "enum": ["unclassified", "test", "ci", "deployment"]},
+    "component_id": {"type": "string", "minLength": 1},
+    "runtime": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["python_version", "implementation", "system", "machine", "executable"],
+      "properties": {
+        "python_version": {"type": "string", "minLength": 1},
+        "implementation": {"type": "string", "minLength": 1},
+        "system": {"type": "string", "minLength": 1},
+        "machine": {"type": "string", "minLength": 1},
+        "executable": {"type": "string", "minLength": 1}
+      }
+    },
+    "real_components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "component_id"],
+        "properties": {
+          "role": {"type": "string", "enum": ["compute", "sensor", "controller", "actuator", "plant", "environment"]},
+          "component_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "simulated_components": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "component_id"],
+        "properties": {
+          "role": {"type": "string", "enum": ["compute", "sensor", "controller", "actuator", "plant", "environment"]},
+          "component_id": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}
