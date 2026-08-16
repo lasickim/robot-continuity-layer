@@ -1,0 +1,8 @@
+{
+  "robot_id": "RCL-V05-SIM-A",
+  "display_name": "RCL v0.5 Simulation Robot A",
+  "continuity_generation": 1,
+  "first_activated_at": "2026-08-16T00:00:00Z",
+  "previous_profile_id": null,
+  "notes": "Deterministic source embodiment for the v0.5 Simulation Reference Experiment."
+}

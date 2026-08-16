@@ -1,0 +1,18 @@
+{
+  "embodiment_id": "v05-sim-rover-a",
+  "vendor": "RCL Simulation",
+  "model": "Rear Attention A",
+  "class": "other",
+  "capabilities": [
+    "perception.directional_attention",
+    "x.demo.rear_clearance_classifier"
+  ],
+  "sensors": [
+    "simulated_front_camera"
+  ],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.capability_paths",
+    "adapter_version": "0.4-dev"
+  }
+}

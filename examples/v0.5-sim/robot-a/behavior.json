@@ -1,0 +1,65 @@
+{
+  "behaviors": [
+    {
+      "behavior_id": "safety.pre_sit_clearance_check",
+      "description": "Verify the intended sitting area before committing to the sitting motion.",
+      "parameters": {
+        "verification_pause_ms": 250
+      },
+      "required_capabilities": [],
+      "intent": {
+        "goal_id": "safety.verify_sitting_area_clear",
+        "description": "Verify the intended sitting area without requiring one embodiment-specific sensing recipe.",
+        "trigger": "activity.before_sit_down",
+        "success_condition": "state.sitting_area_clear",
+        "failure_action": "block",
+        "criticality": "required",
+        "capability_paths": [
+          {
+            "path_id": "direct_clearance",
+            "description": "Use a target capability that directly exposes sitting-area clearance.",
+            "all_of": [
+              "perception.sitting_area_clearance"
+            ]
+          },
+          {
+            "path_id": "rear_attention_classifier",
+            "description": "Direct attention rearward and use one compatible semantic clearance estimator.",
+            "all_of": [
+              "perception.directional_attention"
+            ],
+            "any_of": [
+              "x.demo.rear_clearance_classifier",
+              "x.demo.rear_occupancy_estimator"
+            ]
+          },
+          {
+            "path_id": "external_seat_state",
+            "description": "Select one external semantic source that reports seat-area clearance.",
+            "one_of": [
+              "x.demo.external_seat_clearance",
+              "x.demo.networked_seat_clearance"
+            ]
+          }
+        ],
+        "constraints": [
+          "safety.no_unverified_sit"
+        ]
+      },
+      "expression": {
+        "expression_id": "observation.brief_rearward_check",
+        "description": "Robot A briefly turns rearward as its recognizable source manner before sitting.",
+        "preservation_priority": "optional",
+        "required_capabilities": [
+          "perception.directional_attention"
+        ]
+      },
+      "preservation": {
+        "priority": "required",
+        "mode": "semantic"
+      },
+      "source": "learned",
+      "confidence": 0.95
+    }
+  ]
+}
