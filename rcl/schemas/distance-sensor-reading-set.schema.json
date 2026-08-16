@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:distance-sensor-reading-set",
+  "title": "RCL Distance Sensor Reading Set v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "distance_sensor_reading_set_version",
+    "reading_set_id",
+    "robot_id",
+    "sensor_component_id",
+    "captured_at",
+    "evidence_refs",
+    "sessions"
+  ],
+  "properties": {
+    "distance_sensor_reading_set_version": {"const": "0.1"},
+    "reading_set_id": {"type": "string", "minLength": 1},
+    "robot_id": {"type": "string", "minLength": 1},
+    "sensor_component_id": {"type": "string", "minLength": 1},
+    "captured_at": {"type": "string", "format": "date-time"},
+    "evidence_refs": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {"type": "string", "minLength": 1}
+    },
+    "sessions": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["session_id", "started_at", "trials"],
+        "properties": {
+          "session_id": {"type": "string", "minLength": 1},
+          "started_at": {"type": "string", "format": "date-time"},
+          "trials": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["trial_id", "captured_at", "distance_mm", "evidence_refs"],
+              "properties": {
+                "trial_id": {"type": "string", "minLength": 1},
+                "captured_at": {"type": "string", "format": "date-time"},
+                "distance_mm": {"type": "number", "minimum": 0},
+                "evidence_refs": {
+                  "type": "array",
+                  "uniqueItems": true,
+                  "items": {"type": "string", "minLength": 1}
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
