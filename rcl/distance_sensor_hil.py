@@ -9,6 +9,7 @@ from .profile import RCLProfile, RCLValidationError, validate_schema
 
 
 DISTANCE_SENSOR_HIL_VERSION = "0.1"
+DISTANCE_SENSOR_HIL_METHOD = "rcl.hil.distance_sensor.v0.5"
 DISTANCE_SENSOR_STRATEGY_ID = "target.direct_clearance_state"
 
 
@@ -60,7 +61,6 @@ def distance_readings_to_intent_series(
         for trial in session["trials"]:
             distance_mm = float(trial["distance_mm"])
             satisfied = distance_mm >= minimum_clearance_mm
-            evidence_refs = list(trial.get("evidence_refs", []))
             trials.append(
                 {
                     "trial_id": trial["trial_id"],
@@ -74,7 +74,7 @@ def distance_readings_to_intent_series(
                             "success_condition": success_condition,
                             "success_state": "satisfied" if satisfied else "not_satisfied",
                             "strategy_id": strategy_id,
-                            "evidence_refs": evidence_refs,
+                            "evidence_refs": list(trial.get("evidence_refs", [])),
                         }
                     ],
                 }
@@ -116,15 +116,20 @@ def run_distance_sensor_hil_experiment(
     expected_target_path_id: str | None = None,
     created_at: str | None = None,
 ) -> dict[str, Any]:
-    """Run the Phase-2 HIL reference with real distance-sensor measurements.
+    """Run Phase-2 HIL using a measured distance-sensor reading set.
 
-    The function does not talk to one vendor-specific sensor driver. Instead it
-    consumes a validated reading set produced by the deployment's sensor driver,
-    preserving RCL's vendor-neutral core while allowing the target Intent series
-    to be derived from real measured data rather than a static fixture.
+    Vendor-specific sensor drivers remain outside RCL core. The reading set is the
+    portable evidence boundary: deployment code produces measured millimeters;
+    RCL converts those readings into target Intent observations and feeds them to
+    the same HIL evaluator used by other execution boundaries.
     """
 
     validate_distance_reading_set(reading_set)
+    if reading_set["sensor_component_id"] != sensor_component_id:
+        raise RCLValidationError(
+            "sensor_component_id does not match the distance reading set"
+        )
+
     timestamp = created_at or _now()
     target_series = distance_readings_to_intent_series(
         reading_set,
@@ -136,7 +141,9 @@ def run_distance_sensor_hil_experiment(
         minimum_clearance_mm=minimum_clearance_mm,
     )
 
-    combined_refs = tuple(dict.fromkeys((*evidence_refs, *reading_set.get("evidence_refs", []))))
+    combined_refs = tuple(
+        dict.fromkeys((*evidence_refs, *reading_set.get("evidence_refs", [])))
+    )
     attestation = build_hil_runtime_attestation(
         component_id=edge_component_id,
         environment="deployment" if deployment else "unclassified",
@@ -145,14 +152,12 @@ def run_distance_sensor_hil_experiment(
         evidence_refs=combined_refs,
         captured_at=timestamp,
     )
-    # Preserve the concrete sensor identity without changing the generic HIL
-    # attestation shape used by existing clients.
     for component in attestation["real_components"]:
         if component["role"] == "sensor":
             component["component_id"] = sensor_component_id
     validate_schema(attestation, "hil-runtime-attestation")
 
-    report = run_hil_reference_experiment(
+    hil_report = run_hil_reference_experiment(
         profile,
         target_embodiment,
         source_series,
@@ -163,14 +168,35 @@ def run_distance_sensor_hil_experiment(
         expected_target_path_id=expected_target_path_id,
         created_at=timestamp,
     )
-    report["distance_sensor"] = {
+
+    report = {
         "distance_sensor_hil_version": DISTANCE_SENSOR_HIL_VERSION,
+        "method": DISTANCE_SENSOR_HIL_METHOD,
+        "created_at": timestamp,
         "reading_set_id": reading_set["reading_set_id"],
         "sensor_component_id": sensor_component_id,
         "minimum_clearance_mm": minimum_clearance_mm,
-        "reading_count": sum(len(session["trials"]) for session in reading_set["sessions"]),
+        "reading_count": sum(
+            len(session["trials"]) for session in reading_set["sessions"]
+        ),
         "strategy_id": DISTANCE_SENSOR_STRATEGY_ID,
+        "hil_reference": hil_report,
+        "assertions": {
+            "reading_set_valid": True,
+            "sensor_identity_matches": True,
+            "hil_experiment_passed": bool(
+                hil_report["assertions"]["experiment_passed"]
+            ),
+            "experiment_passed": bool(
+                hil_report["assertions"]["experiment_passed"]
+            ),
+        },
+        "disclaimer": (
+            "Distance Sensor HIL v0.1 converts deployment-provided distance measurements into declared Intent observations. "
+            "The clearance threshold is experiment-specific and is not a universal RCL safety limit. Sensor accuracy, calibration, placement, and physical safety remain deployment responsibilities."
+        ),
     }
+    validate_schema(report, "distance-sensor-hil-report")
     return report
 
 
@@ -185,11 +211,11 @@ def collect_distance_reading_set(
     evidence_ref_factory: Callable[[int, int], str] | None = None,
     clock: Callable[[], str] = _now,
 ) -> dict[str, Any]:
-    """Collect a small deterministic-shape reading set from a deployment reader.
+    """Collect a small repeated reading set from a deployment sensor reader.
 
-    The caller supplies the actual sensor driver as a zero-argument callable.
-    CI can inject a fake reader; deployment code can inject VL53, lidar, serial,
-    ROS 2, or another distance source without adding that dependency to RCL core.
+    The caller supplies the actual driver as a zero-argument callable. CI may
+    inject a fake reader; deployment code may inject VL53, lidar, serial, ROS 2,
+    or another distance source without adding that dependency to RCL core.
     """
 
     if sessions < 1 or trials_per_session < 1:
