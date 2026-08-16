@@ -1,0 +1,89 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:artifact-governance-report",
+  "title": "RCL Artifact Governance Review Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "report_version",
+    "method",
+    "created_at",
+    "artifact",
+    "provenance_record",
+    "policy",
+    "operation",
+    "include_external_evidence_refs",
+    "copy_external_evidence_content",
+    "status",
+    "allowed",
+    "gates",
+    "non_mutating",
+    "share_executed",
+    "archive_executed",
+    "prune_executed",
+    "content_privacy_inferred",
+    "disclaimer"
+  ],
+  "properties": {
+    "report_version": {"const": "0.1"},
+    "method": {"const": "rcl.provenance_privacy.evaluate.v0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "artifact_type", "sha256"],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "artifact_type": {"type": "string", "minLength": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "provenance_record": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["record_id", "record_sha256", "privacy_classification", "sharing_scope", "parent_count"],
+      "properties": {
+        "record_id": {"type": "string", "minLength": 1},
+        "record_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "privacy_classification": {"enum": ["public", "internal", "private", "restricted"]},
+        "sharing_scope": {"enum": ["local_only", "approved_recipients", "public"]},
+        "parent_count": {"type": "integer", "minimum": 0}
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["policy_id", "policy_version"],
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "policy_version": {"const": "0.1"}
+      }
+    },
+    "operation": {"enum": ["local_use", "share_approved", "share_public", "archive", "prune_review"]},
+    "include_external_evidence_refs": {"type": "boolean"},
+    "copy_external_evidence_content": {"type": "boolean"},
+    "status": {"enum": ["allowed", "blocked"]},
+    "allowed": {"type": "boolean"},
+    "gates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["gate", "passed", "actual", "required", "reason"],
+        "properties": {
+          "gate": {"type": "string", "minLength": 1},
+          "passed": {"type": "boolean"},
+          "actual": {},
+          "required": {},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "non_mutating": {"const": true},
+    "share_executed": {"const": false},
+    "archive_executed": {"const": false},
+    "prune_executed": {"const": false},
+    "content_privacy_inferred": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
