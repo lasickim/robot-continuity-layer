@@ -1,22 +1,26 @@
 # Robot Continuity Layer (RCL)
 
-**Experimental open specification · semantic/reference implementation `0.4.0-dev`**
+**Experimental open specification · semantic/reference implementation `0.5.0-dev`**
 
 > **Hardware can be replaced. Experience shouldn't be.**
 
 RCL is an experimental open specification and reference implementation for carrying a robot's **portable continuity** across hardware changes: identity metadata, preferences, semantic behavior, habits and history, declared functional intent, familiar expression, long-lived experience evidence, and provenance needed to review those claims.
 
-RCL does **not** require Robot B to mechanically imitate every limitation of Robot A. The new body should use its own better sensors, actuators, controllers, planners, and safety systems while preserving the purpose, experience, and recognizable manner that should survive the hardware change.
+RCL does **not** require Robot B to mechanically imitate every limitation of Robot A. The new body should use its own sensors, actuators, controllers, planners, and safety systems while preserving the purpose, experience, and recognizable manner that should survive the hardware change.
 
-> **Start here:** [`docs/V0.4_OVERVIEW.md`](docs/V0.4_OVERVIEW.md) is the concise external-facing description of the frozen v0.4 capability surface.
+> **Current development line:** [`docs/V0.5_DEVELOPMENT_LINE.md`](docs/V0.5_DEVELOPMENT_LINE.md)  
+> **Frozen v0.4 overview:** [`docs/V0.4_OVERVIEW.md`](docs/V0.4_OVERVIEW.md)  
+> **v0.4 release checkpoint:** [`docs/V0.4_RELEASE_CHECKPOINT.md`](docs/V0.4_RELEASE_CHECKPOINT.md)
 
 ## Project status
 
 ```text
-semantic/reference implementation   0.4.0-dev
+semantic/reference implementation   0.5.0-dev
 .rcl archive/package format         0.2 compatible
-v0.4 capability surface             FROZEN for polish
-next major direction                physical Robot A → Robot B validation
+v0.4 capability surface             FROZEN + CHECKPOINTED
+v0.5 current phase                  deterministic semantic simulation
+next validation step                hardware-in-the-loop
+ultimate v0.5 direction             physical Robot A → Robot B evidence
 ```
 
 The `.rcl` package remains the same five portable payloads plus a manifest:
@@ -30,9 +34,9 @@ skills.json
 embodiment.json
 ```
 
-v0.4 expands the semantics and supporting evidence/governance artifacts without breaking that archive layout.
+v0.5 starts from the frozen v0.4 semantics. It does not add a sixth required profile payload or redefine synthetic evidence as physical evidence.
 
-For development detail, see [`docs/V0.4_CHECKPOINT.md`](docs/V0.4_CHECKPOINT.md). For planned work, see [`ROADMAP.md`](ROADMAP.md). For version history, see [`CHANGELOG.md`](CHANGELOG.md).
+For planned work, see [`ROADMAP.md`](ROADMAP.md). For version history, see [`CHANGELOG.md`](CHANGELOG.md).
 
 ## 30-second explanation
 
@@ -60,7 +64,7 @@ The compact mental model is:
 
 ## The semantic split
 
-RCL keeps several concepts deliberately separate:
+RCL deliberately separates:
 
 ```text
 WHY      → Intent / functional goal
@@ -71,26 +75,20 @@ TEMPO    → expressive temporal style
 HISTORY  → habits, legacy behavior, prior Intent and Expression interpretations
 ```
 
-That separation allows Robot B to use a completely different physical strategy while preserving the same functional reason and, where appropriate, the familiar visible manner.
-
 Example:
 
 ```text
-Robot V1
-rearward turn → camera check → safe to sit
+Robot A
+rearward turn → camera/classifier check → safe to sit
 
 Portable WHY
 verify sitting area is clear before sitting
 
-Robot V2
-rear depth sensing → clearance verified
-                   ↓
-optional familiar rearward glance
-                   ↓
-sit
+Robot B
+direct rear clearance state → safe to sit
 ```
 
-V2 uses its new sensing system immediately for the function. The old glance may remain as expression if it is safe and meaningful; old hardware delay does not become a requirement.
+Robot B may satisfy the same WHY through a completely different HOW. A familiar source gesture may remain separately as expression when safe and representable; a target that cannot reproduce that gesture does not automatically fail functional Intent migration.
 
 ## Five continuity principles
 
@@ -104,7 +102,9 @@ V2 uses its new sensing system immediately for the function. The old glance may 
 >
 > **Preserve the goal, not one body's capability recipe.**
 
-## v0.4 architecture in one flow
+## v0.4 semantic capability foundation
+
+The frozen v0.4 line established the software/spec foundation used by v0.5:
 
 ```text
 Robot operation
@@ -148,6 +148,79 @@ separate motion/statistical continuity evaluation
 
 No one stage silently substitutes for another.
 
+See [`docs/V0.4_OVERVIEW.md`](docs/V0.4_OVERVIEW.md) for the frozen capability surface and [`docs/V0.4_RELEASE_CHECKPOINT.md`](docs/V0.4_RELEASE_CHECKPOINT.md) for the validation record.
+
+## v0.5: progressively stronger continuity evidence
+
+v0.5 changes the emphasis from adding semantic capability areas to **testing the existing model with progressively stronger evidence**.
+
+The validation ladder is:
+
+```text
+Phase 1 — deterministic semantic simulation
+        ↓
+Phase 2 — hardware-in-the-loop
+        ↓
+Phase 3 — low-cost physical Robot A / Robot B
+        ↓
+Phase 4 — richer manipulation / human-interaction validation
+```
+
+Evidence provenance must remain explicit:
+
+```text
+SIMULATION
+→ deterministic or simulator-produced evidence
+
+HIL
+→ real compute/sensor/controller components with simulated or partial plant
+
+PHYSICAL
+→ actual robot measurements in a declared experiment context
+```
+
+Synthetic observations must never be presented as physical robot evidence.
+
+### Phase 1 — Simulation Reference Experiment
+
+The first v0.5 reference experiment is executable and deterministic.
+
+```text
+Robot A
+perception.directional_attention
++ x.demo.rear_clearance_classifier
+        ↓
+source.rear_attention_clearance
+
+same WHY
+safety.verify_sitting_area_clear
+
+Robot B
+perception.sitting_area_clearance
+        ↓
+target.direct_clearance_state
+```
+
+Both sides provide three sessions × three trials of repeated Intent Success evidence. The experiment passes only when:
+
+- source and target have sufficient repeated evidence for the same required Intent;
+- migration succeeds;
+- required Intent is preserved;
+- Robot B selects the expected `direct_clearance` capability path;
+- Robot A and Robot B use different observed strategy IDs;
+- Robot B's observation agrees with the adapter's declared target-native strategy.
+
+Robot B intentionally lacks the source expression capability, so the reference case expects:
+
+```text
+WHY preserved       → yes
+HOW copied          → no
+source LOOKS copied → no
+migration succeeds  → yes
+```
+
+See [`docs/V0.5_SIMULATION_REFERENCE.md`](docs/V0.5_SIMULATION_REFERENCE.md).
+
 ## What works today
 
 ### Portable profile and migration
@@ -158,7 +231,7 @@ A required behavior or required Intent that cannot be represented safely remains
 
 ### Intent, capability paths, and conformance
 
-RCL can preserve a declared engineering WHY separately from visible motion. One Intent may expose multiple semantic capability paths, so different target bodies can satisfy the same goal through different target-native strategies.
+One Intent may expose multiple semantic capability paths, so different target bodies can satisfy the same goal through different target-native strategies.
 
 ```text
 same WHY
@@ -178,22 +251,9 @@ See:
 
 ### WHY proposal, discovery, review, and correction
 
-Humans, rules, LLMs, VLMs, external models, or other plugins can submit the same neutral Intent Hypothesis Proposal envelope.
+Humans, rules, LLMs, VLMs, external models, or other plugins can submit the same neutral Intent Hypothesis Proposal envelope. A proposer's self-confidence is audit metadata only; it never becomes RCL evidence or approval authority.
 
-```text
-proposer
-→ suggests WHY
-
-evidence
-→ supports or fails to support that WHY
-
-approval
-→ decides whether it becomes continuity metadata
-```
-
-A proposer's self-confidence is audit metadata only. It never becomes RCL confidence or approval authority.
-
-Intent Discovery evaluates context-action-outcome association without claiming causality. Context Diagnostics can warn when pooled evidence appears dependent on narrower observed conditions. Eligible candidates require explicit Intent Approval, and later evidence may produce an explicit Intent Revision while preserving the previous interpretation in append-only history.
+Intent Discovery evaluates context-action-outcome association without claiming causality. Context Diagnostics can warn when pooled evidence appears context-dependent. Eligible candidates require explicit Intent Approval, and later evidence may produce an explicit Intent Revision while preserving the previous interpretation in append-only history.
 
 See:
 - [`docs/INTENT_HYPOTHESIS_PROPOSER.md`](docs/INTENT_HYPOTHESIS_PROPOSER.md)
@@ -203,45 +263,15 @@ See:
 - [`docs/INTENT_APPROVAL.md`](docs/INTENT_APPROVAL.md)
 - [`docs/INTENT_REVISION.md`](docs/INTENT_REVISION.md)
 
-### Goal vocabulary governance
+### Experience, habits, provenance, and privacy
 
-Projects may freely experiment with extension goals under:
-
-```text
-x.<owner>.<semantic_path>
-```
-
-When a project wants an experimental WHY to become shared RCL vocabulary, Goal Vocabulary Governance adds deterministic review assistance plus an explicit human decision boundary.
-
-> **Experiment freely; standardize deliberately.**
-
-Approval authorizes a vocabulary-change proposal; it does not silently edit the standard vocabulary file.
-
-See [`docs/GOAL_VOCABULARY_GOVERNANCE.md`](docs/GOAL_VOCABULARY_GOVERNANCE.md).
-
-### Experience lifecycle and long-lived evidence
-
-RCL records lightweight semantic Context + Action + Outcome episodes without requiring an unlimited raw-media archive.
-
-```text
-small semantic episode
-   ↓
-non-destructive compaction
-   ↓
-aggregate evidence
-   ↓
-retention review
-   ↓
-RETAIN | ARCHIVE_CANDIDATE | PRUNE_CANDIDATE
-```
-
-Important boundaries:
+RCL records lightweight semantic Context + Action + Outcome episodes without requiring an unlimited raw-media archive. Compaction is non-destructive, retention review remains separate from deletion, and aggregate evidence never pretends to be raw experience.
 
 > **Compaction is not deletion consent.**
-
-`PRUNE_CANDIDATE` does not mean deleted. Archive records are deployment assertions bound to exact source digests; RCL does not claim to inspect remote storage bytes.
-
-Habit Evidence can consume either raw Experience or compatible aggregate summaries. Aggregate evidence never pretends to be raw experience and never reconstructs pseudo-episodes or synthetic habit-history events.
+>
+> **Provenance is not permission.**
+>
+> **Aggregation does not automatically declassify data.**
 
 See:
 - [`docs/EXPERIENCE_STORE.md`](docs/EXPERIENCE_STORE.md)
@@ -250,34 +280,13 @@ See:
 - [`docs/HABIT_HISTORY.md`](docs/HABIT_HISTORY.md)
 - [`docs/HABIT_PROMOTION.md`](docs/HABIT_PROMOTION.md)
 - [`docs/HABIT_APPROVAL.md`](docs/HABIT_APPROVAL.md)
-
-### Provenance and privacy governance
-
-RCL can bind a companion provenance/privacy record to a canonical JSON artifact and carry parent lineage, declared privacy classification, sharing scope, transformation metadata, and external evidence-reference rules across derived artifacts.
-
-Reference ordering:
-
-```text
-public < internal < private < restricted
-```
-
-Two key rules:
-
-> **Provenance is not permission.**
->
-> **Aggregation does not automatically declassify data.**
-
-A derived artifact cannot silently lower its classification or broaden its sharing scope beyond governed parents. Operation review remains non-mutating; RCL does not perform the share, archive, copy, or prune itself and does not inspect content to infer legal privacy status.
-
-See [`docs/PROVENANCE_PRIVACY.md`](docs/PROVENANCE_PRIVACY.md).
+- [`docs/PROVENANCE_PRIVACY.md`](docs/PROVENANCE_PRIVACY.md)
 
 ### Expression, timing, and explicit optimization
 
-RCL separates recognizable manner from functional execution.
+RCL separates recognizable manner from functional execution. Hardware-caused slowness is not automatically normative; user-valued or recognized timing can be represented semantically and realized using safe target-native timing.
 
-A source gesture can remain even if the new body no longer needs that gesture for the function. Hardware-caused slowness is not automatically normative; user-valued or recognized timing can be represented semantically and realized using safe target-native timing.
-
-RCL may generate a non-mutating recommendation to review simplification/removal, but actual change requires explicit approval and creates a new immutable snapshot. Previous expressions remain in append-only `expression_history`.
+RCL may generate a non-mutating recommendation to review simplification/removal, but actual change requires explicit approval and creates a new immutable snapshot. Previous expressions remain in append-only history.
 
 See:
 - [`docs/EXPRESSIVE_TIMING.md`](docs/EXPRESSIVE_TIMING.md)
@@ -286,7 +295,7 @@ See:
 
 ### Observed and repeated validation
 
-RCL keeps representability, execution success, behavioral similarity, and physical safety separate.
+RCL keeps representability, execution success, behavioral similarity, evidence provenance, and physical safety separate.
 
 ```text
 Capability Path
@@ -296,7 +305,7 @@ Adapter Conformance
 → is the adapter reporting that route honestly?
 
 Observed Intent Success
-→ did one execution actually satisfy the declared success condition?
+→ did one execution satisfy the declared success condition?
 
 Repeated Intent Success
 → does that WHY keep being satisfied across repeated trials/sessions?
@@ -307,8 +316,6 @@ Observed / Statistical Continuity
 Physical validation
 → is the real robot safe and suitable in the actual environment?
 ```
-
-A required failure remains explicit even when an aggregate success rate is high.
 
 See:
 - [`docs/OBSERVED_INTENT_SUCCESS.md`](docs/OBSERVED_INTENT_SUCCESS.md)
@@ -334,6 +341,7 @@ RCL does **not** claim to:
 - infer legal privacy status or consent from content;
 - replace encryption, PKI, access control, or deployment security infrastructure;
 - certify physical robot safety;
+- treat simulation or HIL evidence as real-robot evidence;
 - replace ROS 2, robot controllers, planners, or vendor-specific execution stacks.
 
 RCL standardizes portable semantic continuity, evidence, migration reporting, review boundaries, and conformance—not every command a robot can execute.
@@ -350,31 +358,30 @@ rcl capabilities list
 pytest -q
 ```
 
-A few useful v0.4 commands:
+Run the v0.5 Phase 1 reference experiment:
 
 ```bash
-# Long-lived semantic experience
+python examples/v0.5-sim/run_reference_experiment.py
+```
+
+A few established semantic/evidence commands:
+
+```bash
 rcl compact-experience examples/experience/mixed-robot-life.episodes.json \
   --output /tmp/experience-summary.json
 
-# Intent discovery from raw evidence
 rcl discover-intent \
   examples/intent-discovery/object-release-stability.dataset.json
 
-# Inspect a human/rule/LLM/VLM WHY proposal
 rcl inspect-intent-proposal \
   examples/intent-proposer/llm-object-release.proposal.json
 
-# Evaluate one execution against declared Intent
 rcl evaluate-intent \
   examples/intent/sit-assistant-v1 \
   examples/intent-observations/sit-assistant-v2.observations.json
 
-# Adapter protocol conformance
 rcl-conformance intent rcl:CapabilityPathReferenceAdapter
 ```
-
-See each feature document for complete CLI examples and report formats.
 
 ## Development and compatibility
 
@@ -387,45 +394,27 @@ Compatibility and contribution guidance:
 - [`ROADMAP.md`](ROADMAP.md)
 - [`CHANGELOG.md`](CHANGELOG.md)
 
-## v0.4 freeze boundary
+## Version boundaries
 
-The major planned v0.4 software/spec capability areas are represented. During the v0.4 polish line:
+### v0.4
 
-```text
-new conceptual capability area     → later version
-bug / safety / validation fix      → allowed
-documentation correction           → allowed
-schema inconsistency correction    → allowed
-release-story consolidation        → allowed
-```
+The v0.4 semantic capability surface is frozen and checkpointed. It remains open only as historical documentation and for narrowly scoped correction work where necessary.
 
-This boundary is documented in [`docs/V0.4_OVERVIEW.md`](docs/V0.4_OVERVIEW.md).
+See:
+- [`docs/V0.4_OVERVIEW.md`](docs/V0.4_OVERVIEW.md)
+- [`docs/V0.4_CHECKPOINT.md`](docs/V0.4_CHECKPOINT.md)
+- [`docs/V0.4_RELEASE_CHECKPOINT.md`](docs/V0.4_RELEASE_CHECKPOINT.md)
 
-## v0.5 direction: physical continuity evidence
+### v0.5
 
-The next major direction is real Robot A → Robot B evidence rather than more configuration-only feature growth.
+The active v0.5 development line is about **evidence strength**, moving from deterministic semantic simulation toward hardware-in-the-loop and then real Robot A → Robot B validation.
 
-A physical validation sequence may look like:
+The simulation fixture is useful because it exercises the exact WHY / HOW / LOOKS split that later hardware experiments must preserve, while making the evidence boundary impossible to confuse with physical validation.
 
-```text
-Robot A repeated behavior
-        ↓
-semantic observations / Experience
-        ↓
-RCL profile + evidence
-        ↓
-Robot B migration
-        ↓
-target-native execution
-        ↓
-Intent Success + behavior similarity + repeated sessions
-        ↓
-physical safety / user review
-```
-
-Human-interaction tasks such as handover or handshake-style behavior are useful candidate scenarios because they can expose functional success, expression, timing, and relationship-context continuity at the same time. RCL should preserve behavior that was actually experienced; it should not fabricate source experience for previously unseen contexts.
-
-See [`ROADMAP.md`](ROADMAP.md) for the v0.5 validation plan.
+See:
+- [`docs/V0.5_DEVELOPMENT_LINE.md`](docs/V0.5_DEVELOPMENT_LINE.md)
+- [`docs/V0.5_SIMULATION_REFERENCE.md`](docs/V0.5_SIMULATION_REFERENCE.md)
+- [`ROADMAP.md`](ROADMAP.md)
 
 ## License
 
