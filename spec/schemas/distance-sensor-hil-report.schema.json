@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:distance-sensor-hil-report",
+  "title": "RCL Distance Sensor HIL Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "distance_sensor_hil_version",
+    "method",
+    "created_at",
+    "reading_set_id",
+    "sensor_component_id",
+    "minimum_clearance_mm",
+    "reading_count",
+    "strategy_id",
+    "hil_reference",
+    "assertions",
+    "disclaimer"
+  ],
+  "properties": {
+    "distance_sensor_hil_version": {"const": "0.1"},
+    "method": {"const": "rcl.hil.distance_sensor.v0.5"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "reading_set_id": {"type": "string", "minLength": 1},
+    "sensor_component_id": {"type": "string", "minLength": 1},
+    "minimum_clearance_mm": {"type": "number", "exclusiveMinimum": 0},
+    "reading_count": {"type": "integer", "minimum": 1},
+    "strategy_id": {"const": "target.direct_clearance_state"},
+    "hil_reference": {"type": "object"},
+    "assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reading_set_valid",
+        "sensor_identity_matches",
+        "hil_experiment_passed",
+        "experiment_passed"
+      ],
+      "properties": {
+        "reading_set_valid": {"type": "boolean"},
+        "sensor_identity_matches": {"type": "boolean"},
+        "hil_experiment_passed": {"type": "boolean"},
+        "experiment_passed": {"type": "boolean"}
+      }
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
