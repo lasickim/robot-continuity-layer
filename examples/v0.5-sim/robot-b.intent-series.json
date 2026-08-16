@@ -1,0 +1,170 @@
+{
+  "intent_observation_series_version": "0.1",
+  "series_id": "v05-sim-b-pre-sit-series",
+  "robot_id": "RCL-V05-SIM-B",
+  "embodiment_id": "v05-sim-rover-b",
+  "sessions": [
+    {
+      "session_id": "sim-b-session-01",
+      "started_at": "2026-08-16T03:00:00Z",
+      "trials": [
+        {
+          "trial_id": "sim-b-s01-t01",
+          "captured_at": "2026-08-16T03:00:01Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s01-t01-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-01/trial-01"]
+            }
+          ]
+        },
+        {
+          "trial_id": "sim-b-s01-t02",
+          "captured_at": "2026-08-16T03:00:02Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s01-t02-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-01/trial-02"]
+            }
+          ]
+        },
+        {
+          "trial_id": "sim-b-s01-t03",
+          "captured_at": "2026-08-16T03:00:03Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s01-t03-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-01/trial-03"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "session_id": "sim-b-session-02",
+      "started_at": "2026-08-16T03:10:00Z",
+      "trials": [
+        {
+          "trial_id": "sim-b-s02-t01",
+          "captured_at": "2026-08-16T03:10:01Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s02-t01-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-02/trial-01"]
+            }
+          ]
+        },
+        {
+          "trial_id": "sim-b-s02-t02",
+          "captured_at": "2026-08-16T03:10:02Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s02-t02-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-02/trial-02"]
+            }
+          ]
+        },
+        {
+          "trial_id": "sim-b-s02-t03",
+          "captured_at": "2026-08-16T03:10:03Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s02-t03-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-02/trial-03"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "session_id": "sim-b-session-03",
+      "started_at": "2026-08-16T03:20:00Z",
+      "trials": [
+        {
+          "trial_id": "sim-b-s03-t01",
+          "captured_at": "2026-08-16T03:20:01Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s03-t01-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-03/trial-01"]
+            }
+          ]
+        },
+        {
+          "trial_id": "sim-b-s03-t02",
+          "captured_at": "2026-08-16T03:20:02Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s03-t02-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-03/trial-02"]
+            }
+          ]
+        },
+        {
+          "trial_id": "sim-b-s03-t03",
+          "captured_at": "2026-08-16T03:20:03Z",
+          "intent_observations": [
+            {
+              "observation_id": "sim-b-s03-t03-obs",
+              "behavior_id": "safety.pre_sit_clearance_check",
+              "trigger": "activity.before_sit_down",
+              "trigger_state": "observed",
+              "success_condition": "state.sitting_area_clear",
+              "success_state": "satisfied",
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["sim://b/session-03/trial-03"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

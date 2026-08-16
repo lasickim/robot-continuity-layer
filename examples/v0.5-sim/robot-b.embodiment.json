@@ -1,0 +1,17 @@
+{
+  "embodiment_id": "v05-sim-rover-b",
+  "vendor": "RCL Simulation",
+  "model": "Direct Clearance B",
+  "class": "other",
+  "capabilities": [
+    "perception.sitting_area_clearance"
+  ],
+  "sensors": [
+    "simulated_rear_depth_sensor"
+  ],
+  "limits": {},
+  "adapter": {
+    "adapter_id": "rcl.reference.capability_paths",
+    "adapter_version": "0.4-dev"
+  }
+}
