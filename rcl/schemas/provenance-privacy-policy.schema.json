@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:provenance-privacy-policy",
+  "title": "RCL Provenance / Privacy Governance Policy v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "policy_version",
+    "policy_id",
+    "description",
+    "privacy_order",
+    "sharing_scope_order",
+    "evidence_ref_propagation_order",
+    "operations",
+    "external_evidence",
+    "automatic_declassification",
+    "content_privacy_inference",
+    "non_mutating"
+  ],
+  "properties": {
+    "policy_version": {"const": "0.1"},
+    "policy_id": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1},
+    "privacy_order": {
+      "const": ["public", "internal", "private", "restricted"]
+    },
+    "sharing_scope_order": {
+      "const": ["local_only", "approved_recipients", "public"]
+    },
+    "evidence_ref_propagation_order": {
+      "const": ["exclude", "approved_recipients", "public"]
+    },
+    "operations": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["local_use", "share_approved", "share_public", "archive", "prune_review"],
+      "properties": {
+        "local_use": {"$ref": "#/$defs/operationRule"},
+        "share_approved": {"$ref": "#/$defs/operationRule"},
+        "share_public": {"$ref": "#/$defs/operationRule"},
+        "archive": {"$ref": "#/$defs/operationRule"},
+        "prune_review": {"$ref": "#/$defs/operationRule"}
+      }
+    },
+    "external_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "share_approved_minimum_propagation",
+        "share_public_minimum_propagation",
+        "content_copy_requires_deployment_permission"
+      ],
+      "properties": {
+        "share_approved_minimum_propagation": {"const": "approved_recipients"},
+        "share_public_minimum_propagation": {"const": "public"},
+        "content_copy_requires_deployment_permission": {"const": true}
+      }
+    },
+    "automatic_declassification": {"const": false},
+    "content_privacy_inference": {"const": false},
+    "non_mutating": {"const": true}
+  },
+  "$defs": {
+    "operationRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed_classifications", "minimum_sharing_scope"],
+      "properties": {
+        "allowed_classifications": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {"enum": ["public", "internal", "private", "restricted"]}
+        },
+        "minimum_sharing_scope": {
+          "enum": ["local_only", "approved_recipients", "public"]
+        }
+      }
+    }
+  }
+}
