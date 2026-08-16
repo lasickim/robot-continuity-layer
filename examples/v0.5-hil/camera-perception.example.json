@@ -1,0 +1,39 @@
+{
+  "camera_perception_series_version": "0.1",
+  "series_id": "camera-clearance-demo",
+  "robot_id": "RCL-V05-SIM-B",
+  "sensor_component_id": "camera-01",
+  "model": {
+    "model_id": "rear-clearance-perception",
+    "runtime": "deployment-adapter",
+    "version": "0.1"
+  },
+  "evidence_refs": [
+    "file://camera/session-manifest.json"
+  ],
+  "sessions": [
+    {
+      "session_id": "camera-session-01",
+      "started_at": "2026-08-16T10:01:00Z",
+      "trials": [
+        {
+          "trial_id": "camera-s01-t01",
+          "captured_at": "2026-08-16T10:01:01Z",
+          "frame_ref": "file://camera/frames/s01-t01.jpg",
+          "inferences": [
+            {
+              "inference_id": "camera-inf-s01-t01",
+              "semantic_state": "state.sitting_area_clear",
+              "predicate": true,
+              "confidence": 0.96,
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": [
+                "file://camera/inference/s01-t01.json"
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
