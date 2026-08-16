@@ -154,6 +154,11 @@ from .session_evaluation import (
     evaluate_repeated_sessions,
     t95_critical,
 )
+from .simulation_reference import (
+    SIMULATION_REFERENCE_METHOD,
+    SIMULATION_REFERENCE_VERSION,
+    run_simulation_reference_experiment,
+)
 from .statistical_evaluation import (
     DEFAULT_MIN_TRIALS,
     STATISTICAL_EVALUATION_METHOD,
@@ -227,6 +232,8 @@ __all__ = [
     "RCL_VERSION",
     "SESSION_EVALUATION_METHOD",
     "SESSION_EVALUATION_VERSION",
+    "SIMULATION_REFERENCE_METHOD",
+    "SIMULATION_REFERENCE_VERSION",
     "STATISTICAL_EVALUATION_METHOD",
     "STATISTICAL_EVALUATION_VERSION",
     "apply_expression_optimization",
@@ -272,6 +279,7 @@ __all__ = [
     "reserved_namespaces",
     "run_adapter_conformance",
     "run_intent_adapter_conformance",
+    "run_simulation_reference_experiment",
     "sample_mean",
     "sample_std",
     "select_satisfied_capability_path",

@@ -1,9 +1,13 @@
 import json
 from pathlib import Path
 
+from rcl import (
+    SIMULATION_REFERENCE_METHOD,
+    SIMULATION_REFERENCE_VERSION,
+    run_simulation_reference_experiment,
+)
 from rcl.capability_path_reference_adapter import CapabilityPathReferenceAdapter
 from rcl.profile import RCLProfile, validate_schema
-from rcl.simulation_reference import run_simulation_reference_experiment
 
 
 def _root() -> Path:
@@ -12,6 +16,12 @@ def _root() -> Path:
 
 def _read(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_v05_simulation_reference_public_api_is_exposed():
+    assert SIMULATION_REFERENCE_VERSION == "0.1"
+    assert SIMULATION_REFERENCE_METHOD == "rcl.simulation.reference_migration.v0.5"
+    assert callable(run_simulation_reference_experiment)
 
 
 def test_v05_simulation_reference_experiment_passes():
