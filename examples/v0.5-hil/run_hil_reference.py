@@ -4,9 +4,8 @@ import argparse
 import json
 from pathlib import Path
 
-from rcl import (
-    CapabilityPathReferenceAdapter,
-    RCLProfile,
+from rcl import CapabilityPathReferenceAdapter, RCLProfile
+from rcl.hil_reference import (
     build_hil_runtime_attestation,
     run_hil_reference_experiment,
 )
