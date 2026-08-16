@@ -2,6 +2,19 @@
 
 ## 0.4.0-dev — 2026-08-14
 
+### Late v0.4 freeze additions — 2026-08-16
+
+- Added Intent-aware Adapter Conformance v0.1 (`rcl.adapter.intent.v0.4`) so third-party adapters may choose a different target-native HOW while the core independently verifies that the adapter reports the preserved WHY and selected capability path honestly.
+- Added Repeated-Trial / Repeated-Session Intent Success v0.1 with observable success rate, Wilson uncertainty, session coverage, explicit required-failure handling, and the principle that one successful execution shows possibility while repeated evidence measures consistency.
+- Added Context Specificity / Possible-Confound Diagnostics v0.1 as a separate advisory report for Intent Discovery, including context strata, action-prevalence imbalance, effect heterogeneity, insufficient-coverage reporting, and raw/aggregate evidence parity without changing Intent Candidate status or claiming causality.
+- Added Goal Vocabulary Proposal / Review Governance v0.1 for deciding when experimental `x.<owner>...` WHY semantics should be proposed for shared RCL vocabulary; automated checks are advisory/blocking inputs to human review, and approval never silently mutates the bundled vocabulary.
+- Added the model-neutral Intent Hypothesis Proposer Interface v0.1 so humans, rules, planners, LLMs, VLMs, external models, and other plugins can submit the same structured WHY proposal envelope while proposer self-confidence remains non-normative audit metadata and never becomes RCL evidence or approval authority.
+- Added Experience Retention / Archive / Prune Policy v0.1 with exact Experience Store ↔ Summary binding verification, conservative retain/archive/prune-candidate classification, exemplar/evidence-ref/sparse-group protection, per-group prune caps, and explicit non-mutating archive records. Compaction is not deletion consent, and `prune_candidate` is not deletion.
+- Added Summary-aware Habit Evidence v0.1 so Habit review can use either RAW Experience or AGGREGATE Experience Summary evidence with comparable counts/repeat-rate/span metrics while preserving `direct_source`, `summary_declared`, or `raw_verified` provenance and never reconstructing pseudo-episodes or synthetic habit-history events.
+- Added Provenance / Privacy Governance v0.1 with canonical artifact SHA-256 binding, parent-lineage verification, declared `public < internal < private < restricted` classifications, sharing-scope inheritance, external-evidence reference controls, and non-mutating operation review. Provenance is not permission, and aggregation does not automatically declassify data.
+- Added `docs/V0.4_OVERVIEW.md` and froze the major v0.4 capability surface. v0.4 polish now accepts bug/safety/validation/schema/documentation fixes and release-story consolidation rather than automatically adding new conceptual capability areas; real Robot A → Robot B physical validation remains the v0.5 direction.
+- Kept the semantic/reference implementation at `0.4.0-dev` while preserving the existing five-payload `.rcl` archive container format and package-format compatibility boundary.
+
 - Added Alternative Capability Sets / Goal Satisfaction Paths v0.1 so one declared Intent can be represented by multiple valid semantic capability combinations across different robot embodiments.
 - Added optional named `intent.capability_paths` with clause-level `all_of`, `any_of`, and `one_of` semantics; clauses inside one path combine as AND while complete paths are alternatives (OR).
 - Kept legacy `intent.required_capabilities` backward-compatible by normalizing it to one implicit `legacy.required_capabilities` `all_of` path; v0.1 requires exactly one of the legacy or new representations.
