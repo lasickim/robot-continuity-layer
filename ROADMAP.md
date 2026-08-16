@@ -156,13 +156,15 @@ Primary goal: preserve **why** a behavior exists independently from the source b
 - [x] false selected-path, no-path false-preservation, and expression-as-Intent substitution detection
 - [x] required-Intent migration-failure and legacy flat-capability compatibility checks
 - [x] `rcl-conformance intent` CLI plus dedicated runtime/public conformance-report schema
-- [ ] optional proposer plugin interface for LLM/VLM/foundation-model or human-generated goal hypotheses
-- [ ] goal vocabulary proposal / review workflow
+- [x] model-neutral Human / Rule / LLM / VLM Intent Hypothesis Proposer Interface v0.1
+- [x] Goal Vocabulary Proposal / Review Governance v0.1
 - [x] richer alternative-capability / capability-set semantics for goals with multiple valid satisfaction paths
-- [ ] repeated-trial / repeated-session statistical Intent Success evaluation
-- [ ] stronger context-specificity / confound reporting beyond v0.1 association comparison
-- [ ] explicit retention / prune / archive policy after verified compaction
-- [ ] summary-aware Habit evidence evaluation with raw-vs-aggregate provenance distinction
+- [x] Repeated-Trial / Repeated-Session Intent Success v0.1
+- [x] Context Specificity / Possible-Confound Diagnostics v0.1
+- [x] Experience Retention / Archive / Prune Policy v0.1 after verified compaction
+- [x] Summary-aware Habit Evidence v0.1 with explicit raw-vs-aggregate provenance
+- [x] Provenance / Privacy Governance v0.1 for artifact lineage, declared privacy, and operation review
+- [x] v0.4 external overview and capability freeze boundary
 
 ### v0.4 semantic rule
 
@@ -263,19 +265,22 @@ non-destructive compaction
   ↓
 long-lived aggregate evidence
   ↓
-summary-aware Intent Discovery / other longitudinal analysis
+summary-aware Intent Discovery / Habit Evidence / longitudinal analysis
 ```
 
-### v0.4 privacy/provenance follow-on
+### v0.4 completion / freeze boundary
 
-Long-lived intent/history profiles will also need stronger provenance and privacy controls:
+The major planned v0.4 software/spec capability areas are represented. `docs/V0.4_OVERVIEW.md` is the concise external-facing description of this frozen capability surface.
 
-- [ ] memory namespaces
-- [ ] encrypted private sections
-- [ ] profile signing
-- [ ] provenance metadata beyond current experience / approval / revision digests
-- [ ] selective export
-- [ ] retained-history archival / deletion policy
+```text
+new conceptual capability area     → later version
+bug / safety / validation fix      → v0.4 polish allowed
+documentation correction           → v0.4 polish allowed
+schema inconsistency correction    → v0.4 polish allowed
+release-story consolidation        → v0.4 polish allowed
+```
+
+The v0.4 Provenance / Privacy Governance layer validates declared lineage, classification inheritance, sharing scope, and non-mutating operation review. It does **not** claim that encryption, PKI, access-control infrastructure, or legal compliance are solved.
 
 ## v0.5 — real robot reference migration
 
@@ -307,21 +312,25 @@ Primary goal: replace configuration-only similarity with measured physical behav
 - [ ] uncertainty and confidence reporting on real robot data
 - [ ] user-reviewed habit promotion on real longitudinal evidence
 - [ ] explicit approval creating a new real-robot profile snapshot
+- [ ] relationship-context continuity test such as known-vs-unknown interaction without fabricating unobserved source experience
 - [ ] video demo
 - [ ] reproducible test procedure and dataset
 
-## v0.6+ — ecosystem and governance experiments
+## v0.6+ — ecosystem, security infrastructure, and governance experiments
 
 - [ ] LeRobot integration experiment
 - [ ] simulator reference adapters
 - [ ] multiple independently maintained robot adapters
 - [ ] cross-vendor migration demo
 - [ ] migration report cross-implementation fixtures
-- [ ] capability and intent vocabulary proposal / review workflow
+- [ ] multi-party / cross-project vocabulary governance beyond the v0.4 proposal-review foundation
 - [ ] version negotiation
 - [ ] backward-compatibility policy
 - [ ] public adapter registry concept
-- [ ] multi-party vocabulary governance experiment
+- [ ] memory namespaces / selective export experiments
+- [ ] encrypted private-section experiment
+- [ ] profile signing / key-management experiment
+- [ ] deployment access-control integration guidance
 
 ## v1.0 target — stable continuity interoperability layer
 
