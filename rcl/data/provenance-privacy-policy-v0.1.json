@@ -1,0 +1,38 @@
+{
+  "policy_version": "0.1",
+  "policy_id": "rcl.provenance_privacy.default.v0.1",
+  "description": "Conservative governance policy for RCL artifact provenance, privacy inheritance, and non-mutating operation review.",
+  "privacy_order": ["public", "internal", "private", "restricted"],
+  "sharing_scope_order": ["local_only", "approved_recipients", "public"],
+  "evidence_ref_propagation_order": ["exclude", "approved_recipients", "public"],
+  "operations": {
+    "local_use": {
+      "allowed_classifications": ["public", "internal", "private", "restricted"],
+      "minimum_sharing_scope": "local_only"
+    },
+    "share_approved": {
+      "allowed_classifications": ["public", "internal", "private", "restricted"],
+      "minimum_sharing_scope": "approved_recipients"
+    },
+    "share_public": {
+      "allowed_classifications": ["public"],
+      "minimum_sharing_scope": "public"
+    },
+    "archive": {
+      "allowed_classifications": ["public", "internal", "private", "restricted"],
+      "minimum_sharing_scope": "local_only"
+    },
+    "prune_review": {
+      "allowed_classifications": ["public", "internal", "private", "restricted"],
+      "minimum_sharing_scope": "local_only"
+    }
+  },
+  "external_evidence": {
+    "share_approved_minimum_propagation": "approved_recipients",
+    "share_public_minimum_propagation": "public",
+    "content_copy_requires_deployment_permission": true
+  },
+  "automatic_declassification": false,
+  "content_privacy_inference": false,
+  "non_mutating": true
+}

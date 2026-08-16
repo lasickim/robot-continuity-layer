@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.4:artifact-provenance-record",
+  "title": "RCL Artifact Provenance / Privacy Record v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "record_version",
+    "method",
+    "record_id",
+    "created_at",
+    "created_by",
+    "artifact",
+    "origin",
+    "parents",
+    "privacy",
+    "non_mutating",
+    "content_privacy_inferred",
+    "disclaimer"
+  ],
+  "properties": {
+    "record_version": {"const": "0.1"},
+    "method": {"const": "rcl.provenance_privacy.record.v0.1"},
+    "record_id": {"type": "string", "pattern": "^artifact-provenance-[0-9a-f]{16}$"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "created_by": {"type": "string", "minLength": 1},
+    "artifact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["artifact_id", "artifact_type", "sha256"],
+      "properties": {
+        "artifact_id": {"type": "string", "minLength": 1},
+        "artifact_type": {"type": "string", "pattern": "^[a-z][a-z0-9_]*(?:\\.[a-z][a-z0-9_]*)*$"},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      }
+    },
+    "origin": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind"],
+      "properties": {
+        "kind": {"enum": ["sensor", "user", "operator", "imported", "model", "derived", "system", "other"]},
+        "source_ref": {"type": "string", "minLength": 1}
+      }
+    },
+    "parents": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["record_id", "record_sha256", "artifact_id", "artifact_sha256", "relationship"],
+        "properties": {
+          "record_id": {"type": "string", "pattern": "^artifact-provenance-[0-9a-f]{16}$"},
+          "record_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "artifact_id": {"type": "string", "minLength": 1},
+          "artifact_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "relationship": {"enum": ["derived_from", "summarized_from", "migrated_from", "evaluated_from", "references"]}
+        }
+      }
+    },
+    "transformation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method"],
+      "properties": {
+        "method": {"type": "string", "minLength": 1},
+        "version": {"type": "string", "minLength": 1}
+      }
+    },
+    "privacy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["classification", "sharing_scope", "external_evidence_refs"],
+      "properties": {
+        "classification": {"enum": ["public", "internal", "private", "restricted"]},
+        "sharing_scope": {"enum": ["local_only", "approved_recipients", "public"]},
+        "external_evidence_refs": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["propagation", "content_copy"],
+          "properties": {
+            "propagation": {"enum": ["exclude", "approved_recipients", "public"]},
+            "content_copy": {"enum": ["not_permitted", "deployment_permitted"]}
+          }
+        }
+      }
+    },
+    "non_mutating": {"const": true},
+    "content_privacy_inferred": {"const": false},
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
