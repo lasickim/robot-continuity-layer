@@ -1,0 +1,8 @@
+{
+  "artifact_kind": "semantic_experience_excerpt",
+  "robot_id": "home-robot-demo",
+  "observations": [
+    {"context": "home", "action": "interaction.handover", "outcome": "completed"},
+    {"context": "home", "action": "interaction.handover", "outcome": "completed"}
+  ]
+}
