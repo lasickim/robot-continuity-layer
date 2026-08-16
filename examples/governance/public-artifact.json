@@ -1,0 +1,5 @@
+{
+  "artifact_kind": "documentation_note",
+  "title": "RCL public interoperability example",
+  "message": "This fixture contains no deployment-private payload and is intentionally classified public by its companion provenance example."
+}
