@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:hil-reference-report",
+  "title": "RCL HIL Reference Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["hil_reference_version", "method", "created_at", "evidence_grade", "status", "attestation", "readiness", "semantic_reference", "assertions", "disclaimer"],
+  "properties": {
+    "hil_reference_version": {"const": "0.1"},
+    "method": {"const": "rcl.hil.reference_migration.v0.5"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "evidence_grade": {"type": "string", "enum": ["HIL", "UNCLASSIFIED"]},
+    "status": {"type": "string", "enum": ["passed", "not_eligible", "semantic_failure"]},
+    "attestation": {"type": "object"},
+    "readiness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["deployment_environment", "has_real_loop_component", "has_simulated_boundary", "has_external_evidence_ref", "attestation_is_self_declared", "eligible"],
+      "properties": {
+        "deployment_environment": {"type": "boolean"},
+        "has_real_loop_component": {"type": "boolean"},
+        "has_simulated_boundary": {"type": "boolean"},
+        "has_external_evidence_ref": {"type": "boolean"},
+        "attestation_is_self_declared": {"type": "boolean"},
+        "eligible": {"type": "boolean"}
+      }
+    },
+    "semantic_reference": {"type": "object"},
+    "assertions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["hil_eligible", "semantic_experiment_passed", "experiment_passed"],
+      "properties": {
+        "hil_eligible": {"type": "boolean"},
+        "semantic_experiment_passed": {"type": "boolean"},
+        "experiment_passed": {"type": "boolean"}
+      }
+    },
+    "disclaimer": {"type": "string", "minLength": 1}
+  }
+}
