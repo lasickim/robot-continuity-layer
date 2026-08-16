@@ -1,0 +1,30 @@
+{
+  "sensor_evidence_series_version": "0.1",
+  "series_id": "camera-clearance-example",
+  "robot_id": "RCL-V05-SIM-B",
+  "sensor_component_id": "camera-01",
+  "modality": "camera",
+  "evidence_refs": ["file://camera/session-manifest.json"],
+  "sessions": [
+    {
+      "session_id": "camera-session-01",
+      "started_at": "2026-08-16T12:00:00Z",
+      "trials": [
+        {
+          "trial_id": "camera-trial-01",
+          "captured_at": "2026-08-16T12:00:01Z",
+          "claims": [
+            {
+              "claim_id": "camera-claim-01",
+              "semantic_state": "state.sitting_area_clear",
+              "state": "satisfied",
+              "confidence": 0.99,
+              "strategy_id": "target.direct_clearance_state",
+              "evidence_refs": ["file://camera/frame-0001.json"]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
