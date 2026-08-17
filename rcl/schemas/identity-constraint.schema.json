@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:identity-constraint",
+  "title": "RCL Identity Constraint Set v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["identity_constraint_version", "constraint_set_id", "robot_id", "constraints"],
+  "properties": {
+    "identity_constraint_version": {"const": "0.1"},
+    "constraint_set_id": {"type": "string", "minLength": 1},
+    "robot_id": {"type": "string", "minLength": 1},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "constraints": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["constraint_id", "behavior_id", "dimension", "importance", "preservation_mode", "substitution_allowed", "adaptation_allowed", "tolerance"],
+        "properties": {
+          "constraint_id": {"type": "string", "minLength": 1},
+          "behavior_id": {"type": "string", "minLength": 1},
+          "dimension": {"type": "string", "minLength": 1},
+          "context": {
+            "type": "object",
+            "additionalProperties": {"type": ["string", "number", "boolean"]}
+          },
+          "importance": {"type": "number", "minimum": 0, "maximum": 1},
+          "preservation_mode": {"type": "string", "enum": ["preference", "characteristic", "identity_critical"]},
+          "substitution_allowed": {"type": "boolean"},
+          "adaptation_allowed": {"type": "boolean"},
+          "tolerance": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["mode"],
+            "properties": {
+              "mode": {"type": "string", "enum": ["exact", "absolute", "relative"]},
+              "value": {"type": "number", "minimum": 0}
+            }
+          },
+          "notes": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
