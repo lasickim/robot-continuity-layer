@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:capability-manifest",
+  "title": "RCL Capability Manifest v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["capability_manifest_version", "manifest_id", "robot_id", "embodiment_id", "capabilities"],
+  "properties": {
+    "capability_manifest_version": {"const": "0.1"},
+    "manifest_id": {"type": "string", "minLength": 1},
+    "robot_id": {"type": "string", "minLength": 1},
+    "embodiment_id": {"type": "string", "minLength": 1},
+    "vendor": {"type": "string"},
+    "model": {"type": "string"},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "capabilities": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["capability_id", "category", "supports"],
+        "properties": {
+          "capability_id": {"type": "string", "minLength": 1},
+          "category": {"type": "string", "enum": ["locomotion", "manipulation", "perception", "timing", "expression", "communication", "control", "other"]},
+          "supports": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["dimension", "mapping_mode", "value_kind"],
+              "properties": {
+                "dimension": {"type": "string", "minLength": 1},
+                "mapping_mode": {"type": "string", "enum": ["direct", "substitute"]},
+                "value_kind": {"type": "string", "enum": ["number", "boolean", "categorical"]},
+                "unit": {"type": "string", "minLength": 1},
+                "minimum": {"type": "number"},
+                "maximum": {"type": "number"},
+                "resolution": {"type": "number", "exclusiveMinimum": 0},
+                "allowed_values": {"type": "array", "minItems": 1, "uniqueItems": true, "items": {"type": ["string", "boolean"]}},
+                "substitution_strategy": {"type": "string", "minLength": 1}
+              }
+            }
+          },
+          "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  }
+}
