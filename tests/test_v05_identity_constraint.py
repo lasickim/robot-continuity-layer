@@ -35,7 +35,7 @@ def _profile() -> dict:
                 "context": {"environment": "home"},
                 "traits": [
                     {"trait_id":"distance","dimension":"following_distance","value":0.82,"unit":"m","confidence":0.95,"observed_samples":120},
-                    {"trait_id":"gaze","dimension":"gaze_before_move","value":true,"confidence":0.93,"observed_samples":110}
+                    {"trait_id":"gaze","dimension":"gaze_before_move","value":True,"confidence":0.93,"observed_samples":110}
                 ]
             }
         ]
