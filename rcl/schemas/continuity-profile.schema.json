@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:continuity-profile",
+  "title": "RCL Continuity Profile v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["continuity_profile_version", "profile_id", "robot_id", "created_at", "signatures"],
+  "properties": {
+    "continuity_profile_version": {"const": "0.1"},
+    "profile_id": {"type": "string", "minLength": 1},
+    "robot_id": {"type": "string", "minLength": 1},
+    "created_at": {"type": "string", "format": "date-time"},
+    "updated_at": {"type": "string", "format": "date-time"},
+    "source_embodiment_id": {"type": "string", "minLength": 1},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "signatures": {"type": "array", "minItems": 1, "items": {"type": "object"}}
+  }
+}
