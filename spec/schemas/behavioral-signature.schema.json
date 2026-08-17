@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:behavioral-signature",
+  "title": "RCL Behavioral Signature v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["behavioral_signature_version", "signature_id", "behavior_id", "traits"],
+  "properties": {
+    "behavioral_signature_version": {"const": "0.1"},
+    "signature_id": {"type": "string", "minLength": 1},
+    "behavior_id": {"type": "string", "minLength": 1},
+    "context": {"type": "object", "additionalProperties": {"type": ["string", "number", "boolean"]}},
+    "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}},
+    "traits": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["trait_id", "dimension", "value"],
+        "properties": {
+          "trait_id": {"type": "string", "minLength": 1},
+          "dimension": {"type": "string", "minLength": 1},
+          "value": {"type": ["string", "number", "boolean"]},
+          "unit": {"type": "string", "minLength": 1},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "observed_samples": {"type": "integer", "minimum": 1},
+          "evidence_refs": {"type": "array", "uniqueItems": true, "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    }
+  }
+}
