@@ -32,7 +32,6 @@ def _profile() -> dict:
                 "signature_id": "follow-home",
                 "behavior_id": "FOLLOW_USER",
                 "context": {"environment": "home"},
-                "observed_at": "2026-08-17T12:00:00Z",
                 "traits": [
                     {"trait_id":"distance","dimension":"following_distance","value":0.82,"unit":"m","confidence":0.95,"observed_samples":120},
                     {"trait_id":"gaze","dimension":"gaze_before_move","value":true,"confidence":0.93,"observed_samples":110}
