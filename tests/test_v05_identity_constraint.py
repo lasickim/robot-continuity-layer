@@ -25,6 +25,7 @@ def _profile() -> dict:
         "continuity_profile_version": "0.1",
         "profile_id": "demo",
         "robot_id": "RCL-V05-SIM-A",
+        "created_at": "2026-08-17T12:00:00Z",
         "source_embodiment_id": "v05-sim-rover-a",
         "signatures": [
             {
