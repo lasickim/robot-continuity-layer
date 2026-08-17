@@ -1,0 +1,15 @@
+{
+  "identity_constraint_version": "0.1",
+  "constraint_set_id": "robot-a-follow-user-identity",
+  "robot_id": "RCL-V05-SIM-A",
+  "evidence_refs": ["doc://user-approved-identity-policy"],
+  "constraints": [
+    {"constraint_id":"follow-distance","behavior_id":"FOLLOW_USER","dimension":"following_distance","importance":0.3,"preservation_mode":"preference","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"absolute","value":0.08}},
+    {"constraint_id":"follow-side","behavior_id":"FOLLOW_USER","dimension":"lateral_offset","importance":0.72,"preservation_mode":"characteristic","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"absolute","value":0.06}},
+    {"constraint_id":"follow-smoothness","behavior_id":"FOLLOW_USER","dimension":"acceleration_style","importance":0.8,"preservation_mode":"characteristic","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"exact"}},
+    {"constraint_id":"follow-delay","behavior_id":"FOLLOW_USER","dimension":"turn_delay","importance":0.66,"preservation_mode":"characteristic","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"absolute","value":40}},
+    {"constraint_id":"follow-gaze","behavior_id":"FOLLOW_USER","dimension":"gaze_before_move","importance":0.95,"preservation_mode":"identity_critical","substitution_allowed":true,"adaptation_allowed":false,"tolerance":{"mode":"exact"}},
+    {"constraint_id":"follow-speed","behavior_id":"FOLLOW_USER","dimension":"approach_speed","importance":0.45,"preservation_mode":"preference","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"relative","value":0.15}},
+    {"constraint_id":"follow-stop","behavior_id":"FOLLOW_USER","dimension":"stop_overshoot","importance":0.58,"preservation_mode":"characteristic","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"absolute","value":0.02}}
+  ]
+}
