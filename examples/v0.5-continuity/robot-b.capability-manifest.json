@@ -1,0 +1,94 @@
+{
+  "capability_manifest_version": "0.1",
+  "manifest_id": "robot-b-capability-manifest",
+  "robot_id": "RCL-V05-SIM-B",
+  "embodiment_id": "v05-sim-rover-b",
+  "vendor": "reference",
+  "model": "v05-sim-rover-b",
+  "evidence_refs": [
+    "sim://v0.5/robot-b/capabilities"
+  ],
+  "capabilities": [
+    {
+      "capability_id": "locomotion.following_geometry",
+      "category": "locomotion",
+      "supports": [
+        {
+          "dimension": "following_distance",
+          "mapping_mode": "direct",
+          "value_kind": "number",
+          "unit": "m",
+          "minimum": 0.3,
+          "maximum": 3.0,
+          "resolution": 0.01
+        },
+        {
+          "dimension": "lateral_offset",
+          "mapping_mode": "direct",
+          "value_kind": "number",
+          "unit": "m",
+          "minimum": -0.8,
+          "maximum": 0.8,
+          "resolution": 0.01
+        },
+        {
+          "dimension": "approach_speed",
+          "mapping_mode": "direct",
+          "value_kind": "number",
+          "unit": "m/s",
+          "minimum": 0.05,
+          "maximum": 1.5,
+          "resolution": 0.01
+        }
+      ]
+    },
+    {
+      "capability_id": "control.motion_profile",
+      "category": "control",
+      "supports": [
+        {
+          "dimension": "acceleration_style",
+          "mapping_mode": "direct",
+          "value_kind": "categorical",
+          "allowed_values": ["soft", "balanced", "fast"]
+        },
+        {
+          "dimension": "stop_overshoot",
+          "mapping_mode": "direct",
+          "value_kind": "number",
+          "unit": "m",
+          "minimum": 0.0,
+          "maximum": 0.2,
+          "resolution": 0.01
+        }
+      ]
+    },
+    {
+      "capability_id": "timing.action_delay",
+      "category": "timing",
+      "supports": [
+        {
+          "dimension": "turn_delay",
+          "mapping_mode": "direct",
+          "value_kind": "number",
+          "unit": "ms",
+          "minimum": 0,
+          "maximum": 1000,
+          "resolution": 10
+        }
+      ]
+    },
+    {
+      "capability_id": "expression.body_orientation_attention",
+      "category": "expression",
+      "supports": [
+        {
+          "dimension": "gaze_before_move",
+          "mapping_mode": "substitute",
+          "value_kind": "boolean",
+          "substitution_strategy": "body_yaw_attention_cue"
+        }
+      ]
+    }
+  ]
+}
