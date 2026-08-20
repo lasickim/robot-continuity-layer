@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:target-execution-bundle",
+  "title": "RCL Target Execution Bundle v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "target_execution_version", "created_at", "execution_id", "adapter_id",
+    "source_robot_id", "source_profile_id", "constraint_set_id",
+    "target_robot_id", "target_embodiment_id", "compiler_plan_status",
+    "dispatch_allowed", "instructions", "blocked_reasons"
+  ],
+  "properties": {
+    "target_execution_version": {"const": "0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "execution_id": {"type": "string", "minLength": 1},
+    "adapter_id": {"type": "string", "minLength": 1},
+    "source_robot_id": {"type": "string", "minLength": 1},
+    "source_profile_id": {"type": "string", "minLength": 1},
+    "constraint_set_id": {"type": "string", "minLength": 1},
+    "target_robot_id": {"type": "string", "minLength": 1},
+    "target_embodiment_id": {"type": "string", "minLength": 1},
+    "compiler_plan_status": {"enum": ["READY", "REVIEW_REQUIRED", "BLOCKED"]},
+    "dispatch_allowed": {"type": "boolean"},
+    "instructions": {
+      "type": "array",
+      "items": {"$ref": "behavior-compiler-plan.schema.json#/$defs/instruction"}
+    },
+    "blocked_reasons": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["constraint_id", "execution_status", "reason"],
+        "properties": {
+          "constraint_id": {"type": "string", "minLength": 1},
+          "execution_status": {"enum": ["REVIEW_REQUIRED", "BLOCKED"]},
+          "reason": {"type": "string", "minLength": 1}
+        }
+      }
+    }
+  }
+}
