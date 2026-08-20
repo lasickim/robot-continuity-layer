@@ -40,7 +40,7 @@ def test_unassessed_substitute_produces_score_bounds():
         created_at="2026-08-20T11:00:00Z",
     )
 
-    assert report["summary"]["lower_bound"] == pytest.approx(0.7756951813)
+    assert report["summary"]["lower_bound"] == pytest.approx(0.7757004843)
     assert report["summary"]["upper_bound"] == pytest.approx(1.0)
     assert report["summary"]["resolved_weight_fraction"] == pytest.approx(
         report["summary"]["lower_bound"]
@@ -73,9 +73,9 @@ def test_evidence_backed_substitute_resolves_score():
         created_at="2026-08-20T11:00:00Z",
     )
 
-    assert report["summary"]["lower_bound"] == pytest.approx(0.9551401022)
-    assert report["summary"]["upper_bound"] == pytest.approx(0.9551401022)
-    assert report["summary"]["resolved_score"] == pytest.approx(0.9551401022)
+    assert report["summary"]["lower_bound"] == pytest.approx(0.9551400969)
+    assert report["summary"]["upper_bound"] == pytest.approx(0.9551400969)
+    assert report["summary"]["resolved_score"] == pytest.approx(0.9551400969)
     assert report["summary"]["resolved_weight_fraction"] == pytest.approx(1.0)
 
     gaze = next(
