@@ -1,0 +1,18 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"urn:rcl:schema:v0.5:target-execution-report",
+  "title":"RCL Target Execution Report v0.1",
+  "type":"object","additionalProperties":false,
+  "required":["target_execution_report_version","completed_at","execution_id","adapter_id","target_robot_id","target_embodiment_id","result","instruction_results","summary"],
+  "properties":{
+    "target_execution_report_version":{"const":"0.1"},
+    "completed_at":{"type":"string","format":"date-time"},
+    "execution_id":{"type":"string","minLength":1},
+    "adapter_id":{"type":"string","minLength":1},
+    "target_robot_id":{"type":"string","minLength":1},
+    "target_embodiment_id":{"type":"string","minLength":1},
+    "result":{"enum":["SUCCESS","FAILED"]},
+    "instruction_results":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["constraint_id","behavior_id","dimension","success","evidence_refs"],"properties":{"constraint_id":{"type":"string","minLength":1},"behavior_id":{"type":"string","minLength":1},"dimension":{"type":"string","minLength":1},"success":{"type":"boolean"},"evidence_refs":{"type":"array","items":{"type":"string","minLength":1}},"message":{"type":"string","minLength":1}}}},
+    "summary":{"type":"object","additionalProperties":false,"required":["attempted","succeeded","failed"],"properties":{"attempted":{"type":"integer","minimum":0},"succeeded":{"type":"integer","minimum":0},"failed":{"type":"integer","minimum":0}}}
+  }
+}
