@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:behavior-compiler-plan",
+  "title": "RCL Behavior Compiler Plan v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["behavior_compiler_version","created_at","source_robot_id","source_profile_id","constraint_set_id","target_robot_id","target_embodiment_id","instructions","summary"],
+  "properties": {
+    "behavior_compiler_version": {"const": "0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_robot_id": {"type": "string", "minLength": 1},
+    "source_profile_id": {"type": "string", "minLength": 1},
+    "constraint_set_id": {"type": "string", "minLength": 1},
+    "target_robot_id": {"type": "string", "minLength": 1},
+    "target_embodiment_id": {"type": "string", "minLength": 1},
+    "instructions": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["constraint_id","behavior_id","dimension","classification","preservation_mode","constraint_satisfied","execution_status","reason"],
+        "properties": {
+          "constraint_id": {"type":"string","minLength":1},
+          "behavior_id": {"type":"string","minLength":1},
+          "dimension": {"type":"string","minLength":1},
+          "classification": {"enum":["EXACT","APPROXIMATE","SUBSTITUTE","UNSUPPORTED"]},
+          "preservation_mode": {"enum":["preference","characteristic","identity_critical"]},
+          "constraint_satisfied": {"type":"boolean"},
+          "execution_status": {"enum":["READY","REVIEW_REQUIRED","BLOCKED"]},
+          "reason": {"type":"string","minLength":1},
+          "capability_id": {"type":"string","minLength":1},
+          "mapping_mode": {"enum":["direct","substitute"]},
+          "target_value": {"type":["string","number","boolean"]},
+          "absolute_error": {"type":"number","minimum":0},
+          "substitution_strategy": {"type":"string","minLength":1},
+          "assessed_fidelity": {"type":"number","minimum":0,"maximum":1},
+          "assessment_evidence_refs": {"type":"array","items":{"type":"string","minLength":1}}
+        }
+      }
+    },
+    "summary": {
+      "type":"object", "additionalProperties": false,
+      "required":["plan_status","instruction_count","status_counts","identity_critical_blocked","continuity_lower_bound","continuity_upper_bound"],
+      "properties": {
+        "plan_status": {"enum":["READY","REVIEW_REQUIRED","BLOCKED"]},
+        "instruction_count": {"type":"integer","minimum":1},
+        "status_counts": {
+          "type":"object","additionalProperties":false,
+          "required":["READY","REVIEW_REQUIRED","BLOCKED"],
+          "properties": {
+            "READY":{"type":"integer","minimum":0},
+            "REVIEW_REQUIRED":{"type":"integer","minimum":0},
+            "BLOCKED":{"type":"integer","minimum":0}
+          }
+        },
+        "identity_critical_blocked": {"type":"array","items":{"type":"string","minLength":1}},
+        "continuity_lower_bound": {"type":"number","minimum":0,"maximum":1},
+        "continuity_upper_bound": {"type":"number","minimum":0,"maximum":1},
+        "resolved_continuity_score": {"type":"number","minimum":0,"maximum":1}
+      }
+    }
+  }
+}
