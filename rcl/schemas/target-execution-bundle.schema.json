@@ -24,7 +24,35 @@
     "dispatch_allowed": {"type": "boolean"},
     "instructions": {
       "type": "array",
-      "items": {"$ref": "behavior-compiler-plan.schema.json#/$defs/instruction"}
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "constraint_id", "behavior_id", "dimension", "classification",
+          "preservation_mode", "constraint_satisfied", "execution_status",
+          "reason", "capability_id", "mapping_mode"
+        ],
+        "properties": {
+          "constraint_id": {"type": "string", "minLength": 1},
+          "behavior_id": {"type": "string", "minLength": 1},
+          "dimension": {"type": "string", "minLength": 1},
+          "classification": {"enum": ["EXACT", "APPROXIMATE", "SUBSTITUTE"]},
+          "preservation_mode": {"enum": ["preference", "characteristic", "identity_critical"]},
+          "constraint_satisfied": {"const": true},
+          "execution_status": {"const": "READY"},
+          "reason": {"type": "string", "minLength": 1},
+          "capability_id": {"type": "string", "minLength": 1},
+          "mapping_mode": {"enum": ["direct", "substitute"]},
+          "target_value": {"type": ["string", "number", "boolean"]},
+          "absolute_error": {"type": "number", "minimum": 0},
+          "substitution_strategy": {"type": "string", "minLength": 1},
+          "assessed_fidelity": {"type": "number", "minimum": 0, "maximum": 1},
+          "assessment_evidence_refs": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1}
+          }
+        }
+      }
     },
     "blocked_reasons": {
       "type": "array",
