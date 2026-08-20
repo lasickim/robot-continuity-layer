@@ -1,7 +1,7 @@
 {
   "identity_constraint_version": "0.1",
   "constraint_set_id": "robot-a-follow-user-identity",
-  "robot_id": "RCL-V05-SIM-A",
+  "robot_id": "RCL-V05-ROBOT-A",
   "evidence_refs": ["doc://user-approved-identity-policy"],
   "constraints": [
     {"constraint_id":"follow-distance","behavior_id":"FOLLOW_USER","dimension":"following_distance","importance":0.3,"preservation_mode":"preference","substitution_allowed":true,"adaptation_allowed":true,"tolerance":{"mode":"absolute","value":0.08}},
