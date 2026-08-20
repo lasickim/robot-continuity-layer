@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:rcl:schema:v0.5:compatibility-mapping-report",
+  "title": "RCL Compatibility Mapping Report v0.1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "compatibility_mapping_version",
+    "created_at",
+    "source_robot_id",
+    "source_profile_id",
+    "constraint_set_id",
+    "target_robot_id",
+    "target_embodiment_id",
+    "mappings",
+    "summary"
+  ],
+  "properties": {
+    "compatibility_mapping_version": {"const": "0.1"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "source_robot_id": {"type": "string", "minLength": 1},
+    "source_profile_id": {"type": "string", "minLength": 1},
+    "constraint_set_id": {"type": "string", "minLength": 1},
+    "target_robot_id": {"type": "string", "minLength": 1},
+    "target_embodiment_id": {"type": "string", "minLength": 1},
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "constraint_id",
+          "behavior_id",
+          "dimension",
+          "importance",
+          "preservation_mode",
+          "classification",
+          "constraint_satisfied",
+          "reason"
+        ],
+        "properties": {
+          "constraint_id": {"type": "string", "minLength": 1},
+          "behavior_id": {"type": "string", "minLength": 1},
+          "dimension": {"type": "string", "minLength": 1},
+          "importance": {"type": "number", "minimum": 0, "maximum": 1},
+          "preservation_mode": {
+            "type": "string",
+            "enum": ["preference", "characteristic", "identity_critical"]
+          },
+          "classification": {
+            "type": "string",
+            "enum": ["EXACT", "APPROXIMATE", "SUBSTITUTE", "UNSUPPORTED"]
+          },
+          "constraint_satisfied": {"type": "boolean"},
+          "reason": {"type": "string", "minLength": 1},
+          "capability_id": {"type": "string", "minLength": 1},
+          "mapping_mode": {"type": "string", "enum": ["direct", "substitute"]},
+          "source_value": {"type": ["string", "number", "boolean"]},
+          "target_value": {"type": ["string", "number", "boolean"]},
+          "absolute_error": {"type": "number", "minimum": 0},
+          "substitution_strategy": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["trait_count", "counts", "all_constraints_satisfied"],
+      "properties": {
+        "trait_count": {"type": "integer", "minimum": 1},
+        "counts": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["EXACT", "APPROXIMATE", "SUBSTITUTE", "UNSUPPORTED"],
+          "properties": {
+            "EXACT": {"type": "integer", "minimum": 0},
+            "APPROXIMATE": {"type": "integer", "minimum": 0},
+            "SUBSTITUTE": {"type": "integer", "minimum": 0},
+            "UNSUPPORTED": {"type": "integer", "minimum": 0}
+          }
+        },
+        "all_constraints_satisfied": {"type": "boolean"}
+      }
+    }
+  }
+}
